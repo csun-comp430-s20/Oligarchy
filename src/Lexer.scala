@@ -28,11 +28,15 @@ case object SubtractToken extends Token
 case object ForToken extends Token
 case object ConstructorToken extends Token
 case object BreakToken extends Token
-case object ReturnToken extends Token 
-case object PrintToken extends Token 
-case object AndToken extends Token 
+case object ReturnToken extends Token
+case object PrintToken extends Token
+case object AndToken extends Token
 
 class Lexer {
-  
+
+}
+
+object Lexer extends App {
+  println("hello")
 }
 
