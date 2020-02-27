@@ -5,4 +5,6 @@ target
 .DS_Store
 *.iml
 /.idea/sbt.xml
+/.idea/vcs.xml
+/.idea/modules.xml
 /.idea/scala_compiler.xml
