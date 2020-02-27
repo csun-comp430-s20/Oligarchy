@@ -32,11 +32,116 @@ case object ReturnToken extends Token
 case object PrintToken extends Token
 case object AndToken extends Token
 
-class Lexer {
 
+case class LexerException(msg: String) extends Exception(msg)
+
+object Lexer {
+  def apply(input: String): Lexer = {
+    new Lexer(input.toCharArray.toList)
+  }
 }
 
-object Lexer extends App {
-  println("hello")
-}
+class Lexer(private var input: List[Char]) {
+  private def tryTokenizeVariableOrReservedWord(): Option[Token] = {
+    @scala.annotation.tailrec
+    def readLetters(accum: String): String = {
+      input match {
+        case head :: tail if Character.isLetterOrDigit(head) => {
+          input = tail
+          readLetters(accum + head)
+        }
+        case _ => accum
+      }
+    }
 
+    input match {
+      case head :: tail if Character.isLetter(head) => {
+        input = tail
+        readLetters("" + head) match {
+          case "if" => Some(IfToken)
+          case "else" => Some(ElseToken)
+          case other => Some(VarToken(other))
+        }
+      }
+      case _ => None
+    }
+  } // tryTokenizeVariableOrReservedWord
+
+  private def tryTokenizeInteger(): Option[IntegerToken] = {
+    @scala.annotation.tailrec
+    def readDigits(accum: String): Option[IntegerToken] = {
+      input match {
+        case head :: tail if Character.isDigit(head) => {
+          input = tail
+          readDigits(accum + head)
+        }
+        case _ => {
+          if (accum.length > 0) {
+            Some(IntegerToken(accum.toInt))
+          } else {
+            None
+          }
+        }
+      }
+    }
+
+    input match {
+      case '-' :: tail => readDigits("-")
+      case _ => readDigits("")
+    }
+  } // tryTokenizeInteger
+
+  @scala.annotation.tailrec
+  private def skipWhitespace() {
+    input match {
+      case head :: tail if Character.isWhitespace(head) => {
+        input = tail
+        skipWhitespace()
+      }
+      case _ => ()
+    }
+  } // skipWhitespace
+
+  // assumes it's not starting on whitespace
+  private def tokenizeOne(): Token = {
+    tryTokenizeVariableOrReservedWord().getOrElse {
+      tryTokenizeInteger().getOrElse {
+        input match {
+          case '(' :: tail => {
+            input = tail
+            LeftParenToken
+          }
+          case ')' :: tail => {
+            input = tail
+            RightParenToken
+          }
+          case _ :: _ => {
+            throw LexerException("Have input, but it's not valid")
+          }
+          case Nil => {
+            throw LexerException("Have no more input")
+          }
+        }
+      }
+    }
+  } // tokenizeOne
+
+  def tokenize(): Seq[Token] = {
+    @scala.annotation.tailrec
+    def withAccum(accum: List[Token]): Seq[Token] = {
+      input match {
+        case _ :: _ => {
+          skipWhitespace()
+          input match {
+            case _ :: _ => withAccum(tokenizeOne() :: accum)
+            case Nil => accum.reverse.toSeq
+          }
+        }
+        case Nil => accum.reverse.toSeq
+      }
+    }
+
+    withAccum(List())
+  } // tokenize
+
+} // Lexer //

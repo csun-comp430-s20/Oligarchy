@@ -1,3 +1,5 @@
 /.idea/
-/Oligarchy.iml
-
+/out/
+target
+.DS_Store
+*.iml
