@@ -150,27 +150,27 @@ class Lexer(private var input: List[Char]) {
             input = tail
             MultiplicationToken
           }
-//          case /*@todo*/ :: tail => {
-//            input = tail
-//            /*@todo*/
-//          }
-//          // dan
-//          case /*@todo*/ :: tail => {
-//            input = tail
-//            /*@todo*/
-//          }
-//          case /*@todo*/ :: tail => {
-//            input = tail
-//            /*@todo*/
-//          }
-//          case /*@todo*/ :: tail => {
-//            input = tail
-//            /*@todo*/
-//          }
-//          case /*@todo*/ :: tail => {
-//            input = tail
-//            /*@todo*/
-//          }
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          // dan
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
           // jiamin
             
           case '-' :: tail => {
