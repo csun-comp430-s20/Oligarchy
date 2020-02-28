@@ -33,6 +33,18 @@ object LexerTest {
     testTokenizes("if else", IfToken, ElseToken)
   }
 
+  def testAnd() {
+    testTokenizes("&", AndToken)
+  }
+
+  def testMultiplication() {
+    testTokenizes("*", MultiplicationToken)
+  }
+
+  def testBreak() {
+    testTokenizes("break", BreakToken)
+  }
+
   def main(args: Array[String]) {
     testLeftParen()
     testRightParen()
@@ -41,5 +53,9 @@ object LexerTest {
     testVariableWithWhitespaceAfter()
     testVariableContainingReservedWords()
     testTwoReservedWords()
+    testAnd()
+    testMultiplication()
+    testBreak()
+
   } // main
 } // LexerTest
