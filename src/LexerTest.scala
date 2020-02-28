@@ -33,6 +33,43 @@ object LexerTest {
     testTokenizes("if else", IfToken, ElseToken)
   }
 
+  def testPeriod(): Unit = {
+    testTokenizes(".", PeriodToken)
+  }
+  def testSemiColon(): Unit = {
+    testTokenizes(";", SemicolonToken)
+  }
+  def testDivision(): Unit = {
+    testTokenizes("/", DivisionToken)
+  }
+  def testOr(): Unit = {
+    testTokenizes("|", OrToken)
+  }
+  def testPeriodWithWhitespaceBefore(): Unit = {
+    testTokenizes(" .", PeriodToken)
+  }
+  def testPeriodWithWhitespaceAfter(): Unit = {
+    testTokenizes(". ", PeriodToken)
+  }
+  def testSemiColonWithWhitespaceBefore(): Unit = {
+    testTokenizes(" ;", SemicolonToken)
+  }
+  def testSemicolonWithWhitespaceAfter(): Unit = {
+    testTokenizes("; ", SemicolonToken)
+  }
+  def testDivisionWithWhitespaceBefore(): Unit = {
+    testTokenizes(" /", DivisionToken)
+  }
+  def testDivisionWithWhitespaceAfter(): Unit = {
+    testTokenizes("/ ", DivisionToken)
+  }
+  def testOrWithWhitespaceBefore(): Unit = {
+    testTokenizes(" |", OrToken)
+  }
+  def testOrWithWhitespaceAfter(): Unit = {
+    testTokenizes("| ", OrToken)
+  }
+
   def testBooleanTrue(){
     testTokenizes("true", BooleanToken(true))
   }
@@ -64,6 +101,7 @@ object LexerTest {
   def testEquals(){
     testTokenizes("=", EqualsToken)
   }
+
   def main(args: Array[String]) {
     testLeftParen()
     testRightParen()
@@ -72,6 +110,18 @@ object LexerTest {
     testVariableWithWhitespaceAfter()
     testVariableContainingReservedWords()
     testTwoReservedWords()
+    testPeriod()
+    testSemiColon()
+    testDivision()
+    testOr()
+    testPeriodWithWhitespaceBefore()
+    testPeriodWithWhitespaceAfter()
+    testSemiColonWithWhitespaceBefore()
+    testSemicolonWithWhitespaceAfter()
+    testDivisionWithWhitespaceBefore()
+    testDivisionWithWhitespaceAfter()
+    testOrWithWhitespaceBefore()
+    testOrWithWhitespaceAfter()
     testBooleanTrue()
     testBooleanFalse()
     testBooleanWithLeadingWhiteSpace()
@@ -80,7 +130,6 @@ object LexerTest {
     testClass()
     testClassWithWhiteSpaces()
     testEquals()
-
   } // main
 } // LexerTest
 

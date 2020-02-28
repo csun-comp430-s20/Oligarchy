@@ -59,6 +59,7 @@ class Lexer(private var input: List[Char]) {
         input = tail
         readLetters("" + head) match {
           case "if" => Some(IfToken)
+          //daniel
           case "else" => Some(ElseToken)
           //ed
           case "print" => Some(PrintToken)
@@ -149,27 +150,27 @@ class Lexer(private var input: List[Char]) {
           case '*' :: tail => {
             input = tail
             MultiplicationToken
-          }
+          } /*
           case /*@todo*/ :: tail => {
             input = tail
             /*@todo*/
-          }
+          } */
           // dan
-          case /*@todo*/ :: tail => {
+          case ';' :: tail => {
             input = tail
-            /*@todo*/
+            SemicolonToken
           }
-          case /*@todo*/ :: tail => {
+          case '|' :: tail => {
             input = tail
-            /*@todo*/
+            OrToken
           }
-          case /*@todo*/ :: tail => {
+          case '/' :: tail => {
             input = tail
-            /*@todo*/
+            DivisionToken
           }
-          case /*@todo*/ :: tail => {
+          case '.' :: tail => {
             input = tail
-            /*@todo*/
+            PeriodToken
           }
           // jiamin
             
