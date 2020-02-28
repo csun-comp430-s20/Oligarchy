@@ -45,15 +45,15 @@ object LexerTest {
     testTokenizes("for", ForToken)
   }
 
-  def testSubtract{
+  def testSubtract(){
     testTokenizes("-", SubtractToken)
   }
 
-  def testLeftCurly{
+  def testLeftCurly(){
     testTokenizes("{", LeftCurlyToken)
   }
 
-  def testConstructor{
+  def testConstructor(){
     testTokenizes("constructor", ConstructorToken)
   }
 
@@ -68,8 +68,8 @@ object LexerTest {
     testLessThan()
     testFunc()
     testFor()
-    testSubtract
-    testLeftCurly
-    testConstructor
+    testSubtract()
+    testLeftCurly()
+    testConstructor()
   } // main
 } // LexerTest
