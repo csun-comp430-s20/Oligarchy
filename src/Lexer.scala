@@ -67,8 +67,8 @@ class Lexer(private var input: List[Char]) {
           case /*@todo*/ => Some(/*@todo*/)
           case /*@todo*/ => Some(/*@todo*/)
           //imon
-          case /*@todo*/ => Some(/*@todo*/)
-          case /*@todo*/ => Some(/*@todo*/)
+          case "return" => Some(ReturnToken)
+          case "break" => Some(BreakToken)
           // steph
           case "Class" => Some(ClassToken)
           case "true" => Some(BooleanToken(true))
@@ -142,13 +142,13 @@ class Lexer(private var input: List[Char]) {
             PlusToken
           }
           // imon
-          case /*@todo*/ :: tail => {
+          case '&' :: tail => {
             input = tail
-            /*@todo*/
+            AndToken
           }
-          case /*@todo*/ :: tail => {
+          case '*' :: tail => {
             input = tail
-            /*@todo*/
+            MultiplicationToken
           }
           case /*@todo*/ :: tail => {
             input = tail
