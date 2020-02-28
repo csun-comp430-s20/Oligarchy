@@ -59,6 +59,7 @@ class Lexer(private var input: List[Char]) {
         input = tail
         readLetters("" + head) match {
           case "if" => Some(IfToken)
+          //daniel
           case "else" => Some(ElseToken)
           //ed
           case "print" => Some(PrintToken)
@@ -125,19 +126,19 @@ class Lexer(private var input: List[Char]) {
             LeftParenToken
           }
           // ed
-          case ">" :: tail => {
+          case '>' :: tail => {
             input = tail
             GreaterThanToken
           }
-          case "}" :: tail => {
+          case '}' :: tail => {
             input = tail
             RightCurlyToken
           }
-          case ")" :: tail => {
+          case ')' :: tail => {
             input = tail
             RightParenToken
           }
-          case "+" :: tail => {
+          case '+' :: tail => {
             input = tail
             PlusToken
           }
@@ -149,48 +150,48 @@ class Lexer(private var input: List[Char]) {
           case '*' :: tail => {
             input = tail
             MultiplicationToken
-          }
+          } /*
           case /*@todo*/ :: tail => {
             input = tail
             /*@todo*/
-          }
+          } */
           // dan
-          case /*@todo*/ :: tail => {
+          case ';' :: tail => {
             input = tail
-            /*@todo*/
+            SemicolonToken
           }
-          case /*@todo*/ :: tail => {
+          case '|' :: tail => {
             input = tail
-            /*@todo*/
+            OrToken
           }
-          case /*@todo*/ :: tail => {
+          case '/' :: tail => {
             input = tail
-            /*@todo*/
+            DivisionToken
           }
-          case /*@todo*/ :: tail => {
+          case '.' :: tail => {
             input = tail
-            /*@todo*/
+            PeriodToken
           }
           // jiamin
             
-          case "-" :: tail => {
+          case '-' :: tail => {
             input = tail
             SubtractToken
           }
-          case "<" :: tail => {
+          case '<' :: tail => {
             input = tail
             LessThanToken
           }
-          case "{" :: tail => {
+          case '{' :: tail => {
             input = tail
             LeftCurlyToken
           }
           // steph
-          case "(" :: tail => {
+          case '(' :: tail => {
             input = tail
             LeftParenToken
           }
-          case "=" :: tail => {
+          case '=' :: tail => {
             input = tail
             EqualsToken
           }
