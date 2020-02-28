@@ -1,36 +1,36 @@
 sealed trait Token
 
-case class ClassNameToken(name: String) extends Token
-case class IntegerToken(value: Int) extends Token
-case class StrToken(value: String) extends Token
-case class VarToken(name: String) extends Token
-case class BooleanToken(name: Boolean) extends Token
+case class ClassNameToken(name: String) extends Token // better if just use var for now ed
+case class IntegerToken(value: Int) extends Token // detect if it is just a number dan
+case class StrToken(value: String) extends Token // Detect if between to quotes imon
+case class VarToken(name: String) extends Token // steph
+case class BooleanToken(name: Boolean) extends Token // can treat as reserved word  but you pass in the value steph
 
-case object ClassToken extends Token
-case object DivisionToken extends Token
-case object OrToken extends Token
-case object SemicolonToken extends Token
-case object IfToken extends Token
-case object ElseToken extends Token
-case object PeriodToken extends Token
-case object GreaterThanToken extends Token
-case object LessThanToken extends Token
-case object RightCurlyToken extends Token
-case object LeftCurlyToken extends Token
-case object RightParenToken extends Token
-case object LeftParenToken extends Token
-case object PlusToken extends Token
-case object MultiplicationToken extends Token
-case object CaretToken extends Token
-case object EqualsToken extends Token
-case object FuncToken extends Token
-case object SubtractToken extends Token
-case object ForToken extends Token
-case object ConstructorToken extends Token
-case object BreakToken extends Token
-case object ReturnToken extends Token
-case object PrintToken extends Token
-case object AndToken extends Token
+case object ClassToken extends Token // reserved word class steph
+case object DivisionToken extends Token // single /  dan
+case object OrToken extends Token // single |  dan
+case object SemicolonToken extends Token // single ; dan
+case object IfToken extends Token // reserved word if  imon  // already done given to us
+case object ElseToken extends Token // reserved word else dan // already done given to us
+case object PeriodToken extends Token // single  .  dan
+case object GreaterThanToken extends Token // single >  ed
+case object LessThanToken extends Token // single < jiamin
+case object RightCurlyToken extends Token // single  } ed
+case object LeftCurlyToken extends Token // single  { jiamin
+case object RightParenToken extends Token // single )  ed   // already done given to us
+case object LeftParenToken extends Token // single (  steph  //already done given to us
+case object PlusToken extends Token // single + ed
+case object MultiplicationToken extends Token // single * imon
+case object CaretToken extends Token // single ^ steph
+case object EqualsToken extends Token // single  = steph
+case object FuncToken extends Token // reserved word func  jiamin
+case object SubtractToken extends Token // single  - jiamin
+case object ForToken extends Token // reserved word for jiamin
+case object ConstructorToken extends Token // reserved word   constructor jiamin
+case object BreakToken extends Token // reserved word  break  imon
+case object ReturnToken extends Token // reserved word  return imon
+case object PrintToken extends Token // reserved word   print ed
+case object AndToken extends Token // single & imon
 
 
 case class LexerException(msg: String) extends Exception(msg)
@@ -60,6 +60,19 @@ class Lexer(private var input: List[Char]) {
         readLetters("" + head) match {
           case "if" => Some(IfToken)
           case "else" => Some(ElseToken)
+          //ed
+          case "print" => Some(PrintToken)
+            //jiamin
+          case /*@todo*/ => Some(/*@todo*/)
+          case /*@todo*/ => Some(/*@todo*/)
+          case /*@todo*/ => Some(/*@todo*/)
+          //imon
+          case /*@todo*/ => Some(/*@todo*/)
+          case /*@todo*/ => Some(/*@todo*/)
+          // steph
+          case "Class" => Some(ClassToken)
+          case "true" => Some(BooleanToken(true))
+          case "false" => Some(BooleanToken(false))
           case other => Some(VarToken(other))
         }
       }
@@ -111,10 +124,76 @@ class Lexer(private var input: List[Char]) {
             input = tail
             LeftParenToken
           }
-          case ')' :: tail => {
+          // ed
+          case ">" :: tail => {
+            input = tail
+            GreaterThanToken
+          }
+          case "}" :: tail => {
+            input = tail
+            RightCurlyToken
+          }
+          case ")" :: tail => {
             input = tail
             RightParenToken
           }
+          case "+" :: tail => {
+            input = tail
+            PlusToken
+          }
+          // imon
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          // dan
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          // jiamin
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          case /*@todo*/ :: tail => {
+            input = tail
+            /*@todo*/
+          }
+          // steph
+          case "(" :: tail => {
+            input = tail
+            LeftParenToken
+          }
+          case "=" :: tail => {
+            input = tail
+            EqualsToken
+          }
+
           case _ :: _ => {
             throw LexerException("Have input, but it's not valid")
           }
