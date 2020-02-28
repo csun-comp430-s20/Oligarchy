@@ -70,9 +70,9 @@ class Lexer(private var input: List[Char]) {
           case /*@todo*/ => Some(/*@todo*/)
           case /*@todo*/ => Some(/*@todo*/)
           // steph
-          case /*@todo*/ => Some(/*@todo*/)
-          case /*@todo*/ => Some(/*@todo*/)
-          case /*@todo*/ => Some(/*@todo*/)
+          case "Class" => Some(ClassToken)
+          case "true" => Some(BooleanToken(true))
+          case "false" => Some(BooleanToken(false))
           case other => Some(VarToken(other))
         }
       }
@@ -185,13 +185,13 @@ class Lexer(private var input: List[Char]) {
             /*@todo*/
           }
           // steph
-          case /*@todo*/ :: tail => {
+          case "(" :: tail => {
             input = tail
-            /*@todo*/
+            LeftParenToken
           }
-          case /*@todo*/ :: tail => {
+          case "=" :: tail => {
             input = tail
-            /*@todo*/
+            EqualsToken
           }
 
           case _ :: _ => {
