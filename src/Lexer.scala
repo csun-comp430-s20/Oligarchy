@@ -59,16 +59,17 @@ class Lexer(private var input: List[Char]) {
         input = tail
         readLetters("" + head) match {
           case "if" => Some(IfToken)
+          //daniel
           case "else" => Some(ElseToken)
           //ed
           case "print" => Some(PrintToken)
             //jiamin
-          case /*@todo*/ => Some(/*@todo*/)
-          case /*@todo*/ => Some(/*@todo*/)
-          case /*@todo*/ => Some(/*@todo*/)
+          case "Func" => Some(FuncToken)
+          case "for" => Some(ForToken)
+          case "constructor" => Some(ConstructorToken)
           //imon
-          case /*@todo*/ => Some(/*@todo*/)
-          case /*@todo*/ => Some(/*@todo*/)
+          case "return" => Some(ReturnToken)
+          case "break" => Some(BreakToken)
           // steph
           case "Class" => Some(ClassToken)
           case "true" => Some(BooleanToken(true))
@@ -125,71 +126,72 @@ class Lexer(private var input: List[Char]) {
             LeftParenToken
           }
           // ed
-          case ">" :: tail => {
+          case '>' :: tail => {
             input = tail
             GreaterThanToken
           }
-          case "}" :: tail => {
+          case '}' :: tail => {
             input = tail
             RightCurlyToken
           }
-          case ")" :: tail => {
+          case ')' :: tail => {
             input = tail
             RightParenToken
           }
-          case "+" :: tail => {
+          case '+' :: tail => {
             input = tail
             PlusToken
           }
           // imon
+          case '&' :: tail => {
+            input = tail
+            AndToken
+          }
+          case '*' :: tail => {
+            input = tail
+            MultiplicationToken
+          } /*
           case /*@todo*/ :: tail => {
             input = tail
             /*@todo*/
-          }
-          case /*@todo*/ :: tail => {
-            input = tail
-            /*@todo*/
-          }
-          case /*@todo*/ :: tail => {
-            input = tail
-            /*@todo*/
-          }
+          } */
           // dan
-          case /*@todo*/ :: tail => {
+          case ';' :: tail => {
             input = tail
-            /*@todo*/
+            SemicolonToken
           }
-          case /*@todo*/ :: tail => {
+          case '|' :: tail => {
             input = tail
-            /*@todo*/
+            OrToken
           }
-          case /*@todo*/ :: tail => {
+          case '/' :: tail => {
             input = tail
-            /*@todo*/
+            DivisionToken
           }
-          case /*@todo*/ :: tail => {
+          case '.' :: tail => {
             input = tail
-            /*@todo*/
+            PeriodToken
           }
           // jiamin
-          case /*@todo*/ :: tail => {
+            
+          case '-' :: tail => {
             input = tail
-            /*@todo*/
+            SubtractToken
           }
-          case /*@todo*/ :: tail => {
+          case '<' :: tail => {
             input = tail
-            /*@todo*/
+            LessThanToken
           }
-          case /*@todo*/ :: tail => {
+          case '{' :: tail => {
             input = tail
-            /*@todo*/
+            LeftCurlyToken
           }
           // steph
-          case "(" :: tail => {
+          case '(' :: tail => {
             input = tail
             LeftParenToken
           }
-          case "=" :: tail => {
+          case '=' :: tail => {
             input = tail
             EqualsToken
           }
