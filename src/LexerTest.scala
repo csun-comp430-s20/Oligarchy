@@ -33,6 +33,30 @@ object LexerTest {
     testTokenizes("if else", IfToken, ElseToken)
   }
 
+  def testLessThan(){
+    testTokenizes("<", LessThanToken)
+  }
+
+  def testFunc(){
+    testTokenizes("func", FuncToken)
+  }
+
+  def testFor(){
+    testTokenizes("for", ForToken)
+  }
+
+  def testSubtract{
+    testTokenizes("-", SubtractToken)
+  }
+
+  def testLeftCurly{
+    testTokenizes("{", LeftCurlyToken)
+  }
+
+  def testConstructor{
+    testTokenizes("constructor", ConstructorToken)
+  }
+
   def main(args: Array[String]) {
     testLeftParen()
     testRightParen()
@@ -41,5 +65,11 @@ object LexerTest {
     testVariableWithWhitespaceAfter()
     testVariableContainingReservedWords()
     testTwoReservedWords()
+    testLessThan()
+    testFunc()
+    testFor()
+    testSubtract
+    testLeftCurly
+    testConstructor
   } // main
 } // LexerTest
