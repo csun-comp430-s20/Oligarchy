@@ -125,19 +125,19 @@ class Lexer(private var input: List[Char]) {
             LeftParenToken
           }
           // ed
-          case ">" :: tail => {
+          case '>' :: tail => {
             input = tail
             GreaterThanToken
           }
-          case "}" :: tail => {
+          case '}' :: tail => {
             input = tail
             RightCurlyToken
           }
-          case ")" :: tail => {
+          case ')' :: tail => {
             input = tail
             RightParenToken
           }
-          case "+" :: tail => {
+          case '+' :: tail => {
             input = tail
             PlusToken
           }
@@ -173,24 +173,24 @@ class Lexer(private var input: List[Char]) {
           }
           // jiamin
             
-          case "-" :: tail => {
+          case '-' :: tail => {
             input = tail
             SubtractToken
           }
-          case "<" :: tail => {
+          case '<' :: tail => {
             input = tail
             LessThanToken
           }
-          case "{" :: tail => {
+          case '{' :: tail => {
             input = tail
             LeftCurlyToken
           }
           // steph
-          case "(" :: tail => {
+          case '(' :: tail => {
             input = tail
             LeftParenToken
           }
-          case "=" :: tail => {
+          case '=' :: tail => {
             input = tail
             EqualsToken
           }
