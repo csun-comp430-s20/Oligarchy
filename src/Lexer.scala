@@ -63,9 +63,9 @@ class Lexer(private var input: List[Char]) {
           //ed
           case "print" => Some(PrintToken)
             //jiamin
-          case /*@todo*/ => Some(/*@todo*/)
-          case /*@todo*/ => Some(/*@todo*/)
-          case /*@todo*/ => Some(/*@todo*/)
+          case "Func" => Some(FuncToken)
+          case "for" => Some(ForToken)
+          case "constructor" => Some(ConstructorToken)
           //imon
           case /*@todo*/ => Some(/*@todo*/)
           case /*@todo*/ => Some(/*@todo*/)
@@ -172,17 +172,17 @@ class Lexer(private var input: List[Char]) {
             /*@todo*/
           }
           // jiamin
-          case /*@todo*/ :: tail => {
+          case "-" :: tail => {
             input = tail
-            /*@todo*/
+            SubtractToken
           }
-          case /*@todo*/ :: tail => {
+          case "<" :: tail => {
             input = tail
-            /*@todo*/
+            LessThanToken
           }
-          case /*@todo*/ :: tail => {
+          case "{" :: tail => {
             input = tail
-            /*@todo*/
+            LeftCurlyToken
           }
           // steph
           case "(" :: tail => {
