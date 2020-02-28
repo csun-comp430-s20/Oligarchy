@@ -1,13 +1,43 @@
 object LexerTest {
-  def testTokenizes(input: String, expectedTokens: Token*) {
+  def testTokenizes(input: String, expectedTokens: Token* ) {
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     assert(receivedTokens == expectedTokens.toSeq)
   }
 
+  def testEx() {
+    testTokenizes("})", RightCurlyToken, RightParenToken)
+  }
+  def testRightCurly() {
+    testTokenizes("}", RightCurlyToken)
+  }
+  def testGreaterThan() {
+    testTokenizes(">", GreaterThanToken)
+  }
+  def testPlus(){
+    testTokenizes("+", PlusToken)
+  }
+  def testPrint(){
+    testTokenizes("print", PrintToken)
+  }
+  def testPositiveLargeInt() {
+    testTokenizes("2147483647", IntegerToken(2147483647))
+  }
+  def testPositiveInt() {
+    testTokenizes("0", IntegerToken(0))
+  }
+  def testNegativeInt() {
+    testTokenizes("-1", IntegerToken(-1))
+  }
+  def testNegativeLargeInt() {
+    testTokenizes("-2147483648", IntegerToken(-2147483648))
+  }
+
+
   def testLeftParen() {
     testTokenizes("(", LeftParenToken)
   }
+
 
   def testRightParen() {
     testTokenizes(")", RightParenToken)
@@ -171,6 +201,13 @@ object LexerTest {
     testClass()
     testClassWithWhiteSpaces()
     testEquals()
+    testNegativeInt()
+    testNegativeLargeInt()
+    testRightCurly()
+    testPlus()
+    testGreaterThan()
+    testPrint()
+    testEx()
   } // main
 } // LexerTest
 

@@ -63,8 +63,8 @@ class Lexer(private var input: List[Char]) {
           case "else" => Some(ElseToken)
           //ed
           case "print" => Some(PrintToken)
-            //jiamin
-          case "Func" => Some(FuncToken)
+          //jiamin
+          case "func" => Some(FuncToken)
           case "for" => Some(ForToken)
           case "constructor" => Some(ConstructorToken)
           //imon
@@ -83,16 +83,18 @@ class Lexer(private var input: List[Char]) {
 
   private def tryTokenizeInteger(): Option[IntegerToken] = {
     @scala.annotation.tailrec
+    var test:List[Char] = input;
     def readDigits(accum: String): Option[IntegerToken] = {
       input match {
-        case head :: tail if Character.isDigit(head) => {
+        case head::tail if Character.isDigit(head) => {
           input = tail
           readDigits(accum + head)
         }
-        case _ => {
-          if (accum.length > 0) {
-            Some(IntegerToken(accum.toInt))
+        case _=> {
+          if (accum.length >0  && accum != "-") {
+            Some(IntegerToken(accum.toInt ))
           } else {
+            input = test
             None
           }
         }
@@ -100,9 +102,12 @@ class Lexer(private var input: List[Char]) {
     }
 
     input match {
-      case '-' :: tail => readDigits("-")
+      case '-' :: tail =>
+        input = tail
+        readDigits("-")
       case _ => readDigits("")
     }
+
   } // tryTokenizeInteger
 
   @scala.annotation.tailrec
@@ -150,11 +155,7 @@ class Lexer(private var input: List[Char]) {
           case '*' :: tail => {
             input = tail
             MultiplicationToken
-          } /*
-          case /*@todo*/ :: tail => {
-            input = tail
-            /*@todo*/
-          } */
+          }
           // dan
           case ';' :: tail => {
             input = tail
@@ -173,7 +174,7 @@ class Lexer(private var input: List[Char]) {
             PeriodToken
           }
           // jiamin
-            
+
           case '-' :: tail => {
             input = tail
             SubtractToken
