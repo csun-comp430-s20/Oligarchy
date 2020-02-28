@@ -33,39 +33,74 @@ object LexerTest {
     testTokenizes("if else", IfToken, ElseToken)
   }
 
+  def testLessThan(){
+    testTokenizes("<", LessThanToken)
+  }
+
+  def testFunc(){
+    testTokenizes("func", FuncToken)
+  }
+
+  def testFor(){
+    testTokenizes("for", ForToken)
+  }
+
+  def testSubtract(){
+    testTokenizes("-", SubtractToken)
+  }
+
+  def testLeftCurly(){
+    testTokenizes("{", LeftCurlyToken)
+  }
+
+  def testConstructor(){
+    testTokenizes("constructor", ConstructorToken)
+  }
+  
   def testPeriod(): Unit = {
     testTokenizes(".", PeriodToken)
   }
+  
   def testSemiColon(): Unit = {
     testTokenizes(";", SemicolonToken)
   }
+  
   def testDivision(): Unit = {
     testTokenizes("/", DivisionToken)
   }
+  
   def testOr(): Unit = {
     testTokenizes("|", OrToken)
   }
+  
   def testPeriodWithWhitespaceBefore(): Unit = {
     testTokenizes(" .", PeriodToken)
   }
+  
   def testPeriodWithWhitespaceAfter(): Unit = {
     testTokenizes(". ", PeriodToken)
   }
+  
   def testSemiColonWithWhitespaceBefore(): Unit = {
     testTokenizes(" ;", SemicolonToken)
   }
+  
   def testSemicolonWithWhitespaceAfter(): Unit = {
     testTokenizes("; ", SemicolonToken)
   }
+  
   def testDivisionWithWhitespaceBefore(): Unit = {
     testTokenizes(" /", DivisionToken)
   }
+  
   def testDivisionWithWhitespaceAfter(): Unit = {
     testTokenizes("/ ", DivisionToken)
   }
+  
   def testOrWithWhitespaceBefore(): Unit = {
     testTokenizes(" |", OrToken)
   }
+  
   def testOrWithWhitespaceAfter(): Unit = {
     testTokenizes("| ", OrToken)
   }
@@ -110,6 +145,12 @@ object LexerTest {
     testVariableWithWhitespaceAfter()
     testVariableContainingReservedWords()
     testTwoReservedWords()
+    testLessThan()
+    testFunc()
+    testFor()
+    testSubtract()
+    testLeftCurly()
+    testConstructor()
     testPeriod()
     testSemiColon()
     testDivision()
