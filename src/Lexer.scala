@@ -95,6 +95,7 @@ class Lexer(private var input: List[Char]) {
           readDigits(accum + head)
         }
         case _ => {
+
           if (accum.length > 0 ) {
             Some(IntegerToken(accum.toInt))
           } else {
