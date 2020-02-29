@@ -119,43 +119,66 @@ class Lexer(private var input: List[Char]) {
     var temp: List[Char] = input;
     def readChars(accum: String): Option[StrToken] = {
       input match {
-        case head :: tail if head != '"' => {
+        case '\"' :: tail  => {
           input = tail
-          readChars(accum + head)
+          Some(StrToken(accum))
         }
-        case head :: tail if head == '\\' => {
-          tail match {
-            case '\"' :: tail =>
-              readChars("\"")
-            case _ =>
-              None
-          }
-          if (accum.length > 0) {
-            Some(StrToken(accum))
-          } else {
-            input = temp
-            None
-          }
-        }
-        case head :: tail if tail == Nil => {
+        case _ :: tail if tail == Nil => {
           throw LexerException("Input ran out before seeing another \"")
         }
-        case _ =>
-          None
+        case head :: tail  =>
+          input = tail
+          readChars(accum + head)
       }
     }
 
     input match {
-      case '\\' :: tail =>
-        tail match {
-          case '\"' :: tail =>
-            input = tail
-            readChars("\"")
-          case _ =>
-            None
-        }
+      case '\"' :: tail =>
+        input = tail
+        readChars("")
       case _ => None
     }
+
+    //    var temp: List[Char] = input;
+    //    def readChars(accum: String): Option[StrToken] = {
+    //      input match {
+    //        case head :: tail if head != '\"' => {
+    //          input = tail
+    //          readChars(accum + head)
+    //        }
+    //        case head :: tail if head == '\\' => {
+    //          tail match {
+    //            case '\"' :: tail =>
+    //              readChars("\"")
+    //            case _ =>
+    //              None
+    //          }
+    //          if (accum.length > 0) {
+    //            Some(StrToken(accum))
+    //          } else {
+    //            input = temp
+    //            None
+    //          }
+    //        }
+    //        case head :: tail if tail == Nil => {
+    //          throw LexerException("Input ran out before seeing another \"")
+    //        }
+    //        case _ =>
+    //          None
+    //      }
+    //    }
+    //
+    //    input match {
+    //      case '\\' :: tail =>
+    //        tail match {
+    //          case '\"' :: tail =>
+    //            input = tail
+    //            readChars("\"")
+    //          case _ =>
+    //            None
+    //        }
+    //      case _ => None
+    //    }
 
   } // tryTokenizeString
 
