@@ -262,6 +262,7 @@ object LexerTest {
     testForLoop()
     testPrintWithInteger()
     testExp1()
+    testStringToken()
   } // main
 } // LexerTest
 
