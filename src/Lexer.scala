@@ -86,8 +86,8 @@ class Lexer(private var input: List[Char]) {
   } // tryTokenizeVariableOrReservedWord
 
   private def tryTokenizeInteger(): Option[IntegerToken] = {
-    @scala.annotation.tailrec
     var test: List[Char] = input;
+    @scala.annotation.tailrec
     def readDigits(accum: String): Option[IntegerToken] = {
       input match {
         case head :: tail if Character.isDigit(head) => {
@@ -95,7 +95,7 @@ class Lexer(private var input: List[Char]) {
           readDigits(accum + head)
         }
         case _ => {
-          if (accum.length > 0 && accum = "-") {
+          if (accum.length > 0 ) {
             Some(IntegerToken(accum.toInt))
           } else {
             input = test
@@ -106,7 +106,10 @@ class Lexer(private var input: List[Char]) {
     }
 
     input match {
-      case _ => readDigits("")
+      case head::tail if Character.isDigit(head)=>
+        input = tail
+        readDigits(head.toString)
+      case _  => None
     }
 
   } // tryTokenizeInteger
