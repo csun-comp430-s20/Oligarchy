@@ -5,6 +5,7 @@ case class IntegerToken(value: Int) extends Token // detect if it is just a numb
 case class StrToken(value: String) extends Token // Detect if between to quotes imon
 case class VarToken(name: String) extends Token // steph
 case class BooleanToken(name: Boolean) extends Token // can treat as reserved word  but you pass in the value steph
+case class TypeToken(name: String) extends Token
 
 case object ClassToken extends Token // reserved word class steph
 case object DivisionToken extends Token // single /  dan
@@ -59,20 +60,24 @@ class Lexer(private var input: List[Char]) {
         input = tail
         readLetters("" + head) match {
           case "if" => Some(IfToken)
+          //daniel
           case "else" => Some(ElseToken)
           //ed
           case "print" => Some(PrintToken)
-            //jiamin
-          case "Func" => Some(FuncToken)
+          //jiamin
+          case "func" => Some(FuncToken)
           case "for" => Some(ForToken)
           case "constructor" => Some(ConstructorToken)
           //imon
-          case /*@todo*/ => Some(/*@todo*/)
-          case /*@todo*/ => Some(/*@todo*/)
+          case "return" => Some(ReturnToken)
+          case "break" => Some(BreakToken)
           // steph
           case "Class" => Some(ClassToken)
           case "true" => Some(BooleanToken(true))
           case "false" => Some(BooleanToken(false))
+          case "str" => Some(TypeToken("str"))
+          case "int" => Some(TypeToken("int"))
+          case "bool" => Some(TypeToken("bool"))
           case other => Some(VarToken(other))
         }
       }
@@ -81,6 +86,7 @@ class Lexer(private var input: List[Char]) {
   } // tryTokenizeVariableOrReservedWord
 
   private def tryTokenizeInteger(): Option[IntegerToken] = {
+    var test: List[Char] = input;
     @scala.annotation.tailrec
     def readDigits(accum: String): Option[IntegerToken] = {
       input match {
@@ -89,9 +95,11 @@ class Lexer(private var input: List[Char]) {
           readDigits(accum + head)
         }
         case _ => {
-          if (accum.length > 0) {
+
+          if (accum.length > 0 ) {
             Some(IntegerToken(accum.toInt))
           } else {
+            input = test
             None
           }
         }
@@ -99,10 +107,41 @@ class Lexer(private var input: List[Char]) {
     }
 
     input match {
-      case '-' :: tail => readDigits("-")
-      case _ => readDigits("")
+      case head::tail if Character.isDigit(head)=>
+        input = tail
+        readDigits(head.toString)
+      case _  => None
     }
+
   } // tryTokenizeInteger
+
+  private def tryTokenizeString(): Option[StrToken] = {
+    @scala.annotation.tailrec
+    var temp: List[Char] = input;
+    def readChars(accum: String): Option[StrToken] = {
+      input match {
+        case '\"' :: tail  => {
+          input = tail
+          Some(StrToken(accum))
+        }
+        case _ :: tail if tail == Nil => {
+          throw LexerException("Input ran out before seeing another \"")
+        }
+        case head :: tail  =>
+          input = tail
+          readChars(accum + head)
+      }
+    }
+
+    input match {
+      case '\"' :: tail =>
+        input = tail
+        readChars("")
+      case _ => None
+    }
+
+
+  } // tryTokenizeString
 
   @scala.annotation.tailrec
   private def skipWhitespace() {
@@ -119,86 +158,85 @@ class Lexer(private var input: List[Char]) {
   private def tokenizeOne(): Token = {
     tryTokenizeVariableOrReservedWord().getOrElse {
       tryTokenizeInteger().getOrElse {
-        input match {
-          case '(' :: tail => {
-            input = tail
-            LeftParenToken
-          }
-          // ed
-          case ">" :: tail => {
-            input = tail
-            GreaterThanToken
-          }
-          case "}" :: tail => {
-            input = tail
-            RightCurlyToken
-          }
-          case ")" :: tail => {
-            input = tail
-            RightParenToken
-          }
-          case "+" :: tail => {
-            input = tail
-            PlusToken
-          }
-          // imon
-          case /*@todo*/ :: tail => {
-            input = tail
-            /*@todo*/
-          }
-          case /*@todo*/ :: tail => {
-            input = tail
-            /*@todo*/
-          }
-          case /*@todo*/ :: tail => {
-            input = tail
-            /*@todo*/
-          }
-          // dan
-          case /*@todo*/ :: tail => {
-            input = tail
-            /*@todo*/
-          }
-          case /*@todo*/ :: tail => {
-            input = tail
-            /*@todo*/
-          }
-          case /*@todo*/ :: tail => {
-            input = tail
-            /*@todo*/
-          }
-          case /*@todo*/ :: tail => {
-            input = tail
-            /*@todo*/
-          }
-          // jiamin
-          case "-" :: tail => {
-            input = tail
-            SubtractToken
-          }
-          case "<" :: tail => {
-            input = tail
-            LessThanToken
-          }
-          case "{" :: tail => {
-            input = tail
-            LeftCurlyToken
-          }
-          // steph
-          case "(" :: tail => {
-            input = tail
-            LeftParenToken
-          }
-          case "=" :: tail => {
-            input = tail
-            EqualsToken
-          }
+        tryTokenizeString().getOrElse {
+          input match {
+            case '(' :: tail => {
+              input = tail
+              LeftParenToken
+            }
+            // ed
+            case '>' :: tail => {
+              input = tail
+              GreaterThanToken
+            }
+            case '}' :: tail => {
+              input = tail
+              RightCurlyToken
+            }
+            case ')' :: tail => {
+              input = tail
+              RightParenToken
+            }
+            case '+' :: tail => {
+              input = tail
+              PlusToken
+            }
+            // imon
+            case '&' :: tail => {
+              input = tail
+              AndToken
+            }
+            case '*' :: tail => {
+              input = tail
+              MultiplicationToken
+            }
+            // dan
+            case ';' :: tail => {
+              input = tail
+              SemicolonToken
+            }
+            case '|' :: tail => {
+              input = tail
+              OrToken
+            }
+            case '/' :: tail => {
+              input = tail
+              DivisionToken
+            }
+            case '.' :: tail => {
+              input = tail
+              PeriodToken
+            }
+            // jiamin
 
-          case _ :: _ => {
-            throw LexerException("Have input, but it's not valid")
-          }
-          case Nil => {
-            throw LexerException("Have no more input")
+            case '-' :: tail => {
+              input = tail
+              SubtractToken
+            }
+            case '<' :: tail => {
+              input = tail
+              LessThanToken
+            }
+            case '{' :: tail => {
+              input = tail
+              LeftCurlyToken
+            }
+            // steph
+            case '(' :: tail => {
+              input = tail
+              LeftParenToken
+            }
+            case '=' :: tail => {
+              input = tail
+              EqualsToken
+            }
+
+            case _ :: _ => {
+              throw LexerException("Have input, but it's not valid")
+            }
+            case Nil => {
+              throw LexerException("Have no more input")
+            }
           }
         }
       }
