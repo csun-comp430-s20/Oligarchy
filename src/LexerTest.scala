@@ -8,31 +8,42 @@ object LexerTest {
   def testEx() {
     testTokenizes("})", RightCurlyToken, RightParenToken)
   }
+
   def testRightCurly() {
     testTokenizes("}", RightCurlyToken)
   }
+
   def testGreaterThan() {
     testTokenizes(">", GreaterThanToken)
   }
+
   def testPlus(){
     testTokenizes("+", PlusToken)
   }
+
   def testPrint(){
     testTokenizes("print", PrintToken)
   }
+
   def testPositiveLargeInt() {
     testTokenizes("2147483647", IntegerToken(2147483647))
   }
+
   def testPositiveInt() {
     testTokenizes("0", IntegerToken(0))
   }
+
   def testNegativeInt() {
     testTokenizes("-1", IntegerToken(-1))
   }
+
   def testNegativeLargeInt() {
     testTokenizes("-2147483648", IntegerToken(-2147483648))
   }
 
+  def testStringToken(){
+    testTokenizes("\"testString\"", StrToken("testString"))
+  }
 
   def testLeftParen() {
     testTokenizes("(", LeftParenToken)
@@ -167,6 +178,44 @@ object LexerTest {
     testTokenizes("=", EqualsToken)
   }
 
+  def testingStatementIf(){
+    testTokenizes("if (i = 10){" +
+                            "return true;" +
+                          "}",
+      IfToken, LeftParenToken, VarToken("i"), EqualsToken, IntegerToken(10), RightParenToken, LeftCurlyToken,
+      ReturnToken, BooleanToken(true),SemicolonToken,
+      RightCurlyToken)
+  }
+  def testingStatementIfElse(){
+    testTokenizes("if (i = 10 | i = 5){" +
+                            "return true;" +
+                          "} " +
+                          "else{" +
+                          "i++" +
+                          "} ",
+      IfToken, LeftParenToken, VarToken("i"), EqualsToken, IntegerToken(10), OrToken, VarToken("i"), EqualsToken, IntegerToken(5), RightParenToken, LeftCurlyToken,
+      ReturnToken, BooleanToken(true), SemicolonToken,
+      RightCurlyToken,
+      ElseToken, LeftCurlyToken,
+      VarToken("i"), PlusToken, PlusToken,
+      RightCurlyToken)
+  }
+
+  def testForLoop(){
+      testTokenizes("for (int i = 0; i <= 10; i++){ w = 10 }", ForToken, LeftParenToken,TypeToken("int"), VarToken("i"), EqualsToken,
+        IntegerToken(0), SemicolonToken, VarToken("i"), LessThanToken, EqualsToken, IntegerToken(10), SemicolonToken,
+        VarToken("i") , PlusToken, PlusToken, RightParenToken, LeftCurlyToken, VarToken("w"), EqualsToken, IntegerToken(10),
+        RightCurlyToken)
+  }
+
+  def testPrintWithInteger(){
+    testTokenizes("print(10);", PrintToken, LeftParenToken, IntegerToken(10), RightParenToken, SemicolonToken)
+  }
+
+  def testExp1(){
+    testTokenizes("int i = 50;", TypeToken("int"), VarToken("i"), EqualsToken,IntegerToken(50), SemicolonToken)
+  }
+
   def main(args: Array[String]) {
     testLeftParen()
     testRightParen()
@@ -208,6 +257,11 @@ object LexerTest {
     testGreaterThan()
     testPrint()
     testEx()
+    testingStatementIf()
+    testingStatementIfElse()
+    testForLoop()
+    testPrintWithInteger()
+    testExp1()
   } // main
 } // LexerTest
 

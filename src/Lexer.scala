@@ -5,6 +5,7 @@ case class IntegerToken(value: Int) extends Token // detect if it is just a numb
 case class StrToken(value: String) extends Token // Detect if between to quotes imon
 case class VarToken(name: String) extends Token // steph
 case class BooleanToken(name: Boolean) extends Token // can treat as reserved word  but you pass in the value steph
+case class TypeToken(name: String) extends Token
 
 case object ClassToken extends Token // reserved word class steph
 case object DivisionToken extends Token // single /  dan
@@ -74,6 +75,9 @@ class Lexer(private var input: List[Char]) {
           case "Class" => Some(ClassToken)
           case "true" => Some(BooleanToken(true))
           case "false" => Some(BooleanToken(false))
+          case "str" => Some(TypeToken("str"))
+          case "int" => Some(TypeToken("int"))
+          case "bool" => Some(TypeToken("bool"))
           case other => Some(VarToken(other))
         }
       }
@@ -119,7 +123,13 @@ class Lexer(private var input: List[Char]) {
           input = tail
           readChars(accum + head)
         }
-        case head :: tail if head == '"' => {
+        case head :: tail if head == '\\' => {
+          tail match {
+            case '\"' :: tail =>
+              readChars("\"")
+            case _ =>
+              None
+          }
           if (accum.length > 0) {
             Some(StrToken(accum))
           } else {
@@ -130,17 +140,24 @@ class Lexer(private var input: List[Char]) {
         case head :: tail if tail == Nil => {
           throw LexerException("Input ran out before seeing another \"")
         }
+        case _ =>
+          None
       }
     }
 
     input match {
-      case '"' :: tail =>
-        input = tail
-        readChars("")
+      case '\\' :: tail =>
+        tail match {
+          case '\"' :: tail =>
+            input = tail
+            readChars("\"")
+          case _ =>
+            None
+        }
       case _ => None
     }
 
-  } // tryTokenizeInteger
+  } // tryTokenizeString
 
   @scala.annotation.tailrec
   private def skipWhitespace() {
