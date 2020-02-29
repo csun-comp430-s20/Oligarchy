@@ -44,6 +44,15 @@ object LexerTest {
   def testStringToken(){
     testTokenizes("\"testString\"", StrToken("testString"))
   }
+  def testInitializeString(){
+    testTokenizes(" str s = \"string\";", TypeToken("str"), VarToken("s"), EqualsToken,  StrToken("string"),SemicolonToken)
+  }
+  def testFuncPrintString(){
+    testTokenizes("func toString(){" +
+      "print(\"hello, \n world \")" +
+      "}",FuncToken, VarToken("toString"), LeftParenToken,RightParenToken,LeftCurlyToken,PrintToken,
+        LeftParenToken, StrToken("hello, \n world "),RightParenToken,RightCurlyToken)
+  }
 
   def testLeftParen() {
     testTokenizes("(", LeftParenToken)
@@ -263,6 +272,8 @@ object LexerTest {
     testPrintWithInteger()
     testExp1()
     testStringToken()
+    testInitializeString()
+    testFuncPrintString()
   } // main
 } // LexerTest
 
