@@ -34,7 +34,7 @@ object LexerTest {
   }
 
   def testNegativeInt() {
-    testTokenizes("-1", IntegerToken(-1))
+    testTokenizes("-1", SubtractToken, IntegerToken(1))
   }
 
   def testNegativeLargeInt() {
@@ -237,6 +237,17 @@ object LexerTest {
     testTokenizes("int i = 50;", TypeToken("int"), VarToken("i"), EqualsToken,IntegerToken(50), SemicolonToken)
   }
 
+  def testMath1(){     // (5 * 10) + 3*(7) / 10 + 12-10
+    testTokenizes("(5 * 10) + 3*(7) / 10 + 12-10", LeftParenToken, IntegerToken(5), MultiplicationToken,
+      IntegerToken(10), RightParenToken, PlusToken, IntegerToken(3), MultiplicationToken, LeftParenToken,
+      IntegerToken(7), RightParenToken, DivisionToken, IntegerToken(10), PlusToken, IntegerToken(12), SubtractToken,
+      IntegerToken(10))
+  }
+  def testSubtraction1(){
+    //testTokenizes("5-10", IntegerToken(5), SubtractToken, IntegerToken(10))
+    testTokenizes("5-10", IntegerToken(5),  SubtractToken, IntegerToken(-10))
+  }
+
   def main(args: Array[String]) {
     testLeftParen()
     testRightParen()
@@ -289,6 +300,8 @@ object LexerTest {
     testAnd()
     testMultiplication()
     testBreak()
+    testMath1()
+    testSubtraction1
   } // main
 } // LexerTest
 

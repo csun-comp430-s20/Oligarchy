@@ -95,7 +95,7 @@ class Lexer(private var input: List[Char]) {
           readDigits(accum + head)
         }
         case _ => {
-          if (accum.length > 0 && accum != "-") {
+          if (accum.length > 0 && accum = "-") {
             Some(IntegerToken(accum.toInt))
           } else {
             input = test
@@ -106,9 +106,6 @@ class Lexer(private var input: List[Char]) {
     }
 
     input match {
-      case '-' :: tail =>
-        input = tail
-        readDigits("-")
       case _ => readDigits("")
     }
 
