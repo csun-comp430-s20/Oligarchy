@@ -38,3 +38,15 @@ case class Var(name:String) extends Variable
 
 
 
+
+case class ParserException(msg: String) extends Exception(msg)
+
+object Parser {
+  def apply(input: Seq[Token]): Parser = {
+    new Parser(input)
+  }
+}
+
+class Parser(private var input: Seq[Token]) {
+
+}
