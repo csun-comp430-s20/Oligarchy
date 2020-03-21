@@ -1,3 +1,4 @@
+import java.sql.Statement
 
 sealed trait MathOp
 case object PlusMathOp extends MathOp
@@ -35,6 +36,39 @@ case class CallHighOrderExp(e1:Exp , e2: Exp) extends Exp
 
 sealed trait Variable
 case class Var(name:String) extends Variable
+
+
+
+sealed trait Stmt
+case class ExpStmt(e1: Exp) extends Stmt
+case class AssignmentStmt(v1: Variable, vd1: VarDec) extends Stmt
+case class ForStmt(v1: VarDec, e1: Exp, inc: Stmt, forBody: Stmt) extends Stmt
+case object BreakStmt extends Stmt
+case class BlockStmt(s1: Stmt) extends Stmt
+case class ConditionalStmt(e1: Exp, condition: Stmt, ifBody: Stmt) extends Stmt
+case class ReturnStmt(e1: Exp) extends Stmt
+case object VoidStmt extends Stmt
+
+sealed trait Method
+case class DefMethod(methodName: Variable) extends Method
+
+sealed trait Instance
+case class DecInstance(v1: VarDec) extends Instance
+
+sealed trait ClassBody
+case class InstanceClassBody(in1: DecInstance*) extends ClassBody
+case class MethodClassBody(md1: DefMethod*) extends ClassBody
+case class DeclarationClassBody(vd1: VarDec*) extends ClassBody
+
+sealed trait Class
+case class DefClass(v1: Variable, st1: Stmt, cb1: ClassBody*) extends Class
+case class DefExtClass(v1: Variable, v2: Variable, st1: Stmt, cb1: ClassBody*) extends Class
+
+sealed trait Program
+case class Prgm(e1: Exp, c1: DefClass*) extends Program
+
+
+
 
 
 
