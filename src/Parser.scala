@@ -25,6 +25,7 @@ sealed trait VarDec
 case class Declaration(types: Var)extends VarDec
 
 sealed trait Exp
+case class IntegerExp(value:Int) extends Exp
 case class LogicExp(e1:Exp , l1: Logic, e2: Exp) extends Exp
 case class MathExp(e1:Exp , m1: MathOp, e2: Exp) extends Exp
 case class PrintExp(e1:Exp) extends Exp
@@ -80,6 +81,57 @@ object Parser {
 }
 
 class Parser(private var input: Seq[Token]) {
+  private def ParseIntegerExpression(position: Int): (IntegerExp, Int)={
+    input(position) match{
+      case head: IntegerToken =>{
+        (IntegerExp(head.value), position + 1)
+      }
+      case _ =>{
+        throw new ParserException("not an integer")
+      }
+    }
+  }
+
+
+
+
+
+  // work that needs to be done
+  // adding terminals to expression
+  // check if something is a certain token
+  // parse program
+   /*
+    parse program is going to take a seq of tokens and check if they are
+    a series of class definitions followed by an experession  and return a program class
+    otherwise throw a parse exception
+
+    */
+
+  //
+//  private def parseProgram():Prgm ={
+//    val (classDef:DefClass, position: Int) = parseClassDef(0)
+//    val (expression:Exp, nextPos: Int )= parseExpression(position)
+//    Prgm(expression,classDef)
+//  }
+//
+//  private def parseExpression(position: Int):(Exp,Int)={
+//
+//  }
+//  private def parseClassDef(position: Int):( DefClass, Int)={
+//
+//  }
+  // parse classdef
+  /*
+    checks for class token
+   */
+  // parse instancedec
+  // parse methoddef
+  // parse stmt
+  // parse vardec
+  // parse exp
+  // parse mathExp
+    // precedence
+  //
 
 }
 
