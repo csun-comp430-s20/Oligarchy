@@ -29,7 +29,7 @@ case class LogicExp(e1:Exp , l1: Logic, e2: Exp) extends Exp
 case class MathExp(e1:Exp , m1: MathOp, e2: Exp) extends Exp
 case class PrintExp(e1:Exp) extends Exp
 case class MethodExp(e1:Exp , methodName: Variable, e2: Exp) extends Exp
-case class NewClassExp(className: Variable, e1:Exp ) extends Exp
+case class NewClassExp(className: Variable, e1:Exp* ) extends Exp
 case class CastExp(t1: Types , e2: Exp) extends Exp
 case class HighOrderExp(t1: Types , v1: Variable, e2: Exp) extends Exp
 case class CallHighOrderExp(e1:Exp , e2: Exp) extends Exp
@@ -41,7 +41,8 @@ case class Var(name:String) extends Variable
 
 sealed trait Stmt
 case class ExpStmt(e1: Exp) extends Stmt
-case class AssignmentStmt(v1: Variable, vd1: VarDec) extends Stmt
+case class AssignmentStmt(v1: Variable, exp: Exp) extends Stmt
+case class AssignmentStmtVardec(vd1: VarDec, exp: Exp) extends Stmt
 case class ForStmt(v1: VarDec, e1: Exp, inc: Stmt, forBody: Stmt) extends Stmt
 case object BreakStmt extends Stmt
 case class BlockStmt(s1: Stmt) extends Stmt
@@ -50,7 +51,7 @@ case class ReturnStmt(e1: Exp) extends Stmt
 case object VoidStmt extends Stmt
 
 sealed trait Method
-case class DefMethod(methodName: Variable) extends Method
+case class DefMethod(type:Types, methodName: Variable,  stmt: Stmt, parameters: VarDec*) extends Method
 
 sealed trait Instance
 case class DecInstance(v1: VarDec) extends Instance
@@ -62,7 +63,7 @@ case class DeclarationClassBody(vd1: VarDec*) extends ClassBody
 
 sealed trait Class
 case class DefClass(v1: Variable, st1: Stmt, cb1: ClassBody*) extends Class
-case class DefExtClass(v1: Variable, v2: Variable, st1: Stmt, cb1: ClassBody*) extends Class
+case class DefExtClass(classname: Variable, extendedClass: Variable, st1: Stmt, cb1: ClassBody*) extends Class
 
 sealed trait Program
 case class Prgm(e1: Exp, c1: DefClass*) extends Program
@@ -70,5 +71,15 @@ case class Prgm(e1: Exp, c1: DefClass*) extends Program
 
 
 
+case class ParserException(msg: String) extends Exception(msg)
 
+object Parser {
+  def apply(input: Seq[Token]): Parser = {
+    new Parser(input)
+  }
+}
+
+class Parser(private var input: Seq[Token]) {
+
+}
 
