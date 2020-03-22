@@ -51,7 +51,7 @@ case class ReturnStmt(e1: Exp) extends Stmt
 case object VoidStmt extends Stmt
 
 sealed trait Method
-case class DefMethod(type:Types, methodName: Variable,  stmt: Stmt, parameters: VarDec*) extends Method
+case class DefMethod(types:Types, methodName: Variable,  stmt: Stmt, parameters: VarDec*) extends Method
 
 sealed trait Instance
 case class DecInstance(v1: VarDec) extends Instance
