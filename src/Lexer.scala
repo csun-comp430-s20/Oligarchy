@@ -33,6 +33,7 @@ case object ReturnToken extends Token // reserved word  return imon
 case object PrintToken extends Token // reserved word   print ed
 case object AndToken extends Token // single & imon
 case object ExtendsToken extends Token //reserved word
+case object NewToken extends Token //reserved word
 
 
 case class LexerException(msg: String) extends Exception(msg)
@@ -80,6 +81,7 @@ class Lexer(private var input: List[Char]) {
           case "str" => Some(TypeToken("str"))
           case "int" => Some(TypeToken("int"))
           case "bool" => Some(TypeToken("bool"))
+          case "new" => Some(NewToken)
           case other => Some(VarToken(other))
         }
       }

@@ -1,3 +1,6 @@
+
+
+
 sealed trait MathOp
 case object PlusMathOp extends MathOp
 case object MinusMathOp extends MathOp
@@ -25,6 +28,7 @@ case class Declaration(types: Var)extends VarDec
 sealed trait Exp
 case class IntegerExp(value:Int) extends Exp
 case class BooleanExp(value: Boolean) extends Exp
+case class VariableExp(value: Var) extends Exp
 case class LogicExp(e1:Exp , l1: Logic, e2: Exp) extends Exp
 case class MathExp(e1:Exp , m1: MathOp, e2: Exp) extends Exp
 case class PrintExp(e1:Exp) extends Exp
@@ -94,11 +98,79 @@ class Parser(private var input: Seq[Token]) {
         (BooleanExp(head.name), position + 1)
       }
       case _ => {
-        throw new ParserException("not an integer")
+        throw new ParserException("not a boolean")
       }
     }
   }
 
+  private def ParseExp(position: Int): (Exp, Int) = {
+    input(position) match {
+      case IntegerToken(value) =>
+        (IntegerExp(value),position+1)
+      case BooleanToken(name) =>
+        (BooleanExp(name),position+1)
+      case VarToken(name) =>
+        (VariableExp(Var(name)),position+1)
+      case PrintToken => {
+        // start parsing for printExpression
+        input(position+1 ) match {
+          case LeftParenToken => {
+            val (exp: Exp, nextPos: Int) = ParseExp(position+2)
+            input(nextPos) match {
+              case RightParenToken => (PrintExp(exp),nextPos +1)
+            }
+          }
+        }
+      }
+      case NewToken => {
+        input(position+1 ) match {
+          case varToken: VarToken => {
+            input(position + 2) match {
+              case LeftParenToken => {
+                val (parseResult, nextPos) = ParseExp(position+3)
+                input(nextPos) match {
+                  case RightParenToken => {
+                    (NewClassExp(Var(varToken.name),parseResult),nextPos+1)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      case LeftParenToken => {
+        input(position +1 )match {
+          case TypeToken(name) => {
+            input(position +2 ) match {
+              case RightParenToken => {
+                val (result , nextPos) = ParseExp(position + 3)
+                CastExp(Types(name), nextPos)
+              }
+              case VarToken(name) => {
+                input(position +3) match {
+                  case RightParenToken => {
+                    input(position + 4 )match {
+                      case EqualsToken =>{
+                        input (position + 5 ) match {
+                         case GreaterThanToken =>{
+                           val (exp , nextPos ) = ParseExp(position+6)
+                           HighOrderExp(Types(name), nextPos)
+                           }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      case _ => {
+        throw new ParserException("This is not an expresssion")
+      }
+    }
+  }
 
 
 
