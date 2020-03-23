@@ -24,6 +24,7 @@ case class Declaration(types: Var)extends VarDec
 
 sealed trait Exp
 case class IntegerExp(value:Int) extends Exp
+case class BooleanExp(value: Boolean) extends Exp
 case class LogicExp(e1:Exp , l1: Logic, e2: Exp) extends Exp
 case class MathExp(e1:Exp , m1: MathOp, e2: Exp) extends Exp
 case class PrintExp(e1:Exp) extends Exp
