@@ -41,8 +41,6 @@ case class CallHighOrderExp(e1:Exp , e2: Exp) extends Exp
 sealed trait Variable
 case class Var(name:String) extends Variable
 
-
-
 sealed trait Stmt
 case class ExpStmt(e1: Exp) extends Stmt
 case class AssignmentStmt(v1: Variable, exp: Exp) extends Stmt
@@ -102,7 +100,10 @@ class Parser(private var input: Seq[Token]) {
       }
     }
   }
-
+/*
+change seq to list so that you can maintain
+return the current ast and the remaining tokens
+ */
   private def ParseExp(position: Int): (Exp, Int) = {
     input(position) match {
       case IntegerToken(value) =>

@@ -5,7 +5,10 @@ case class IntegerToken(value: Int) extends Token // detect if it is just a numb
 case class StrToken(value: String) extends Token // Detect if between to quotes imon
 case class VarToken(name: String) extends Token // steph
 case class BooleanToken(name: Boolean) extends Token // can treat as reserved word  but you pass in the value steph
-case class TypeToken(name: String) extends Token
+
+case object IntTypeToken extends Token
+case object StringTypeToken extends Token
+case object BooleanTypeToken extends Token
 
 case object ClassToken extends Token // reserved word class steph
 case object DivisionToken extends Token // single /  dan
@@ -78,9 +81,9 @@ class Lexer(private var input: List[Char]) {
           case "true" => Some(BooleanToken(true))
           case "false" => Some(BooleanToken(false))
           case "extends" => Some(ExtendsToken)
-          case "str" => Some(TypeToken("str"))
-          case "int" => Some(TypeToken("int"))
-          case "bool" => Some(TypeToken("bool"))
+          case "str" => Some(StringTypeToken)
+          case "int" => Some(IntTypeToken)
+          case "bool" => Some(BooleanTypeToken)
           case "new" => Some(NewToken)
           case other => Some(VarToken(other))
         }
