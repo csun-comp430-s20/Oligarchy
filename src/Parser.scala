@@ -1,4 +1,12 @@
 import java.sql.Statement
+import scala.util.Try
+import scala.util.Success
+
+import scala.util.parsing.combinator._
+
+
+
+import sun.tools.jstat.Operator
 
 sealed trait MathOp
 case object PlusMathOp extends MathOp
@@ -81,16 +89,57 @@ object Parser {
 }
 
 class Parser(private var input: Seq[Token]) {
-  private def ParseIntegerExpression(position: Int): (IntegerExp, Int)={
-    input(position) match{
-      case head: IntegerToken =>{
+
+  private def eval(operation: String): Int = {
+    var results: List[Int] = Nil
+    var operators: List[String] = Nil;
+
+    def precedence(operator: String) = operator match {
+      case "+" | "-" => 0
+      case "*" | "/" => 1
+    }
+
+    def cal(operator: String) = {
+      (results, operators) match {
+        case (e1 :: e2 :: rest, "+") => results = (e2 + e1) :: rest
+        case (e1 :: e2 :: rest, "-") => results = (e2 - e1) :: rest
+        case (e1 :: e2 :: rest, "*") => results = (e2 * e1) :: rest
+        case (e1 :: e2 :: rest, "/") => results = (e2 / e1) :: rest
+        case (_, _) => throw new ParserException("No operators")
+      }
+    }
+
+    for (num <- "[1-9][0-9]*|[+-*/]".r.findAllIn(operation)) {
+      util.Try (num.toInt) match {
+        case util.Success(number) => results ::= number
+        case _ => {
+          val (operatorsToExecute, rest) = operators.span(operator => precedence(operator) >= precedence(num))
+          operatorsToExecute foreach cal
+          operators = num :: rest
+        }
+      }
+      operators foreach cal
+
+      results match {
+        case res :: Nil => res
+        case _ => throw new ParserException("Execute error")
+      }
+    }
+
+  }
+
+
+  private def ParseIntegerExpression(position: Int): (IntegerExp, Int) = {
+    input(position) match {
+      case head: IntegerToken => {
         (IntegerExp(head.value), position + 1)
       }
-      case _ =>{
+      case _ => {
         throw new ParserException("not an integer")
       }
     }
   }
+
 
 
 
