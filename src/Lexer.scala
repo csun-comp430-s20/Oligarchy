@@ -11,12 +11,14 @@ case object StringTypeToken extends Token
 case object BooleanTypeToken extends Token
 
 case object ClassToken extends Token // reserved word class steph
+case object HOFCToken extends Token
 case object DivisionToken extends Token // single /  dan
 case object OrToken extends Token // single |  dan
 case object SemicolonToken extends Token // single ; dan
 case object IfToken extends Token // reserved word if  imon  // already done given to us
 case object ElseToken extends Token // reserved word else dan // already done given to us
 case object PeriodToken extends Token // single  .  dan
+case object CommaToken extends Token // single  .  dan
 case object GreaterThanToken extends Token // single >  ed
 case object LessThanToken extends Token // single < jiamin
 case object RightCurlyToken extends Token // single  } ed
@@ -85,6 +87,7 @@ class Lexer(private var input: List[Char]) {
           case "int" => Some(IntTypeToken)
           case "bool" => Some(BooleanTypeToken)
           case "new" => Some(NewToken)
+          case "hofc" => Some(HOFCToken)
           case other => Some(VarToken(other))
         }
       }
@@ -193,6 +196,10 @@ class Lexer(private var input: List[Char]) {
               input = tail
               AndToken
             }
+            case ',' :: tail => {
+              input = tail
+              CommaToken
+            }
             case '*' :: tail => {
               input = tail
               MultiplicationToken
@@ -250,18 +257,18 @@ class Lexer(private var input: List[Char]) {
     }
   } // tokenizeOne
 
-  def tokenize(): Seq[Token] = {
+  def tokenize(): List[Token] = {
     @scala.annotation.tailrec
-    def withAccum(accum: List[Token]): Seq[Token] = {
+    def withAccum(accum: List[Token]): List[Token] = {
       input match {
         case _ :: _ => {
           skipWhitespace()
           input match {
             case _ :: _ => withAccum(tokenizeOne() :: accum)
-            case Nil => accum.reverse.toSeq
+            case Nil => accum.reverse.toList
           }
         }
-        case Nil => accum.reverse.toSeq
+        case Nil => accum.reverse.toList
       }
     }
 
