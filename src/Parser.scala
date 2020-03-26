@@ -20,6 +20,8 @@ sealed trait Types
 case object IntTypes extends Types
 case object BoolTypes extends Types
 case object StrTypes extends Types
+case object VoidTypes extends Types
+case object ClassTypes extends Types
 
 sealed trait VarDec
 case class Declaration(types: Var)extends VarDec
@@ -83,3 +85,44 @@ class Parser(private var input: Seq[Token]) {
 
 }
 
+def parseRepeat[A] (tokens: List[Token], parseOne: List[Token] => (A, List[Token])): (List[A], List[Token]) ={
+  try{
+    val (a, restTokens) = parseOne(tokens)
+    val(restAs, finalRestTokens) = parseRepeat(restTokens, parseOne)
+    (a:: restAs, finalRestTokens)
+  }
+  catch{
+    case _: ParserException => (List(), tokens)
+  }
+}
+
+def parseVarDec(tokens: List[Token]): (Exp, List[Token])={
+  tokens match{
+    case VarToken(head.value)::tail =>
+      (Declaration)
+  }
+}
+
+
+def parseMethodDef(tokens: List[Token]): (Exp, List[Token])= {
+
+}
+
+def parseInstanceDec(tokens: List[Token]): (Exp, List[Token])= {
+  val (expression,restTokens) = parseVarDec(tokens)
+}
+
+def parseType(tokens: List[Token]): (Types, List[Token])= {
+  tokens match {
+    case IntegerToken(head.value)::tail =>
+      (IntTypes,tail)
+    case StrToken(head.value)::tail =>
+      (StrTypes,tail)
+    case BooleanToken(head.value)::tail =>
+      (BoolTypes,tail)
+    case ClassNameToken(head.value)::tail =>
+      (ClassTypes,tail)
+    case VoidToken::tail =>
+      (VoidTypes,tail)
+  }
+}
