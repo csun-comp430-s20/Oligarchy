@@ -97,7 +97,7 @@ class Parser(private var input: List[Token]) {
                   case _ => throw ParserException("missing LeftParenToken in ForStatement")
                 }
               }
-              case - => throw ParserException("missing semicolon after exp in ForStatement")
+              case _ => throw ParserException("missing semicolon after exp in ForStatement")
             }
           }
           case _ => throw ParserException("missing semicolon after vardec in ForStatement")
