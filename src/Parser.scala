@@ -29,8 +29,8 @@ sealed trait Exp
 case class IntegerExp(value:Int) extends Exp
 case class BooleanExp(value: Boolean) extends Exp
 case class VariableExp(value: Var) extends Exp
-case class LogicExp(e1:Exp , l1: Logic, e2: Exp) extends Exp
-case class MathExp(e1:Exp , m1: MathOp, e2: Exp) extends Exp
+//case class LogicExp(e1:Exp , l1: Logic, e2: Exp) extends Exp
+//case class MathExp(e1:Exp , m1: MathOp, e2: Exp) extends Exp
 case class PrintExp(e1:Exp) extends Exp
 case class MethodExp(e1:Exp , methodName: Variable, e2: Exp*) extends Exp
 case class NewClassExp(className: Variable, e1:Exp* ) extends Exp
@@ -38,13 +38,18 @@ case class CastExp(t1: Types , e2: Exp) extends Exp
 case class GroupedExp(e: Exp) extends Exp
 case class HighOrderExp(t1: Types , v1: Variable, e2: Exp) extends Exp
 case class CallHighOrderExp(e1:Exp , e2: Exp) extends Exp
-case class LTEExp(exp: Exp, value: List[Exp]) extends Exp
-case class LTExp(exp: Exp, value: List[Exp]) extends Exp
-case class GTEExp(exp: Exp, value: List[Exp]) extends Exp
-case class GTExp(exp: Exp, value: List[Exp]) extends Exp
-case class AndExp(exp: Exp, value: List[Exp]) extends Exp
-case class OrExp(exp: Exp, value: List[Exp]) extends Exp
-case class EqualsExp(exp: Exp, value: List[Exp]) extends Exp
+case class LTEExp(exp: Exp, value: Exp) extends Exp
+case class LTExp(exp: Exp, value: Exp) extends Exp
+case class GTEExp(exp: Exp, value: Exp) extends Exp
+case class GTExp(exp: Exp, value: Exp) extends Exp
+case class AndExp(exp: Exp, value: Exp) extends Exp
+case class OrExp(exp: Exp, value: Exp) extends Exp
+case class PlusExp(exp: Exp, value: Exp) extends Exp
+case class SubtractExp(exp: Exp, value: Exp) extends Exp
+case class MultiplyExp(exp: Exp, value: Exp) extends Exp
+case class DivideExp(exp: Exp, value: Exp) extends Exp
+case class PowerExp(exp: Exp, value: Exp) extends Exp
+case class EqualsExp(exp: Exp, value: Exp) extends Exp
 
 sealed trait Variable
 case class Var(name:String) extends Variable
@@ -156,53 +161,94 @@ class Parser(private var input: List[Token]) {
         }
       }
       }catch{
+        case _:ParserException =>{
+          val (finalExp, restTokens) = parseBinaryOperator(tokens)
+          (finalExp,restTokens)
 
+        }
     }
+  }
+
+  def cascadifyHelper(expression: Exp, tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = {
+    val (followingExps: List[Exp], restTokens) = parseRepeat(tokens, parseBinaryOperator)
+    var finalResult: Exp = expression
+    for (currentExp <- followingExps) {
+      finalResult = mkClass(finalResult, currentExp)
+    }
+    (finalResult, restTokens)
   }
 
   def parseBinaryOperator(tokens: List[Token]): (Exp, List[Token])={
     val (expression,restTokens) = parseAdditiveExpression(tokens)
+    def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
-      case LessThanToken::EqualsToken::tail =>{
+      case LessThanToken::EqualsToken::tail => cascadify(tail,  LTEExp.apply)
+      case LessThanToken:: tail =>cascadify(tail,  LTEExp.apply)
+      case GreaterThanToken::EqualsToken :: tail => cascadify(tail,  GTEExp.apply)
+      case GreaterThanToken:: tail => cascadify(tail,  GTExp.apply)
+      case AndToken::AndToken:: tail => cascadify(tail,  AndExp.apply)
+      case OrToken::OrToken::tail => cascadify(tail,  OrExp.apply)
+      case EqualsToken::EqualsToken::tail => cascadify(tail,  EqualsExp.apply)
+    }
+  }
+
+  def parseAdditiveExpression(tokens: List[Token]): (Exp, List[Token])={
+    val (expression,restTokens) = parseMultiplicativeExpression(tokens)
+    restTokens match {
+      case PlusToken::tail =>{
         val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        (LTEExp(expression,followingExps),restTokens)
+        var finalResult:Exp = expression
+        for (currentExp <- followingExps) {
+          finalResult = PlusExp(finalResult,currentExp)
+        }
+        (finalResult,restTokens)
       }
-      case LessThanToken:: tail =>{
+      case SubtractToken:: tail =>{
         val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        (LTExp(expression,followingExps),restTokens)
-      }
-      case GreaterThanToken::EqualsToken :: tail => {
-        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        (GTEExp(expression,followingExps),restTokens)
-      }
-      case GreaterThanToken:: tail => {
-        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        (GTExp(expression,followingExps),restTokens)
-      }
-      case AndToken::AndToken:: tail => {
-        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        (AndExp(expression,followingExps),restTokens)
-      }
-      case OrToken::OrToken::tail => {
-        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        (OrExp(expression,followingExps),restTokens)
-      }
-      case EqualsToken::EqualsToken::tail =>{
-        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        (EqualsExp(expression,followingExps),restTokens)
+        var finalResult:Exp = expression
+        for (currentExp <- followingExps) {
+          finalResult = SubtractExp(finalResult,currentExp)
+        }
+        (SubtractExp(expression,followingExps),restTokens)
       }
     }
   }
-  def parseAdditiveExpression(tokens: List[Token]): (Exp, List[Token])={
-
-  }
   def parseMultiplicativeExpression(tokens: List[Token]): (Exp, List[Token])={
-
+    tokens match {
+      case MultiplicationToken::tail =>{
+        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
+        (LTEExp(expression,followingExps),restTokens)
+      }
+      case DivisionToken:: tail =>{
+        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
+        (LTExp(expression,followingExps),restTokens)
+      }
+    }
   }
   def parseExponentialExpression(tokens: List[Token]): (Exp, List[Token])={
+    tokens match {
+      case CaretToken::tail =>{
+        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
+        (LTEExp(expression,followingExps),restTokens)
+      }
 
+    }
 
   }
+  def parseGroupedExpression(tokens: List[Token]): (Exp, List[Token])={
+    tokens match {
+      case LeftParenToken::tail =>{
+        val (groupedExp, restTokens) = parseExp(tail)
+        restTokens match {
+          case RightParenToken :: tail => {
+            (GroupedExp(groupedExp),tail)
+          }
+        }
+      }
+    }
+  }
+
+
   def parsePrimaryExpression(tokens: List[Token]): (Exp, List[Token])={
     tokens match {
       case (head:IntegerToken)::tail =>{
@@ -224,9 +270,7 @@ class Parser(private var input: List[Token]) {
       }
     }
   }
-  def parseGroupedExpression(tokens: List[Token]): (Exp, List[Token])={
 
-  }
 
   def parseType(value: List[Token]):(Types,List[Token]) = {
 
