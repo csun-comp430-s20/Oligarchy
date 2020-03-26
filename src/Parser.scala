@@ -194,61 +194,31 @@ class Parser(private var input: List[Token]) {
 
   def parseAdditiveExpression(tokens: List[Token]): (Exp, List[Token])={
     val (expression,restTokens) = parseMultiplicativeExpression(tokens)
+    def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
-      case PlusToken::tail =>{
-        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        var finalResult:Exp = expression
-        for (currentExp <- followingExps) {
-          finalResult = PlusExp(finalResult,currentExp)
-        }
-        (finalResult,restTokens)
-      }
-      case SubtractToken:: tail =>{
-        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        var finalResult:Exp = expression
-        for (currentExp <- followingExps) {
-          finalResult = SubtractExp(finalResult,currentExp)
-        }
-        (SubtractExp(expression,followingExps),restTokens)
+      case PlusToken::tail =>cascadify(tail,  LTEExp.apply)
+      case SubtractToken:: tail =>cascadify(tail,  LTEExp.apply)
       }
     }
   }
+
   def parseMultiplicativeExpression(tokens: List[Token]): (Exp, List[Token])={
-    tokens match {
-      case MultiplicationToken::tail =>{
-        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        (LTEExp(expression,followingExps),restTokens)
-      }
-      case DivisionToken:: tail =>{
-        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        (LTExp(expression,followingExps),restTokens)
-      }
+    val (expression,restTokens) = parseExponentialExpression(tokens)
+    def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
+    restTokens match {
+      case MultiplicationToken::tail =>cascadify(tail,  LTEExp.apply)
+      case DivisionToken:: tail =>cascadify(tail,  LTEExp.apply)
     }
   }
   def parseExponentialExpression(tokens: List[Token]): (Exp, List[Token])={
-    tokens match {
-      case CaretToken::tail =>{
-        val (followingExps:List[Exp], restTokens) = parseRepeat(tail,parseBinaryOperator)
-        (LTEExp(expression,followingExps),restTokens)
-      }
+    val (expression,restTokens) = parsePrimaryExpression(tokens)
+    def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
+    restTokens match {
+      case CaretToken::tail =>cascadify(tail,  LTEExp.apply)
 
     }
 
   }
-  def parseGroupedExpression(tokens: List[Token]): (Exp, List[Token])={
-    tokens match {
-      case LeftParenToken::tail =>{
-        val (groupedExp, restTokens) = parseExp(tail)
-        restTokens match {
-          case RightParenToken :: tail => {
-            (GroupedExp(groupedExp),tail)
-          }
-        }
-      }
-    }
-  }
-
-
   def parsePrimaryExpression(tokens: List[Token]): (Exp, List[Token])={
     tokens match {
       case (head:IntegerToken)::tail =>{
@@ -270,6 +240,21 @@ class Parser(private var input: List[Token]) {
       }
     }
   }
+  def parseGroupedExpression(tokens: List[Token]): (Exp, List[Token])={
+    tokens match {
+      case LeftParenToken::tail =>{
+        val (groupedExp, restTokens) = parseExp(tail)
+        restTokens match {
+          case RightParenToken :: tail => {
+            (GroupedExp(groupedExp),tail)
+          }
+        }
+      }
+    }
+  }
+
+
+
 
 
   def parseType(value: List[Token]):(Types,List[Token]) = {
