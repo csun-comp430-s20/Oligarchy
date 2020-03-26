@@ -1,4 +1,4 @@
-
+import com.sun.tools.javac.parser.Tokens
 
 
 sealed trait MathOp
@@ -112,10 +112,13 @@ class Parser(private var input: List[Token]) {
             case CommaToken ::tail  => {
               val (parameters, restTokens2) = parseRepeat(tail,parseExp)
               restTokens2 match {
-                case RightParenToken::tail =>
-                  (MethodExp(baseExp,Var(method.name),parameters),tail)
+                case RightParenToken::tail => {
+                  (MethodExp(baseExp, Var(method.name), parameters), tail)
+                }
+                case _ => throw new ParserException("missing RightParenToken in method")
               }
             }
+            case _ => throw new ParserException("missing CommaToken in method")
           }
         }
         case NewToken :: (className: VarToken) ::LeftParenToken::tail =>{
@@ -124,6 +127,7 @@ class Parser(private var input: List[Token]) {
             case RightParenToken:: tail =>{
               (NewClassExp(Var(className.name),parameters),tail)
             }
+            case _ => throw new ParserException("Not a New expression")
           }
         }
         case LeftParenToken ::tail=> {
@@ -179,26 +183,31 @@ class Parser(private var input: List[Token]) {
   }
 
   def parseBinaryOperator(tokens: List[Token]): (Exp, List[Token])={
-    val (expression,restTokens) = parseAdditiveExpression(tokens)
-    def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
-    restTokens match {
-      case LessThanToken::EqualsToken::tail => cascadify(tail,  LTEExp.apply)
-      case LessThanToken:: tail =>cascadify(tail,  LTEExp.apply)
-      case GreaterThanToken::EqualsToken :: tail => cascadify(tail,  GTEExp.apply)
-      case GreaterThanToken:: tail => cascadify(tail,  GTExp.apply)
-      case AndToken::AndToken:: tail => cascadify(tail,  AndExp.apply)
-      case OrToken::OrToken::tail => cascadify(tail,  OrExp.apply)
-      case EqualsToken::EqualsToken::tail => cascadify(tail,  EqualsExp.apply)
-    }
+      val (expression, restTokens) = parseAdditiveExpression(tokens)
+
+      def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
+
+      restTokens match {
+        case LessThanToken :: EqualsToken :: tail => cascadify(tail, LTEExp.apply)
+        case LessThanToken :: tail => cascadify(tail, LTExp.apply)
+        case GreaterThanToken :: EqualsToken :: tail => cascadify(tail, GTEExp.apply)
+        case GreaterThanToken :: tail => cascadify(tail, GTExp.apply)
+        case AndToken :: AndToken :: tail => cascadify(tail, AndExp.apply)
+        case OrToken :: OrToken :: tail => cascadify(tail, OrExp.apply)
+        case EqualsToken :: EqualsToken :: tail => cascadify(tail, EqualsExp.apply)
+      }
   }
 
   def parseAdditiveExpression(tokens: List[Token]): (Exp, List[Token])={
-    val (expression,restTokens) = parseMultiplicativeExpression(tokens)
-    def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
-    restTokens match {
-      case PlusToken::tail =>cascadify(tail,  PlusExp.apply)
-      case SubtractToken:: tail =>cascadify(tail,  SubtractExp.apply)
-    }
+
+      val (expression, restTokens) = parseMultiplicativeExpression(tokens)
+
+      def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
+
+      restTokens match {
+        case PlusToken :: tail => cascadify(tail, PlusExp.apply)
+        case SubtractToken :: tail => cascadify(tail, SubtractExp.apply)
+      }
   }
 
   def parseMultiplicativeExpression(tokens: List[Token]): (Exp, List[Token])={
@@ -243,6 +252,8 @@ class Parser(private var input: List[Token]) {
       }
     }
   }
+
+
 
 
 
