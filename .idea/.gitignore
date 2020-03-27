@@ -1,2 +1,7 @@
 # Default ignored files
 /workspace.xml
+/modules.xml
+/scala_compiler.xml
+/uiDesigner.xml
+/.name
+/runConfigurations/Lexer.xml
