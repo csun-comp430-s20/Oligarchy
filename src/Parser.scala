@@ -1,4 +1,4 @@
-import com.sun.tools.javac.parser.Tokens
+
 
 
 sealed trait MathOp
@@ -102,32 +102,24 @@ class Parser(private var input: List[Token]) {
               (PrintExp(printedExp),finalTokens)
             }
             case _ =>{
-              throw new ParserException("not a print expression")
+              throw ParserException("not a print expression")
             }
           }
         }
         case (method: VarToken):: LeftParenToken::tail => {
           val (baseExp, restTokens) = parseExp(tail)
-          restTokens match{
-            case CommaToken ::tail  => {
-              val (parameters, restTokens2) = parseRepeat(tail,parseExp)
-              restTokens2 match {
-                case RightParenToken::tail => {
-                  (MethodExp(baseExp, Var(method.name), parameters), tail)
-                }
-                case _ => throw new ParserException("missing RightParenToken in method")
-              }
-            }
-            case _ => throw new ParserException("missing CommaToken in method")
+          val (parameters, restTokens2) = parseRep1(restTokens,parseExp,skipCommas)
+          restTokens2 match {
+            case RightParenToken::tail =>
+              (MethodExp(baseExp,Var(method.name),parameters),tail)
           }
         }
         case NewToken :: (className: VarToken) ::LeftParenToken::tail =>{
-          val (parameters, restTokens) = parseExp(tail)
+          val (parameters, restTokens) = parseRep1(tail,parseExp,skipCommas)
           restTokens match {
             case RightParenToken:: tail =>{
               (NewClassExp(Var(className.name),parameters),tail)
             }
-            case _ => throw new ParserException("Not a New expression")
           }
         }
         case LeftParenToken ::tail=> {
@@ -183,31 +175,26 @@ class Parser(private var input: List[Token]) {
   }
 
   def parseBinaryOperator(tokens: List[Token]): (Exp, List[Token])={
-      val (expression, restTokens) = parseAdditiveExpression(tokens)
-
-      def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
-
-      restTokens match {
-        case LessThanToken :: EqualsToken :: tail => cascadify(tail, LTEExp.apply)
-        case LessThanToken :: tail => cascadify(tail, LTExp.apply)
-        case GreaterThanToken :: EqualsToken :: tail => cascadify(tail, GTEExp.apply)
-        case GreaterThanToken :: tail => cascadify(tail, GTExp.apply)
-        case AndToken :: AndToken :: tail => cascadify(tail, AndExp.apply)
-        case OrToken :: OrToken :: tail => cascadify(tail, OrExp.apply)
-        case EqualsToken :: EqualsToken :: tail => cascadify(tail, EqualsExp.apply)
-      }
+    val (expression,restTokens) = parseAdditiveExpression(tokens)
+    def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
+    restTokens match {
+      case LessThanToken::EqualsToken::tail => cascadify(tail,  LTEExp.apply)
+      case LessThanToken:: tail =>cascadify(tail,  LTEExp.apply)
+      case GreaterThanToken::EqualsToken :: tail => cascadify(tail,  GTEExp.apply)
+      case GreaterThanToken:: tail => cascadify(tail,  GTExp.apply)
+      case AndToken::AndToken:: tail => cascadify(tail,  AndExp.apply)
+      case OrToken::OrToken::tail => cascadify(tail,  OrExp.apply)
+      case EqualsToken::EqualsToken::tail => cascadify(tail,  EqualsExp.apply)
+    }
   }
 
   def parseAdditiveExpression(tokens: List[Token]): (Exp, List[Token])={
-
-      val (expression, restTokens) = parseMultiplicativeExpression(tokens)
-
-      def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
-
-      restTokens match {
-        case PlusToken :: tail => cascadify(tail, PlusExp.apply)
-        case SubtractToken :: tail => cascadify(tail, SubtractExp.apply)
-      }
+    val (expression,restTokens) = parseMultiplicativeExpression(tokens)
+    def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
+    restTokens match {
+      case PlusToken::tail =>cascadify(tail,  PlusExp.apply)
+      case SubtractToken:: tail =>cascadify(tail,  SubtractExp.apply)
+    }
   }
 
   def parseMultiplicativeExpression(tokens: List[Token]): (Exp, List[Token])={
@@ -222,10 +209,7 @@ class Parser(private var input: List[Token]) {
     val (expression,restTokens) = parsePrimaryExpression(tokens)
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
-      case CaretToken::tail =>{
-        cascadify(tail,  PowerExp.apply)
-      }
-      case _ => throw ParserException("Not an exponential expression")
+      case CaretToken::tail =>cascadify(tail,  PowerExp.apply)
     }
   }
   def parsePrimaryExpression(tokens: List[Token]): (Exp, List[Token])={
@@ -242,7 +226,6 @@ class Parser(private var input: List[Token]) {
           case RightParenToken::tail =>
             (GroupedExp(groupedExpression),tail)
         }
-        case _ => throw ParserException("Not a primary expression")
       }
     }
   }
@@ -254,19 +237,40 @@ class Parser(private var input: List[Token]) {
           case RightParenToken :: tail => (GroupedExp(groupedExp),tail)
         }
       }
-      case _ => throw ParserException("Not a grouped expression");
     }
   }
-
-
-
-
-
-
 
   def parseType(value: List[Token]):(Types,List[Token]) = {
 
   }
+
+  def skipCommas(tokens: List[Token]):(Any,List[Token]) = {
+    tokens match {
+      case CommaToken::restTokens => ("Skipped",restTokens)
+      case _ => throw ParserException("No commas to skip")
+    }
+  }
+
+  def parseRep1[A,B](tokens: List[Token],
+                   parseWanted: List[Token] => (A, List[Token]),
+                   parseSkip: List[Token] => (B,List[Token])):
+              (List[A], List[Token])= {
+    try{
+      val (a, restTokens) = parseWanted(tokens)
+      val(_, restTokens2) = parseRepeat(restTokens, parseSkip)
+      val(restAs2, finalTokens) = parseRep1(restTokens2,parseWanted,parseSkip)
+      (a:: restAs2, finalTokens)
+    }
+    catch{
+      case _: ParserException => {
+
+        (List(), tokens)
+      }
+    }
+
+  }
+
+
   def parseRepeat[A] (tokens: List[Token], parseOne: List[Token] => (A, List[Token])): (List[A], List[Token]) ={
     try{
       val (a, restTokens) = parseOne(tokens)
@@ -277,140 +281,5 @@ class Parser(private var input: List[Token]) {
       case _: ParserException => (List(), tokens)
     }
   }
-
-//  private def ParseIntegerExpression(position: Int): (IntegerExp, Int) = {
-//    input(position) match {
-//      case head: IntegerToken => {
-//        (IntegerExp(head.value), position + 1)
-//        (IntegerExp(head.value), position + 1)
-//      }
-//      case _ => {
-//        throw new ParserException("not an integer")
-//      }
-//    }
-//  }
-//
-//  private def ParseBooleanExpression(position: Int): (BooleanExp, Int) = {
-//    input(position) match {
-//      case head: BooleanToken => {
-//        (BooleanExp(head.name), position + 1)
-//      }
-//      case _ => {
-//        throw new ParserException("not a boolean")
-//      }
-//    }
-//  }
-/*
-change seq to list so that you can maintain
-return the current ast and the remaining tokens
- */
-  private def ParseExp(position: Int): (Exp, Int) = {
-    input(position) match {
-      case IntegerToken(value) =>
-        (IntegerExp(value),position+1)
-      case BooleanToken(name) =>
-        (BooleanExp(name),position+1)
-      case VarToken(name) =>
-        (VariableExp(Var(name)),position+1)
-      case PrintToken => {
-        // start parsing for printExpression
-        input(position+1 ) match {
-          case LeftParenToken => {
-            val (exp: Exp, nextPos: Int) = ParseExp(position+2)
-            input(nextPos) match {
-              case RightParenToken => (PrintExp(exp),nextPos +1)
-            }
-          }
-        }
-      }
-      case NewToken => {
-        input(position+1 ) match {
-          case varToken: VarToken => {
-            input(position + 2) match {
-              case LeftParenToken => {
-                val (parseResult, nextPos) = ParseExp(position+3)
-                input(nextPos) match {
-                  case RightParenToken => {
-                    (NewClassExp(Var(varToken.name),parseResult),nextPos+1)
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      case LeftParenToken => {
-        input(position +1 )match {
-          case TypeToken(name) => {
-            input(position +2 ) match {
-              case RightParenToken => {
-                val (result , nextPos) = ParseExp(position + 3)
-                CastExp(Types(name), nextPos)
-              }
-              case VarToken(name) => {
-                input(position +3) match {
-                  case RightParenToken => {
-                    input(position + 4 )match {
-                      case EqualsToken =>{
-                        input (position + 5 ) match {
-                         case GreaterThanToken =>{
-                           val (exp , nextPos ) = ParseExp(position+6)
-                           HighOrderExp(Types(name), nextPos)
-                           }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      case _ => {
-        throw new ParserException("This is not an expresssion")
-      }
-    }
-  }
-
-
-
-  // work that needs to be done
-  // adding terminals to expression
-  // check if something is a certain token
-  // parse program
-  /*
-   parse program is going to take a seq of tokens and check if they are
-   a series of class definitions followed by an experession  and return a program class
-   otherwise throw a parse exception
-
-   */
-
-  //
-  //  private def parseProgram():Prgm ={
-  //    val (classDef:DefClass, position: Int) = parseClassDef(0)
-  //    val (expression:Exp, nextPos: Int )= parseExpression(position)
-  //    Prgm(expression,classDef)
-  //  }
-  //
-  //  private def parseExpression(position: Int):(Exp,Int)={
-  //
-  //  }
-  //  private def parseClassDef(position: Int):( DefClass, Int)={
-  //
-  //  }
-  // parse classdef
-  /*
-    checks for class token
-   */
-  // parse instancedec
-  // parse methoddef
-  // parse stmt
-  // parse vardec
-  // parse exp
-  // parse mathExp
-  // precedence
-  //
-
 }
 
