@@ -86,17 +86,12 @@ class Parser(private var input: Seq[Token]) {
   //Daniel
   private def parseProgram(tokens: List[Token]): (Prgm, List[Token]) = {
     tokens match {
-      case DefClassToken :: tail =>{
+      case ClassToken :: tail =>{
         var(classes: List[Class], restTokens: List[Token]) = parseRepeat(tail, parseClass)
-        restTokens match {
-          case ExpToken :: restTokens2 => {
-            val(exp: Exp, restTokens3: List[Token]) = parseExp(restTokens2)
-            (Prgm(exp, classes), restTokens3)
-          }
-          case _ => throw ParserException("Missing Expression Token after Classes")
-        }
+        val(exp: Exp, restTokens2: List[Token]) = parseExp(restTokens)
+        (Prgm(exp, classes), restTokens2)
       }
-      case _ => throw ParserException("Missing atleast one Class Definition")
+      case _ => throw ParserException("Missing Classes")
     }
   }  //ParseProgram
 
@@ -111,13 +106,13 @@ class Parser(private var input: Seq[Token]) {
             restTokens2 match {
               case RightParenToken :: tail => {
                 val (stmt, restTokens3) = parseStmt(tail)
-                var(methods: List[MethodClassBody], restTokens4: List[Token]) = parseRepeat(tail, parseMethodClassBody)
+                var(methods: List[MethodClassBody], restTokens4: List[Token]) = parseRepeat(restTokens3, parseMethodClassBody)
                 (DefExtClass(classname, extendclassname, stmt, instances, declarations, methods), restTokens4)
               }
-              case _ => throw parserException("Not a DefExtClass")
+              case _ => throw ParserException("Not a DefExtClass")
             }
           }
-          case _ => throw parserException("Expected Constructor and LeftParen")
+          case _ => throw ParserException("Expected Constructor and LeftParen")
         }
       }  //Extended Class
       case ClassToken :: VarToken(classname: String) :: LeftCurlyToken :: tail => {
@@ -131,13 +126,13 @@ class Parser(private var input: Seq[Token]) {
                 var(methods: List[MethodClassBody], restTokens4: List[Token]) = parseRepeat(tail, parseMethodClassBody)
                 (DefClass(classname, stmt, instances, declarations, methods), restTokens4)
               }
-              case _ => throw parserException("Not a DefClass")
+              case _ => throw ParserException("Not a DefClass")
             }
           }
-          case _ => throw parserException("Expected Constructor and LeftParen")
+          case _ => throw ParserException("Expected Constructor and LeftParen")
         }
       }  //Basic Class
-      case _ => throw PraserException("Not a proper Class Definition")
+      case _ => throw ParserException("Not a proper Class Definition")
     }
   }  //Parse Classes
 
