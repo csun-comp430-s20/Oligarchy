@@ -41,6 +41,7 @@ case object ExtendsToken extends Token //reserved word
 case object NewToken extends Token //reserved word
 
 
+
 case class LexerException(msg: String) extends Exception(msg)
 
 object Lexer {

@@ -60,7 +60,8 @@ case class ReturnStmt(e1: Exp) extends Stmt
 case object VoidStmt extends Stmt
 
 sealed trait Method
-case class DefMethod(types: Types, methodName: Variable, stmt: Stmt, parameters: VarDec*) extends Method
+case class DefMethod(types:Types, methodName: Variable,  stmt: Stmt, parameters: VarDec*) extends Method
+
 
 sealed trait Instance
 case class DecInstance(v1: VarDec) extends Instance
@@ -71,11 +72,15 @@ case class MethodClassBody(md1: DefMethod*) extends ClassBody
 case class DeclarationClassBody(vd1: VarDec*) extends ClassBody
 
 sealed trait Class
-case class DefClass(v1: Variable, st1: Stmt, cb1: ClassBody*) extends Class
-case class DefExtClass(classname: Variable, extendedClass: Variable, st1: Stmt, cb1: ClassBody*) extends Class
+// Modified from: (v1: Variable, st1: Stmt, cb1: ClassBody*)  //daniel
+case class DefClass(v1: String, st1: Stmt, ins: List[InstanceClassBody], dec: List[DeclarationClassBody], met: List[MethodClassBody]) extends Class
+// Modified from: (classname: Variable, extendedClass: Variable, st1: Stmt, cb1: ClassBody*)  //daniel
+case class DefExtClass(classname: String, extendedClass: String, st1: Stmt, ins: List[InstanceClassBody], dec: List[DeclarationClassBody], met: List[MethodClassBody]) extends Class
 
 sealed trait Program
-case class Prgm(e1: Exp, c1: DefClass*) extends Program
+// Modified from: (e1: Exp, c1: DefClass*)  //daniel
+case class Prgm(e1: Exp, c1: Class*) extends Program
+
 
 case class ParserException(msg: String) extends Exception(msg)
 
@@ -86,7 +91,60 @@ object Parser {
 }
 
 class Parser(private var input: List[Token]) {
-  
+
+  //Daniel
+  private def parseProgram(tokens: List[Token]): (Prgm, List[Token]) = {
+    tokens match {
+      case ClassToken :: tail =>{
+        var(classes: List[Class], restTokens: List[Token]) = parseRepeat(tail, parseClass)
+        val(exp: Exp, restTokens2: List[Token]) = parseExp(restTokens)
+        (Prgm(exp, classes), restTokens2)
+      }
+      case _ => throw ParserException("Missing Classes")
+    }
+  }  //ParseProgram
+
+  //Daniel
+  private def parseClass(tokens: List[Token]): (Class, List[Token]) = {
+    tokens match {
+      case ClassToken :: VarToken(classname: String) :: ExtendsToken :: VarToken(extendclassname: String) :: LeftCurlyToken :: tail => {
+        var(instances: List[InstanceClassBody], restTokens: List[Token]) = parseRepeat(tail, parseInstanceClassBody)
+        restTokens match {
+          case ConstructorToken :: LeftParenToken :: tail => {
+            var(declarations: List[DeclarationClassBody], restTokens2: List[Token]) = parseRepeat(tail, parseDeclarationClassBody)
+            restTokens2 match {
+              case RightParenToken :: tail => {
+                val (stmt, restTokens3) = parseStmt(tail)
+                var(methods: List[MethodClassBody], restTokens4: List[Token]) = parseRepeat(restTokens3, parseMethodClassBody)
+                (DefExtClass(classname, extendclassname, stmt, instances, declarations, methods), restTokens4)
+              }
+              case _ => throw ParserException("Not a DefExtClass")
+            }
+          }
+          case _ => throw ParserException("Expected Constructor and LeftParen")
+        }
+      }  //Extended Class
+      case ClassToken :: VarToken(classname: String) :: LeftCurlyToken :: tail => {
+        var(instances: List[InstanceClassBody], restTokens: List[Token]) = parseRepeat(tail, parseInstanceClassBody)
+        restTokens match {
+          case ConstructorToken :: LeftParenToken :: tail => {
+            var(declarations: List[DeclarationClassBody], restTokens2: List[Token]) = parseRepeat(tail, parseDeclarationClassBody)
+            restTokens2 match {
+              case RightParenToken :: tail => {
+                val (stmt, restTokens3) = parseStmt(tail)
+                var(methods: List[MethodClassBody], restTokens4: List[Token]) = parseRepeat(tail, parseMethodClassBody)
+                (DefClass(classname, stmt, instances, declarations, methods), restTokens4)
+              }
+              case _ => throw ParserException("Not a DefClass")
+            }
+          }
+          case _ => throw ParserException("Expected Constructor and LeftParen")
+        }
+      }  //Basic Class
+      case _ => throw ParserException("Not a proper Class Definition")
+    }
+  }  //Parse Classes
+
   private def parseStmt(tokens: List[Token]): (Stmt, List[Token]) = {
     tokens match { //for (vardec; exp; stmt) stmt
       case ForToken :: LeftParenToken :: tail => {
@@ -157,7 +215,7 @@ class Parser(private var input: List[Token]) {
       }
       case _ => {
         try {
-          val (exp: Exp, finalTokens: List[Token]) = parseExp(tail)
+          val (exp: Exp, finalTokens: List[Token]) = parseExp(tokens)
           finalTokens match {
             case SemicolonToken :: finalTokens => {
               (ExpStmt(exp), finalTokens)
@@ -167,7 +225,7 @@ class Parser(private var input: List[Token]) {
         }
         catch {
           try {
-            val (vardec: VarDec, restTokens: List[Token]) = parseVardec(tail)
+            val (vardec: VarDec, restTokens: List[Token]) = parseVardec(tokens)
             restTokens match {
               case EqualsToken :: restTokens2 => {
                 val (exp: Exp, restTokens3: List[Token]) = parseExp(restTokens2)
@@ -387,4 +445,3 @@ class Parser(private var input: List[Token]) {
     }
   }
 }
-
