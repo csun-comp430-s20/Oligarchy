@@ -115,7 +115,7 @@ class Parser(private var input: List[Token]) {
         (BreakStmt, tail)
       }
       case IfToken :: LeftParenToken :: tail => {
-        var (exp: Exp, restTokens:List[Token]) = parseExp(tail)
+        var (exp: Exp, restTokens: List[Token]) = parseExp(tail)
         restTokens match {
           case RightParenToken :: restTokens2 => {
             var (stmt1: Stmt, restTokens3: List[Token]) = parseStmt(restTokens2)
@@ -145,14 +145,14 @@ class Parser(private var input: List[Token]) {
                 case _ => throw ParserException("No SemicolonToken after expression in return statement")
               }
             }
-            catch{
+            catch {
               case _ => throw ParserException("Invalid return statement")
             }
           }
         }
       }
-      case LeftCurlyToken :: tail =>{
-        var(stmts: List[Stmt], restTokens: List[Token]) = parseRepeat(tail, parseStmt)
+      case LeftCurlyToken :: tail => {
+        var (stmts: List[Stmt], restTokens: List[Token]) = parseRepeat(tail, parseStmt)
         (BlockStmt(stmts), restTokens)
       }
       case _ => {
@@ -168,10 +168,10 @@ class Parser(private var input: List[Token]) {
         catch {
           try {
             val (vardec: VarDec, restTokens: List[Token]) = parseVardec(tail)
-            restTokens match{
-              case EqualsToken :: restTokens2 =>{
-                val(exp: Exp, restTokens3:List[Token]) = parseExp(restTokens2)
-                restTokens3 match{
+            restTokens match {
+              case EqualsToken :: restTokens2 => {
+                val (exp: Exp, restTokens3: List[Token]) = parseExp(restTokens2)
+                restTokens3 match {
                   case SemicolonToken :: finalTokens => {
                     (AssignmentStmt(vardec, exp), finalTokens)
                   }
@@ -181,12 +181,13 @@ class Parser(private var input: List[Token]) {
               case _ => throw ParserException("No EqualsToken in Assignment Statement")
             }
           }
-          catch{
+          catch {
             case _ => throw ParserException("Not Statement")
           }
         }
       }
     }
+  }
     private def parseExp(tokens: List[Token]): (Exp,List[Token]) = {
       try{
         tokens match{
