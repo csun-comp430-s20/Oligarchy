@@ -222,7 +222,10 @@ class Parser(private var input: List[Token]) {
     val (expression,restTokens) = parsePrimaryExpression(tokens)
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
-      case CaretToken::tail =>cascadify(tail,  PowerExp.apply)
+      case CaretToken::tail =>{
+        cascadify(tail,  PowerExp.apply)
+      }
+      case _ => throw ParserException("Not an exponential expression")
     }
   }
   def parsePrimaryExpression(tokens: List[Token]): (Exp, List[Token])={
@@ -239,6 +242,7 @@ class Parser(private var input: List[Token]) {
           case RightParenToken::tail =>
             (GroupedExp(groupedExpression),tail)
         }
+        case _ => throw ParserException("Not a primary expression")
       }
     }
   }
@@ -250,6 +254,7 @@ class Parser(private var input: List[Token]) {
           case RightParenToken :: tail => (GroupedExp(groupedExp),tail)
         }
       }
+      case _ => throw ParserException("Not a grouped expression");
     }
   }
 
