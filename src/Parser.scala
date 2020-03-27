@@ -247,6 +247,34 @@ class Parser(private var input: List[Token]) {
   def parseType(value: List[Token]):(Types,List[Token]) = {
 
   }
+
+  def skipCommas(tokens: List[Token]):(Any,List[Token]) = {
+    tokens match {
+      case CommaToken::restTokens => ("Skipped",restTokens)
+      case _ => throw ParserException("No commas to skip")
+    }
+  }
+
+  def parseRep1[A,B](tokens: List[Token],
+                   parseWanted: List[Token] => (A, List[Token]),
+                   parseSkip: List[Token] => (B,List[Token])):
+              (List[A], List[Token])= {
+    try{
+      val (a, restTokens) = parseWanted(tokens)
+      val(_, restTokens2) = parseRepeat(restTokens, parseSkip)
+      val(restAs2, finalTokens) = parseRep1(restTokens2,parseWanted,parseSkip)
+      (a:: restAs2, finalTokens)
+    }
+    catch{
+      case _: ParserException => {
+
+        (List(), tokens)
+      }
+    }
+
+  }
+
+
   def parseRepeat[A] (tokens: List[Token], parseOne: List[Token] => (A, List[Token])): (List[A], List[Token]) ={
     try{
       val (a, restTokens) = parseOne(tokens)
