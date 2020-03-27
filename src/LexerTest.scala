@@ -33,7 +33,6 @@ object LexerTest {
     testTokenizes("if else", IfToken, ElseToken)
   }
 
-  //daniel
   def testPeriod(): Unit = {
     testTokenizes(".", PeriodToken)
   }
@@ -71,6 +70,37 @@ object LexerTest {
     testTokenizes("| ", OrToken)
   }
 
+  def testBooleanTrue(){
+    testTokenizes("true", BooleanToken(true))
+  }
+
+  def testBooleanFalse(){
+    testTokenizes("false", BooleanToken(false))
+  }
+
+  def testBooleanWithWhiteSpaces(){
+    testTokenizes(" true ", BooleanToken(true))
+  }
+
+  def testBooleanWithLeadingWhiteSpace(){
+    testTokenizes(" false", BooleanToken(false))
+  }
+
+  def testBooleanWithEndingWhiteSpace(){
+    testTokenizes("true ", BooleanToken(true))
+  }
+
+  def testClass(){
+    testTokenizes("Class", ClassToken)
+  }
+
+  def testClassWithWhiteSpaces(){
+    testTokenizes(" Class ", ClassToken)
+  }
+
+  def testEquals(){
+    testTokenizes("=", EqualsToken)
+  }
 
   def main(args: Array[String]) {
     testLeftParen()
@@ -80,8 +110,6 @@ object LexerTest {
     testVariableWithWhitespaceAfter()
     testVariableContainingReservedWords()
     testTwoReservedWords()
-
-    //daniel
     testPeriod()
     testSemiColon()
     testDivision()
@@ -94,7 +122,14 @@ object LexerTest {
     testDivisionWithWhitespaceAfter()
     testOrWithWhitespaceBefore()
     testOrWithWhitespaceAfter()
-
-
+    testBooleanTrue()
+    testBooleanFalse()
+    testBooleanWithLeadingWhiteSpace()
+    testBooleanWithEndingWhiteSpace()
+    testBooleanWithWhiteSpaces()
+    testClass()
+    testClassWithWhiteSpaces()
+    testEquals()
   } // main
 } // LexerTest
+
