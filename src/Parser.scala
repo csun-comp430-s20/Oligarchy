@@ -102,24 +102,20 @@ class Parser(private var input: List[Token]) {
               (PrintExp(printedExp),finalTokens)
             }
             case _ =>{
-              throw new ParserException("not a print expression")
+              throw ParserException("not a print expression")
             }
           }
         }
         case (method: VarToken):: LeftParenToken::tail => {
           val (baseExp, restTokens) = parseExp(tail)
-          restTokens match{
-            case CommaToken ::tail  => {
-              val (parameters, restTokens2) = parseRepeat(tail,parseExp)
-              restTokens2 match {
-                case RightParenToken::tail =>
-                  (MethodExp(baseExp,Var(method.name),parameters),tail)
-              }
-            }
+          val (parameters, restTokens2) = parseRep1(restTokens,parseExp,skipCommas)
+          restTokens2 match {
+            case RightParenToken::tail =>
+              (MethodExp(baseExp,Var(method.name),parameters),tail)
           }
         }
         case NewToken :: (className: VarToken) ::LeftParenToken::tail =>{
-          val (parameters, restTokens) = parseExp(tail)
+          val (parameters, restTokens) = parseRep1(tail,parseExp,skipCommas)
           restTokens match {
             case RightParenToken:: tail =>{
               (NewClassExp(Var(className.name),parameters),tail)
