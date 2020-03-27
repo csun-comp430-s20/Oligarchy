@@ -31,6 +31,9 @@ case object BreakToken extends Token // reserved word  break  imon
 case object ReturnToken extends Token // reserved word  return imon
 case object PrintToken extends Token // reserved word   print ed
 case object AndToken extends Token // single & imon
+//added
+case object ExtendsToken extends Token //reserved word
+
 
 
 case class LexerException(msg: String) extends Exception(msg)
