@@ -224,22 +224,20 @@ class Parser(private var input: List[Token]) {
       case _ => throw ParserException("not an exponential expression")
     }
   }
-  def parsePrimaryExpression(tokens: List[Token]): (Exp, List[Token])={
+  def parsePrimaryExpression(tokens: List[Token]): (Exp, List[Token])= {
     tokens match {
-      case (head:IntegerToken)::tail =>
-        (IntegerExp(head.value),tail)
-      case (head:BooleanToken)::tail =>
-        (BooleanExp(head.name),tail)
-      case (head:VarToken)::tail =>
-        (VariableExp(Var(head.name)),tail)
-      case LeftParenToken::tail  =>{
+      case (head: IntegerToken) :: tail =>
+        (IntegerExp(head.value), tail)
+      case (head: BooleanToken) :: tail =>
+        (BooleanExp(head.name), tail)
+      case (head: VarToken) :: tail =>
+        (VariableExp(Var(head.name)), tail)
+      case LeftParenToken :: tail =>
         val (groupedExpression, restTokens) = parseBinaryOperator(tail)
         restTokens match {
-          case RightParenToken::tail =>{
-            (GroupedExp(groupedExpression),tail)
-        }
+          case RightParenToken :: tail => (GroupedExp(groupedExpression), tail)
           case _ => throw ParserException("miss grouped expression")
-      }
+        }
       case _ => throw ParserException("not a primary expression")
     }
   }
