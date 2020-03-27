@@ -21,10 +21,13 @@ case object IntTypes extends Types
 case object BoolTypes extends Types
 case object StrTypes extends Types
 case object VoidTypes extends Types
-case object ClassTypes extends Types
+case class ClassTypes(className: Variable) extends Types
+
+sealed trait InstanceDec
+case class InstDeclaration(vd: VarDec)extends  InstanceDec
 
 sealed trait VarDec
-case class Declaration(types: Var)extends VarDec
+case class VarDeclaration(t1: Types, v1: Variable)extends VarDec
 
 sealed trait Exp
 case class LogicExp(e1:Exp , l1: Logic, e2: Exp) extends Exp
@@ -79,6 +82,44 @@ object Parser {
   def apply(input: Seq[Token]): Parser = {
     new Parser(input)
   }
+
+  def parseTypes(tokens: List[Token]): (Types, List[Token])= {
+    tokens match {
+      case IntTypeToken::tail =>
+        (IntTypes,tail)
+      case StringTypeToken::tail =>
+        (StrTypes,tail)
+      case BooleanTypeToken::tail =>
+        (BoolTypes,tail)
+      case (className:VarToken)::tail =>
+        (ClassTypes(Var(className.value)),tail)
+      case VoidToken::tail =>
+        (VoidTypes,tail)
+    }
+  }
+
+  def parseVarDec(tokens: List[Token]): (VarDec, List[Token])= {
+    val (types, restTokens) = parseTypes(tokens)
+    restTokens match {
+      case (variable: VarToken) :: tail => {
+          (VarDeclaration(types, Var(variable.value)), tail)
+      }
+    }
+  }
+
+  def parseInstanceDec(tokens: List[Token]): (InstanceDec, List[Token])= {
+    val (varDec, restTokens) = parseVarDec(tokens)
+    (InstDeclaration(varDec), restTokens)
+  }
+
+  def parseMethodDef(tokens: List[Token]): (Method, List[Token])= {
+    val (types, restTokens) = parseTypes(tokens)
+    restTokens match {
+      case (variable: VarToken) :: tail => {
+        val()
+      }
+    }
+  }
 }
 
 class Parser(private var input: Seq[Token]) {
@@ -96,33 +137,30 @@ def parseRepeat[A] (tokens: List[Token], parseOne: List[Token] => (A, List[Token
   }
 }
 
-def parseVarDec(tokens: List[Token]): (Exp, List[Token])={
-  tokens match{
-    case VarToken(head.value)::tail =>
-      (Declaration)
+
+
+
+
+
+
+
+
+
+def parseRep1[A](tokens: List[Token],
+                 parseWanted: List[Token] => (A, List[Token]),
+                 parseSkip: List[Token] => (A, List[Token])):
+                  (List[A], List[Token])= {
+  try{
+    val (a, restTokens) = parseWanted(tokens)
+    val(_, restTokens2) = parseRepeat(restTokens, parseSkip)
+    val(restAs2, finalTokens) = parseRep1(restTokens2,parseWanted,parseSkip)
+    (a:: restAs2, finalTokens)
   }
-}
+  catch{
+    case _: ParserException => {
 
-
-def parseMethodDef(tokens: List[Token]): (Exp, List[Token])= {
-
-}
-
-def parseInstanceDec(tokens: List[Token]): (Exp, List[Token])= {
-  val (expression,restTokens) = parseVarDec(tokens)
-}
-
-def parseType(tokens: List[Token]): (Types, List[Token])= {
-  tokens match {
-    case IntegerToken(head.value)::tail =>
-      (IntTypes,tail)
-    case StrToken(head.value)::tail =>
-      (StrTypes,tail)
-    case BooleanToken(head.value)::tail =>
-      (BoolTypes,tail)
-    case ClassNameToken(head.value)::tail =>
-      (ClassTypes,tail)
-    case VoidToken::tail =>
-      (VoidTypes,tail)
+      (List(), tokens)
+    }
   }
+
 }

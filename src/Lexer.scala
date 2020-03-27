@@ -7,6 +7,9 @@ case class VarToken(value: String) extends Token // steph
 case class BooleanToken(value: Boolean) extends Token // can treat as reserved word  but you pass in the value steph
 case class TypeToken(value: String) extends Token
 
+case object IntTypeToken extends Token
+case object StringTypeToken extends Token
+case object BooleanTypeToken extends Token
 case object VoidToken extends Token
 case object ClassToken extends Token // reserved word class steph
 case object DivisionToken extends Token // single /  dan
@@ -82,6 +85,9 @@ class Lexer(private var input: List[Char]) {
           case "int" => Some(TypeToken("int"))
           case "bool" => Some(TypeToken("bool"))
           case "void" => Some(VoidToken)
+          case "str" => Some(StringTypeToken)
+          case "int" => Some(IntTypeToken)
+          case "bool" => Some(BooleanTypeToken)
           case other => Some(VarToken(other))
         }
       }
