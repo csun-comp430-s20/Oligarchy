@@ -110,8 +110,10 @@ class Parser(private var input: List[Token]) {
           val (baseExp, restTokens) = parseExp(tail)
           val (parameters, restTokens2) = parseRep1(restTokens,parseExp,skipCommas)
           restTokens2 match {
-            case RightParenToken::tail =>
-              (MethodExp(baseExp,Var(method.name),parameters),tail)
+            case RightParenToken::tail => {
+              (MethodExp(baseExp, Var(method.name), parameters), tail)
+            }
+            case _ => throw ParserException("not a method expression")
           }
         }
         case NewToken :: (className: VarToken) ::LeftParenToken::tail =>{
@@ -120,6 +122,7 @@ class Parser(private var input: List[Token]) {
             case RightParenToken:: tail =>{
               (NewClassExp(Var(className.name),parameters),tail)
             }
+            case _ => throw ParserException("miss NewToken ")
           }
         }
         case LeftParenToken ::tail=> {
@@ -185,6 +188,8 @@ class Parser(private var input: List[Token]) {
       case AndToken::AndToken:: tail => cascadify(tail,  AndExp.apply)
       case OrToken::OrToken::tail => cascadify(tail,  OrExp.apply)
       case EqualsToken::EqualsToken::tail => cascadify(tail,  EqualsExp.apply)
+
+      case _ => throw ParserException("Not a binary operator")
     }
   }
 
@@ -194,6 +199,8 @@ class Parser(private var input: List[Token]) {
     restTokens match {
       case PlusToken::tail =>cascadify(tail,  PlusExp.apply)
       case SubtractToken:: tail =>cascadify(tail,  SubtractExp.apply)
+
+      case _ => throw ParserException("Not an additive expression")
     }
   }
 
@@ -203,13 +210,18 @@ class Parser(private var input: List[Token]) {
     restTokens match {
       case MultiplicationToken::tail =>cascadify(tail,  MultiplyExp.apply)
       case DivisionToken:: tail =>cascadify(tail,  DivideExp.apply)
+
+      case _ => throw ParserException("Not a multiplicative expression")
     }
   }
   def parseExponentialExpression(tokens: List[Token]): (Exp, List[Token])={
     val (expression,restTokens) = parsePrimaryExpression(tokens)
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
-      case CaretToken::tail =>cascadify(tail,  PowerExp.apply)
+      case CaretToken::tail =>{
+        cascadify(tail,  PowerExp.apply)
+      }
+      case _ => throw ParserException("not an exponential expression")
     }
   }
   def parsePrimaryExpression(tokens: List[Token]): (Exp, List[Token])={
@@ -223,10 +235,12 @@ class Parser(private var input: List[Token]) {
       case LeftParenToken::tail  =>{
         val (groupedExpression, restTokens) = parseBinaryOperator(tail)
         restTokens match {
-          case RightParenToken::tail =>
+          case RightParenToken::tail =>{
             (GroupedExp(groupedExpression),tail)
         }
+          case _ => throw ParserException("miss grouped expression")
       }
+      case _ => throw ParserException("not a primary expression")
     }
   }
   def parseGroupedExpression(tokens: List[Token]): (Exp, List[Token])={
@@ -234,9 +248,13 @@ class Parser(private var input: List[Token]) {
       case LeftParenToken::tail =>{
         val (groupedExp, restTokens) = parseExp(tail)
         restTokens match {
-          case RightParenToken :: tail => (GroupedExp(groupedExp),tail)
+          case RightParenToken :: tail => {
+            (GroupedExp(groupedExp),tail)
+          }
+          case _ => throw ParserException("missing grouped expression")
         }
       }
+      case _ => throw ParserException("not a grouped expression")
     }
   }
 
