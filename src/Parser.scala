@@ -351,7 +351,7 @@ class Parser(private var input: List[Token]) {
               case _ => throw ParserException("is not a cast or high order function instantiation")
             }
         }
-        case HOFCToken :: tail =>{
+        case HOFCToken :: LeftParenToken::tail =>{
           val (preFunction,restTokens) =  parseExp(tail)
           restTokens match {
             case CommaToken:: tail => {
