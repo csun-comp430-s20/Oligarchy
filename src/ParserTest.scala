@@ -5,6 +5,17 @@ object ParserTest {
     assert(received == expectedProgram)
   }
 
+  def testExps(): Unit ={
+    val input = "1^3 + 1^3 "
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val (received, _) = parser.parseExp(receivedTokens)
+    received
+  }
+
+
+
   def testUsingLexer(): Unit ={
     val input = "Class testing { int myInt;" +
       "constructor(bool myBool){1;}" +
@@ -65,8 +76,7 @@ object ParserTest {
 
 
   def main(args: Array[String]): Unit = {
-    testEx()
-    testUsingLexer()
+    testExps()
   } // main
 } // LexerTest
 
