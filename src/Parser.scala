@@ -31,8 +31,8 @@ case class IntegerExp(value:Int) extends Exp
 case class BooleanExp(value: Boolean) extends Exp
 case class VariableExp(value: String) extends Exp
 case class PrintExp(e1:Exp) extends Exp
-case class MethodExp(e1:Exp , methodName: String, e2: Exp*) extends Exp
-case class NewClassExp(className: String, e1:Exp* ) extends Exp
+case class MethodExp(e1:Exp , methodName: String, e2: List[Exp]) extends Exp
+case class NewClassExp(className: String, e1:List[Exp] ) extends Exp
 case class CastExp(t1: Types , e2: Exp) extends Exp
 case class GroupedExp(e: Exp) extends Exp
 case class HighOrderExp(t1: Types , v1: String, e2: Exp) extends Exp
@@ -55,13 +55,13 @@ case class ExpStmt(e1: Exp) extends Stmt
 case class AssignmentStmt(vd1: VarDec, exp: Exp) extends Stmt
 case class ForStmt(v1: VarDec, e1: Exp, inc: Stmt, forBody: Stmt) extends Stmt
 case object BreakStmt extends Stmt
-case class BlockStmt(s1: Stmt*) extends Stmt
+case class BlockStmt(s1: List[Stmt]) extends Stmt
 case class ConditionalStmt(e1: Exp, condition: Stmt, ifBody: Stmt) extends Stmt
 case class ReturnStmt(e1: Exp) extends Stmt
 case object VoidStmt extends Stmt
 
 sealed trait Method
-case class DefMethod(types:Types, methodName: String,  stmt: Stmt, parameters: VarDec*) extends Method
+case class DefMethod(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDec]) extends Method
 
 
 sealed trait Instance
@@ -75,7 +75,7 @@ case class DefExtClass(classname: String, extendedClass: String, st1: Stmt, ins:
 
 sealed trait Program
 // Modified from: (e1: Exp, c1: DefClass*)  //daniel
-case class Prgm(e1: Exp, c1: Class*) extends Program
+case class Prgm(e1: Exp, c1: List[Class]) extends Program
 
 
 case class ParserException(msg: String) extends Exception(msg)
