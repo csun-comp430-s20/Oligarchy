@@ -28,6 +28,7 @@ case class VarDeclaration(t1: Types, v1: String)extends VarDec
 
 sealed trait Exp
 case class IntegerExp(value:Int) extends Exp
+case class StringExp(value:String) extends Exp
 case class BooleanExp(value: Boolean) extends Exp
 case class VariableExp(value: String) extends Exp
 case class PrintExp(e1:Exp) extends Exp
@@ -122,7 +123,6 @@ class Parser(private var input: List[Token]) {
     }
 
   }
-
 
   private def parseMethodDef(tokens: List[Token]): (Method, List[Token]) = {
     val (types, restTokens) = parseTypes(tokens)
@@ -447,6 +447,8 @@ class Parser(private var input: List[Token]) {
         (IntegerExp(head.value), tail)
       case (head: BooleanToken) :: tail =>
         (BooleanExp(head.name), tail)
+      case (head: StrToken) :: tail =>
+        (StringExp(head.value), tail)
       case (head: VarToken) :: tail =>
         (VariableExp(head.name), tail)
       case LeftParenToken :: tail =>

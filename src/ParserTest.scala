@@ -26,6 +26,54 @@ object ParserTest {
     received
   }
 
+  def testExps(): Unit ={
+    val input = "1^3 + 1^3 "
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val (received, _) = parser.parseExp(receivedTokens)
+    received
+  }
+  def testExps(): Unit ={
+    val input = "1^3 + 1^3 "
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val (received, _) = parser.parseExp(receivedTokens)
+    received
+  }
+  def testExps(): Unit ={
+    val input = "1^3 + 1^3 "
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val (received, _) = parser.parseExp(receivedTokens)
+    received
+  }
+  def testExps(): Unit ={
+    val input = "1^3 + 1^3 "
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val (received, _) = parser.parseExp(receivedTokens)
+    received
+  }
+  def testExps(): Unit ={
+    val input = "1^3 + 1^3 "
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val (received, _) = parser.parseExp(receivedTokens)
+    received
+  }
+  def testExps(): Unit ={
+    val input = "1^3 + 1^3 "
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val (received, _) = parser.parseExp(receivedTokens)
+    received
+  }
 
 
   def testUsingLexer(): Unit ={
