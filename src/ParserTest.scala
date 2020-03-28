@@ -47,6 +47,66 @@ object ParserTest {
                   )
     testParses(receivedTokens,program)
   }
+  def testStmtVarDec(): Unit={
+    val input = "int i = 0;"
+    val tokenizer = Lexer(input)
+    val tokens = tokenizer.tokenize()
+    val parser = Parser(tokens)
+    val (received, _ )  = parser.parseStmt(tokens)
+    received
+  }
+  def testStmtFor(): Unit={
+    val input = "for(i = 0; i < 10; i = i +1;) 1;"
+    val tokenizer = Lexer(input)
+    val tokens = tokenizer.tokenize()
+    val parser = Parser(tokens)
+    val (received, _ )  = parser.parseStmt(tokens)
+    received
+  }
+  def testStmtBreak(): Unit={
+    val input = "break;"
+    val tokenizer = Lexer(input)
+    val tokens = tokenizer.tokenize()
+    val parser = Parser(tokens)
+    val (received, _ )  = parser.parseStmt(tokens)
+    received
+  }
+
+  def testBlockStmt(): Unit ={
+    val input = "{int myInt = 10; {int newInt = 11;}}"
+    val tokenizer = Lexer(input)
+    val tokens = tokenizer.tokenize()
+    val parser = Parser(tokens)
+    val (received, _ )  = parser.parseStmt(tokens)
+    received
+  }
+
+  def testIfStmt(): Unit ={
+    val input = "if (x + 5 == 10) int w = 10; else  int w = 11;"
+    val tokenizer = Lexer(input)
+    val tokens = tokenizer.tokenize()
+    val parser = Parser(tokens)
+    val (received, _ )  = parser.parseStmt(tokens)
+    received
+  }
+
+  def testStmtReturnVoid(): Unit={
+    val input = "return;"
+    val tokenizer = Lexer(input)
+    val tokens = tokenizer.tokenize()
+    val parser = Parser(tokens)
+    val (received, _ )  = parser.parseStmt(tokens)
+    received
+  }
+
+  def testStmtReturnExp(): Unit={
+    val input = "return (1 + 2);"
+    val tokenizer = Lexer(input)
+    val tokens = tokenizer.tokenize()
+    val parser = Parser(tokens)
+    val (received, _ )  = parser.parseStmt(tokens)
+    received
+  }
 
   def testEx() {
 //
@@ -90,7 +150,14 @@ object ParserTest {
   def main(args: Array[String]): Unit = {
 //    testExps()
 //    testUsingLexer()
-    testClass()
+//    testClass()
+    testStmtVarDec()
+    testStmtBreak()
+    testStmtReturnExp()
+    testStmtReturnVoid()
+    testStmtFor()
+    testBlockStmt()
+    testIfStmt()
   } // main
 } // LexerTest
 
