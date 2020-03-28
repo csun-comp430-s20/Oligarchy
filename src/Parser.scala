@@ -257,7 +257,11 @@ class Parser(private var input: List[Token]) {
       }
       case LeftCurlyToken :: tail => {
         var (stmts: List[Stmt], restTokens: List[Token]) = parseRepeat(tail, parseStmt)
-        (BlockStmt(stmts), restTokens)
+        restTokens match {
+          case RightCurlyToken :: finalTokens => {
+            (BlockStmt(stmts), finalTokens)
+          }
+        }
       }
       case _ => {
         try {
