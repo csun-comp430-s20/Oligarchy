@@ -247,6 +247,10 @@ class Lexer(private var input: List[Char]) {
               input = tail
               EqualsToken
             }
+            case '^' :: tail => {
+              input = tail
+              CaretToken
+            }
 
             case _ :: _ => {
               throw LexerException("Have input, but it's not valid")
