@@ -114,6 +114,33 @@ object ParserTest {
     testParserMethod(receivedTokens, expectedProgram, parser.parseInstanceDec)
   }
 
+  def testMethodNameExp(): Unit ={
+    val input = "foobar(5)"
+    val expectedProgram = MethodExp(IntegerExp(5), "foobar", List[Exp]())
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = new Parser(receivedTokens)
+    testParserMethod(receivedTokens, expectedProgram, parser.parseExp)
+  }
+
+  def testMethodNameExp1(): Unit ={
+    val input = "foobar(5, 6)"
+    val expectedProgram = MethodExp(IntegerExp(5), "foobar", List[Exp](IntegerExp(6)))
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = new Parser(receivedTokens)
+    testParserMethod(receivedTokens, expectedProgram, parser.parseExp)
+  }
+
+  def testMethodNameExp2(): Unit ={
+    val input = "foobar(5, 6, 7)"
+    val expectedProgram = MethodExp(IntegerExp(5), "foobar", List[Exp](IntegerExp(6), IntegerExp(7)))
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = new Parser(receivedTokens)
+    testParserMethod(receivedTokens, expectedProgram, parser.parseExp)
+  }
+
   def testUsingLexer(): Unit ={
     val input = "Class testing { int myInt;" +
       "constructor(bool myBool){1;}" +
@@ -134,6 +161,15 @@ object ParserTest {
     testParses(receivedTokens,program)
   }
 
+  def testPrintExp(): Unit ={
+    val input = "print(45) "
+    val expectedProgram = PrintExp(IntegerExp(45))
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = new Parser(receivedTokens)
+    testParserMethod(receivedTokens, expectedProgram, parser.parseExp)
+  }
+
   def main(args: Array[String]): Unit = {
     testClass()
     testIntType()
@@ -145,6 +181,13 @@ object ParserTest {
     testMethodDefWith1Parameter()
     testMethodDefWith2Parameter()
     testInstanceDec()
+    testMethodNameExp()
+    testMethodNameExp1()
+    testMethodNameExp2()
+    testPrintExp()
+
+    //do methodname and printexp
+
   } // main
 } // LexerTest
 
