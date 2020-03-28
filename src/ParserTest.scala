@@ -166,7 +166,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testPrecendenceLeftToRightExp(): Unit ={ // broken so far ...
+  def testPrecendenceLeftToRightExp(): Unit ={
     val lexerInput = "1^2*5+6"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -175,7 +175,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testHighOrderFunctionCallExp(): Unit ={ // broken so far ...
+  def testHighOrderFunctionCallExp(): Unit ={
     val lexerInput = "hofc(myHighOrderFunction, mySecondExp)"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -184,7 +184,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testCreateHighOrderFunctionExp(): Unit ={ // broken so far ...
+  def testCreateHighOrderFunctionExp(): Unit ={
     val lexerInput = "(int myVariable ) => myVariable + 2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
