@@ -151,7 +151,7 @@ class Parser(private var input: List[Token]) {
   } //ParseProgram
 
   //Daniel
-  private def parseClass(tokens: List[Token]): (Class, List[Token]) = {
+  def parseClass(tokens: List[Token]): (Class, List[Token]) = {
     tokens match {
       case ClassToken :: VarToken(classname: String) :: ExtendsToken :: VarToken(extendclassname: String) :: LeftCurlyToken :: tail => {
         var (instances: List[Instance], restTokens: List[Token]) = parseRepeat(tail, parseInstanceDec)
@@ -178,8 +178,11 @@ class Parser(private var input: List[Token]) {
             restTokens2 match {
               case RightParenToken :: tail => {
                 val (stmt, restTokens3) = parseStmt(tail)
-                var (methods: List[Method], restTokens4: List[Token]) = parseRepeat(tail, parseMethodDef)
-                (DefClass(classname, stmt, instances, declarations, methods), restTokens4)
+                var (methods: List[Method], restTokens4: List[Token]) = parseRepeat(restTokens3, parseMethodDef)
+                restTokens4 match {
+                  case RightCurlyToken ::afterClassTokens => (DefClass(classname, stmt, instances, declarations, methods), afterClassTokens)
+                }
+
               }
               case _ => throw ParserException("Not a DefClass")
             }
@@ -257,7 +260,11 @@ class Parser(private var input: List[Token]) {
       }
       case LeftCurlyToken :: tail => {
         var (stmts: List[Stmt], restTokens: List[Token]) = parseRepeat(tail, parseStmt)
-        (BlockStmt(stmts), restTokens)
+        restTokens match {
+          case RightCurlyToken :: finalTokens => {
+            (BlockStmt(stmts), finalTokens)
+          }
+        }
       }
       case _ => {
         try {
