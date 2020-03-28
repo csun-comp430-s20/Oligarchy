@@ -9,7 +9,7 @@ object ParserTest {
     val input = "Class testing { int myInt;" +
       "constructor(bool myBool){1;}" +
       "int myMethod(str myString){1;}" +
-      "}1"
+      "}"
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val parser = Parser(receivedTokens)

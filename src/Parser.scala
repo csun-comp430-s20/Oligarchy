@@ -178,8 +178,11 @@ class Parser(private var input: List[Token]) {
             restTokens2 match {
               case RightParenToken :: tail => {
                 val (stmt, restTokens3) = parseStmt(tail)
-                var (methods: List[Method], restTokens4: List[Token]) = parseRepeat(tail, parseMethodDef)
-                (DefClass(classname, stmt, instances, declarations, methods), restTokens4)
+                var (methods: List[Method], restTokens4: List[Token]) = parseRepeat(restTokens3, parseMethodDef)
+                restTokens4 match {
+                  case RightCurlyToken ::afterClassTokens => (DefClass(classname, stmt, instances, declarations, methods), afterClassTokens)
+                }
+
               }
               case _ => throw ParserException("Not a DefClass")
             }
