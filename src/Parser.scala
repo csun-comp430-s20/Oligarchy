@@ -88,7 +88,7 @@ object Parser {
 
 class Parser(private var input: List[Token]) {
 
-  private def parseTypes(tokens: List[Token]): (Types, List[Token]) = {
+  def parseTypes(tokens: List[Token]): (Types, List[Token]) = {
     tokens match {
       case IntTypeToken :: tail =>
         (IntTypes, tail)
@@ -104,7 +104,7 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  private def parseVarDec(tokens: List[Token]): (VarDec, List[Token]) = {
+  def parseVarDec(tokens: List[Token]): (VarDec, List[Token]) = {
     val (types, restTokens) = parseTypes(tokens)
     restTokens match {
       case (variable: VarToken) :: tail => {
@@ -114,7 +114,7 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  private def parseInstanceDec(tokens: List[Token]): (Instance, List[Token]) = {
+  def parseInstanceDec(tokens: List[Token]): (Instance, List[Token]) = {
     val (varDec, restTokens) = parseVarDec(tokens)
     restTokens match {
       case SemicolonToken::returnTokens =>(DecInstance(varDec), returnTokens)
@@ -124,7 +124,7 @@ class Parser(private var input: List[Token]) {
   }
 
 
-  private def parseMethodDef(tokens: List[Token]): (Method, List[Token]) = {
+  def parseMethodDef(tokens: List[Token]): (Method, List[Token]) = {
     val (types, restTokens) = parseTypes(tokens)
     restTokens match {
       case (variable: VarToken) :: tail => {
