@@ -21,13 +21,9 @@ case object StrTypes extends Types
 case object VoidTypes extends Types
 case class ClassTypes(className: String) extends Types
 
-sealed trait InstanceDec
-case class InstDeclaration(vd: VarDec)extends  InstanceDec
 
 sealed trait VarDec
 case class VarDeclaration(t1: Types, v1: String)extends VarDec
-
-case class Declaration(types: Types) extends VarDec
 
 
 sealed trait Exp
@@ -73,9 +69,9 @@ case class DecInstance(v1: VarDec) extends Instance
 
 sealed trait Class
 // Modified from: (v1: Variable, st1: Stmt, cb1: ClassBody*)  //daniel
-case class DefClass(v1: String, st1: Stmt, ins: List[Instance], dec: List[Declaration], met: List[Method]) extends Class
+case class DefClass(v1: String, st1: Stmt, ins: List[Instance], dec: List[VarDec], met: List[Method]) extends Class
 // Modified from: (classname: Variable, extendedClass: Variable, st1: Stmt, cb1: ClassBody*)  //daniel
-case class DefExtClass(classname: String, extendedClass: String, st1: Stmt, ins: List[Instance], dec: List[Declaration], met: List[Method]) extends Class
+case class DefExtClass(classname: String, extendedClass: String, st1: Stmt, ins: List[Instance], dec: List[VarDec], met: List[Method]) extends Class
 
 sealed trait Program
 // Modified from: (e1: Exp, c1: DefClass*)  //daniel
@@ -116,9 +112,9 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  private def parseInstanceDec(tokens: List[Token]): (InstanceDec, List[Token]) = {
+  private def parseInstanceDec(tokens: List[Token]): (Instance, List[Token]) = {
     val (varDec, restTokens) = parseVarDec(tokens)
-    (InstDeclaration(varDec), restTokens)
+    (DecInstance(varDec), restTokens)
   }
 
 
@@ -160,7 +156,7 @@ class Parser(private var input: List[Token]) {
         var (instances: List[Instance], restTokens: List[Token]) = parseRepeat(tail, parseInstanceDec)
         restTokens match {
           case ConstructorToken :: LeftParenToken :: tail => {
-            var (declarations: List[Declaration], restTokens2: List[Token]) = parseRepeat(tail, parseVarDec)
+            var (declarations: List[VarDeclaration], restTokens2: List[Token]) = parseRepeat(tail, parseVarDec)
             restTokens2 match {
               case RightParenToken :: tail => {
                 val (stmt, restTokens3) = parseStmt(tail)
@@ -177,7 +173,7 @@ class Parser(private var input: List[Token]) {
         var (instances: List[Instance], restTokens: List[Token]) = parseRepeat(tail, parseInstanceDec)
         restTokens match {
           case ConstructorToken :: LeftParenToken :: tail => {
-            var (declarations: List[Declaration], restTokens2: List[Token]) = parseRepeat(tail, parseVarDec)
+            var (declarations: List[VarDec], restTokens2: List[Token]) = parseRepeat(tail, parseVarDec)
             restTokens2 match {
               case RightParenToken :: tail => {
                 val (stmt, restTokens3) = parseStmt(tail)
