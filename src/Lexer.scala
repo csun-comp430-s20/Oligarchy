@@ -1,6 +1,6 @@
 sealed trait Token
 
-case class ClassNameToken(name: String) extends Token // better if just use var for now ed
+case class ClassNameToken(value: String) extends Token // better if just use var for now ed
 case class IntegerToken(value: Int) extends Token // detect if it is just a number dan
 case class StrToken(value: String) extends Token // Detect if between to quotes imon
 case class VarToken(name: String) extends Token // steph
@@ -10,6 +10,7 @@ case object IntTypeToken extends Token
 case object StringTypeToken extends Token
 case object BooleanTypeToken extends Token
 
+case object VoidToken extends Token
 case object ClassToken extends Token // reserved word class steph
 case object HOFCToken extends Token
 case object DivisionToken extends Token // single /  dan
@@ -84,6 +85,7 @@ class Lexer(private var input: List[Char]) {
           case "true" => Some(BooleanToken(true))
           case "false" => Some(BooleanToken(false))
           case "extends" => Some(ExtendsToken)
+          case "void" => Some(VoidToken)
           case "str" => Some(StringTypeToken)
           case "int" => Some(IntTypeToken)
           case "bool" => Some(BooleanTypeToken)
