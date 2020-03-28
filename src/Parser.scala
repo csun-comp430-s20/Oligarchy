@@ -151,7 +151,7 @@ class Parser(private var input: List[Token]) {
   } //ParseProgram
 
   //Daniel
-  private def parseClass(tokens: List[Token]): (Class, List[Token]) = {
+  def parseClass(tokens: List[Token]): (Class, List[Token]) = {
     tokens match {
       case ClassToken :: VarToken(classname: String) :: ExtendsToken :: VarToken(extendclassname: String) :: LeftCurlyToken :: tail => {
         var (instances: List[Instance], restTokens: List[Token]) = parseRepeat(tail, parseInstanceDec)
