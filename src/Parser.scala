@@ -205,13 +205,13 @@ class Parser(private var input: List[Token]) {
         val (vardec: VarDec, restTokens: List[Token]) = parseVarDec(tail)
         restTokens match {
           case SemicolonToken :: restTokens2 => {
-            var (exp: Exp, restTokens3: List[Token]) = parseExp(restTokens2)
+            val (exp: Exp, restTokens3: List[Token]) = parseExp(restTokens2)
             restTokens3 match {
               case SemicolonToken :: restTokens4 => {
-                var (stmt1: Stmt, restTokens5: List[Token]) = parseStmt(restTokens4)
+                val (stmt1: Stmt, restTokens5: List[Token]) = parseStmt(restTokens4)
                 restTokens5 match {
                   case LeftParenToken :: restTokens6 => {
-                    var (stmt2: Stmt, finalTokens: List[Token]) = parseStmt(restTokens6)
+                    val (stmt2: Stmt, finalTokens: List[Token]) = parseStmt(restTokens6)
                     (ForStmt(vardec, exp, stmt1, stmt2), finalTokens)
                   }
                   case _ => throw ParserException("missing LeftParenToken in ForStatement")
