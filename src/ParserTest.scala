@@ -180,7 +180,7 @@ object ParserTest {
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
     val parser = Parser(receivedTokens)
-    val expected = HighOrderExp(IntTypes,"myVariable",PlusExp(VariableExp("myVariable"),IntegerExp(2)))
+    val expected = CallHighOrderExp(VariableExp("myHighOrderFunction"),VariableExp("mySecondExp"))
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
@@ -189,12 +189,20 @@ object ParserTest {
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
     val parser = Parser(receivedTokens)
-    val expected = CallHighOrderExp(VariableExp("myHighOrderFunction"),VariableExp("mySecondExp"))
+    val expected = HighOrderExp(IntTypes,"myVariable",PlusExp(VariableExp("myVariable"),IntegerExp(2)))
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-
+  def testMethodNameExp1(): Unit ={
+    val input = "foobar(5, 6)"
+    val expectedProgram = MethodExp(IntegerExp(5), "foobar", List[Exp](IntegerExp(6)))
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = new Parser(receivedTokens)
+    testParses(receivedTokens, expectedProgram, parser.parseExp)
+  }
   def main(args: Array[String]): Unit = {
+    testMethodNameExp1()
     testCreateHighOrderFunctionExp()
     testHighOrderFunctionCallExp()
 //    testPrecendenceLeftToRightExp()
