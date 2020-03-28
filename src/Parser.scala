@@ -403,7 +403,7 @@ class Parser(private var input: List[Token]) {
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
       case LessThanToken::EqualsToken::tail => cascadify(tail,  LTEExp.apply)
-      case LessThanToken:: tail =>cascadify(tail,  LTEExp.apply)
+      case LessThanToken:: tail =>cascadify(tail,  LTExp.apply)
       case GreaterThanToken::EqualsToken :: tail => cascadify(tail,  GTEExp.apply)
       case GreaterThanToken:: tail => cascadify(tail,  GTExp.apply)
       case AndToken::AndToken:: tail => cascadify(tail,  AndExp.apply)
