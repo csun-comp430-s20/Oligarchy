@@ -97,7 +97,7 @@ object Parser {
 
 class Parser(private var input: List[Token]) {
 
-  def parseTypes(tokens: List[Token]): (Types, List[Token]) = {
+  private def parseTypes(tokens: List[Token]): (Types, List[Token]) = {
     tokens match {
       case IntTypeToken :: tail =>
         (IntTypes, tail)
@@ -112,7 +112,7 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  def parseVarDec(tokens: List[Token]): (VarDec, List[Token]) = {
+  private def parseVarDec(tokens: List[Token]): (VarDec, List[Token]) = {
     val (types, restTokens) = parseTypes(tokens)
     restTokens match {
       case (variable: VarToken) :: tail => {
@@ -121,13 +121,13 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  def parseInstanceDec(tokens: List[Token]): (InstanceDec, List[Token]) = {
+  private def parseInstanceDec(tokens: List[Token]): (InstanceDec, List[Token]) = {
     val (varDec, restTokens) = parseVarDec(tokens)
     (InstDeclaration(varDec), restTokens)
   }
 
 
-  def parseMethodDef(tokens: List[Token]): (Method, List[Token]) = {
+  private def parseMethodDef(tokens: List[Token]): (Method, List[Token]) = {
     val (types, restTokens) = parseTypes(tokens)
     restTokens match {
       case (variable: VarToken) :: tail => {
@@ -147,7 +147,7 @@ class Parser(private var input: List[Token]) {
   }
 
   //Daniel
-  private def parseProgram(tokens: List[Token]): (Prgm, List[Token]) = {
+  def parseProgram(tokens: List[Token]): (Prgm, List[Token]) = {
     tokens match {
       case ClassToken :: tail => {
         var (classes: List[Class], restTokens: List[Token]) = parseRepeat(tail, parseClass)
@@ -381,7 +381,7 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  def cascadifyHelper(expression: Exp, tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = {
+  private def cascadifyHelper(expression: Exp, tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = {
     val (followingExps: List[Exp], restTokens) = parseRepeat(tokens, parseBinaryOperator)
     var finalResult: Exp = expression
     for (currentExp <- followingExps) {
@@ -390,7 +390,7 @@ class Parser(private var input: List[Token]) {
     (finalResult, restTokens)
   }
 
-  def parseBinaryOperator(tokens: List[Token]): (Exp, List[Token])={
+  private def parseBinaryOperator(tokens: List[Token]): (Exp, List[Token])={
     val (expression,restTokens) = parseAdditiveExpression(tokens)
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
@@ -406,7 +406,7 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  def parseAdditiveExpression(tokens: List[Token]): (Exp, List[Token])={
+  private def parseAdditiveExpression(tokens: List[Token]): (Exp, List[Token])={
     val (expression,restTokens) = parseMultiplicativeExpression(tokens)
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
@@ -417,7 +417,7 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  def parseMultiplicativeExpression(tokens: List[Token]): (Exp, List[Token])={
+  private def parseMultiplicativeExpression(tokens: List[Token]): (Exp, List[Token])={
     val (expression,restTokens) = parseExponentialExpression(tokens)
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
@@ -427,7 +427,7 @@ class Parser(private var input: List[Token]) {
       case _ => throw ParserException("Not a multiplicative expression")
     }
   }
-  def parseExponentialExpression(tokens: List[Token]): (Exp, List[Token])={
+  private def parseExponentialExpression(tokens: List[Token]): (Exp, List[Token])={
     val (expression,restTokens) = parsePrimaryExpression(tokens)
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
@@ -437,7 +437,7 @@ class Parser(private var input: List[Token]) {
       case _ => throw ParserException("not an exponential expression")
     }
   }
-  def parsePrimaryExpression(tokens: List[Token]): (Exp, List[Token])= {
+  private def parsePrimaryExpression(tokens: List[Token]): (Exp, List[Token])= {
     tokens match {
       case (head: IntegerToken) :: tail =>
         (IntegerExp(head.value), tail)
@@ -454,7 +454,7 @@ class Parser(private var input: List[Token]) {
       case _ => throw ParserException("not a primary expression")
     }
   }
-  def parseGroupedExpression(tokens: List[Token]): (Exp, List[Token])={
+  private def parseGroupedExpression(tokens: List[Token]): (Exp, List[Token])={
     tokens match {
       case LeftParenToken::tail =>{
         val (groupedExp, restTokens) = parseExp(tail)
@@ -469,14 +469,14 @@ class Parser(private var input: List[Token]) {
     }
   }
         
-  def skipCommas(tokens: List[Token]):(Any,List[Token]) = {
+  private def skipCommas(tokens: List[Token]):(Any,List[Token]) = {
     tokens match {
       case CommaToken::restTokens => ("Skipped",restTokens)
       case _ => throw ParserException("No commas to skip")
     }
   }
 
-  def parseRep1[A,B](tokens: List[Token],
+  private def parseRep1[A,B](tokens: List[Token],
                    parseWanted: List[Token] => (A, List[Token]),
                    parseSkip: List[Token] => (B,List[Token])):
               (List[A], List[Token])= {
@@ -493,7 +493,7 @@ class Parser(private var input: List[Token]) {
       }
     }
   }
-  def parseRepeat[A] (tokens: List[Token], parseOne: List[Token] => (A, List[Token])): (List[A], List[Token]) ={
+  private def parseRepeat[A] (tokens: List[Token], parseOne: List[Token] => (A, List[Token])): (List[A], List[Token]) ={
     try{
       val (a, restTokens) = parseOne(tokens)
       val(restAs, finalRestTokens) = parseRepeat(restTokens, parseOne)
