@@ -54,12 +54,13 @@ case class EqualsExp(exp: Exp, value: Exp) extends Exp
 sealed trait Stmt
 case class ExpStmt(e1: Exp) extends Stmt
 case class AssignmentStmt(vd1: VarDec, exp: Exp) extends Stmt
-case class ForStmt(v1: VarDec, e1: Exp, inc: Stmt, forBody: Stmt) extends Stmt
+case class ForStmt(assign: Stmt, e1: Exp, inc: Stmt, forBody: Stmt) extends Stmt
 case object BreakStmt extends Stmt
 case class BlockStmt(s1: List[Stmt]) extends Stmt
 case class ConditionalStmt(e1: Exp, condition: Stmt, ifBody: Stmt) extends Stmt
 case class ReturnStmt(e1: Exp) extends Stmt
 case object VoidStmt extends Stmt
+case class VarStmt(name:String, e1:Exp) extends Stmt
 
 sealed trait Method
 case class DefMethod(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDec]) extends Method
@@ -195,41 +196,37 @@ class Parser(private var input: List[Token]) {
     }
   } //Parse Classes
 
-  private def parseStmt(tokens: List[Token]): (Stmt, List[Token]) = {
+  def parseStmt(tokens: List[Token]): (Stmt, List[Token]) = {
     tokens match { //for (vardec; exp; stmt) stmt
       case ForToken :: LeftParenToken :: tail => {
-        val (vardec: VarDec, restTokens: List[Token]) = parseVarDec(tail)
-        restTokens match {
-          case SemicolonToken :: restTokens2 => {
-            val (exp: Exp, restTokens3: List[Token]) = parseExp(restTokens2)
-            restTokens3 match {
-              case SemicolonToken :: restTokens4 => {
-                val (stmt1: Stmt, restTokens5: List[Token]) = parseStmt(restTokens4)
-                restTokens5 match {
-                  case LeftParenToken :: restTokens6 => {
-                    val (stmt2: Stmt, finalTokens: List[Token]) = parseStmt(restTokens6)
-                    (ForStmt(vardec, exp, stmt1, stmt2), finalTokens)
-                  }
-                  case _ => throw ParserException("missing LeftParenToken in ForStatement")
-                }
+        val (stmt: Stmt, restTokens: List[Token]) = parseStmt(tail)
+        val (exp: Exp, restTokens2: List[Token]) = parseExp(restTokens)
+        restTokens2 match {
+          case SemicolonToken :: restTokens3 => {
+            val (stmt1: Stmt, restTokens4: List[Token]) = parseStmt(restTokens3)
+            restTokens4 match {
+              case RightParenToken :: restTokens5 => {
+                val (stmt2: Stmt, finalTokens: List[Token]) = parseStmt(restTokens5)
+                (ForStmt(stmt, exp, stmt1, stmt2), finalTokens)
               }
-              case _ => throw ParserException("missing semicolon after exp in ForStatement")
+              case _ => throw ParserException("missing RightParenToken in ForStatement")
             }
           }
-          case _ => throw ParserException("missing semicolon after vardec in ForStatement")
+          case _ => throw ParserException("missing semicolon after exp in ForStatement")
         }
       }
+
       case BreakToken :: SemicolonToken :: tail => {
         (BreakStmt, tail)
       }
       case IfToken :: LeftParenToken :: tail => {
-        var (exp: Exp, restTokens: List[Token]) = parseExp(tail)
+        val (exp: Exp, restTokens: List[Token]) = parseExp(tail)
         restTokens match {
           case RightParenToken :: restTokens2 => {
-            var (stmt1: Stmt, restTokens3: List[Token]) = parseStmt(restTokens2)
+            val (stmt1: Stmt, restTokens3: List[Token]) = parseStmt(restTokens2)
             restTokens3 match {
               case ElseToken :: restTokens4 => {
-                var (stmt2: Stmt, finalTokens: List[Token]) = parseStmt(restTokens4)
+                val (stmt2: Stmt, finalTokens: List[Token]) = parseStmt(restTokens4)
                 (ConditionalStmt(exp, stmt1, stmt2), finalTokens)
               }
               case _ => throw ParserException("Missing ElseToken")
@@ -260,10 +257,18 @@ class Parser(private var input: List[Token]) {
         }
       }
       case LeftCurlyToken :: tail => {
-        var (stmts: List[Stmt], restTokens: List[Token]) = parseRepeat(tail, parseStmt)
+        val (stmts: List[Stmt], restTokens: List[Token]) = parseRepeat(tail, parseStmt)
         restTokens match {
           case RightCurlyToken :: finalTokens => {
             (BlockStmt(stmts), finalTokens)
+          }
+        }
+      }
+      case (varName : VarToken) :: EqualsToken :: restTokens=>{
+        val (exp: Exp, restTokens2: List[Token]) = parseExp(restTokens)
+        restTokens2 match{
+          case SemicolonToken :: finalTokens =>{
+            (VarStmt(varName.name, exp), finalTokens)
           }
         }
       }
