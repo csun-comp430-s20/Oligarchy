@@ -116,7 +116,11 @@ class Parser(private var input: List[Token]) {
 
   private def parseInstanceDec(tokens: List[Token]): (Instance, List[Token]) = {
     val (varDec, restTokens) = parseVarDec(tokens)
-    (DecInstance(varDec), restTokens)
+    restTokens match {
+      case SemicolonToken::returnTokens =>(DecInstance(varDec), returnTokens)
+      case _ => throw ParserException("missing semicolon")
+    }
+
   }
 
 
@@ -296,75 +300,71 @@ class Parser(private var input: List[Token]) {
   def parseExp(tokens: List[Token]): (Exp,List[Token]) = {
     try{
       tokens match{
-      case PrintToken:: LeftParenToken :: tail => {
-        val (printedExp, restTokens) = parseExp(tail)
-        restTokens match {
-          case RightParenToken::finalTokens =>{
-            (PrintExp(printedExp),finalTokens)
-          }
-          case _ =>{
-            throw ParserException("not a print expression")
-          }
-        }
-      }
-      case (method: VarToken):: LeftParenToken::tail => {
-        val (baseExp, restTokens) = parseExp(tail)
-        val (parameters, restTokens2) = parseRep1(restTokens,parseExp,skipCommas)
-        restTokens2 match {
-          case RightParenToken::tail => {
-            (MethodExp(baseExp, method.name, parameters), tail)
-          }
-          case _ => throw ParserException("not a method expression")
-        }
-      }
-      case NewToken :: (className: VarToken) ::LeftParenToken::tail =>{
-        val (parameters, restTokens) = parseRep1(tail,parseExp,skipCommas)
-        restTokens match {
-          case RightParenToken:: tail =>{
-            (NewClassExp(className.name,parameters),tail)
-          }
-          case _ => throw ParserException("miss NewToken ")
-        }
-      }
-      case LeftParenToken ::tail=> {
-          val (nextType, restTokens)= parseTypes(tail)
+        case PrintToken:: LeftParenToken :: tail => {
+          val (printedExp, restTokens) = parseExp(tail)
           restTokens match {
-            case RightParenToken::tail => {
-              val(expToBeCasted, restTokens2) =  parseExp(tail)
-              (CastExp(nextType,expToBeCasted),restTokens2)
+            case RightParenToken::finalTokens =>{
+              (PrintExp(printedExp),finalTokens)
             }
-            case (highOrderFunction: VarToken)::RightParenToken:: EqualsToken:: GreaterThanToken::tail => {
-              val (innerExp, restTokens2) = parseExp(tail)
-              (HighOrderExp(nextType,highOrderFunction.name,innerExp),restTokens2)
-            }
-            case _ => throw ParserException("is not a cast or high order function instantiation")
-          }
-      }
-      case HOFCToken :: tail =>{
-        val (preFunction,restTokens) =  parseExp(tail)
-        restTokens match {
-          case CommaToken:: tail => {
-            val (postFunction,restTokens2) = parseExp(tail)
-            restTokens2 match {
-              case RightParenToken:: tail => {
-                (CallHighOrderExp(preFunction,postFunction), tail)
-              }
-              case _ => throw ParserException("not a high order function call")
+            case _ =>{
+              throw ParserException("not a print expression")
             }
           }
-          case _ => throw ParserException("not a high order function call")
         }
+        case (method: VarToken):: LeftParenToken::tail => {
+          val (baseExp, restTokens) = parseExp(tail)
+          val (parameters, restTokens2) = parseRep1(restTokens,parseExp,skipCommas)
+          restTokens2 match {
+            case RightParenToken::tail => {
+              (MethodExp(baseExp, method.name, parameters), tail)
+            }
+            case _ => throw ParserException("not a method expression")
+          }
+        }
+        case NewToken :: (className: VarToken) ::LeftParenToken::tail =>{
+          val (parameters, restTokens) = parseRep1(tail,parseExp,skipCommas)
+          restTokens match {
+            case RightParenToken:: tail =>{
+              (NewClassExp(className.name,parameters),tail)
+            }
+            case _ => throw ParserException("miss NewToken ")
+          }
+        }
+        case LeftParenToken ::tail=> {
+            val (nextType, restTokens)= parseTypes(tail)
+            restTokens match {
+              case RightParenToken::tail => {
+                val(expToBeCasted, restTokens2) =  parseExp(tail)
+                (CastExp(nextType,expToBeCasted),restTokens2)
+              }
+              case (highOrderFunction: VarToken)::RightParenToken:: EqualsToken:: GreaterThanToken::tail => {
+                val (innerExp, restTokens2) = parseExp(tail)
+                (HighOrderExp(nextType,highOrderFunction.name,innerExp),restTokens2)
+              }
+              case _ => throw ParserException("is not a cast or high order function instantiation")
+            }
+        }
+        case HOFCToken :: tail =>{
+          val (preFunction,restTokens) =  parseExp(tail)
+          restTokens match {
+            case CommaToken:: tail => {
+              val (postFunction,restTokens2) = parseExp(tail)
+              restTokens2 match {
+                case RightParenToken:: tail => {
+                  (CallHighOrderExp(preFunction,postFunction), tail)
+                }
+                case _ => throw ParserException("not a high order function call")
+              }
+            }
+            case _ => throw ParserException("not a high order function call")
+          }
+        }
+        case _ => throw ParserException("Probably Not an Expression")
       }
-      case _ => {
-        val (finalExp, restTokens) = parseBinaryOperator(tokens)
-        (finalExp,restTokens)
-      }
-    }
     }catch{
       case _:ParserException =>{
         val (finalExp, restTokens) = parseBinaryOperator(tokens)
         (finalExp,restTokens)
-
       }
     }
   }
@@ -378,8 +378,21 @@ class Parser(private var input: List[Token]) {
     (finalResult, restTokens)
   }
 
+//  def parseAdditiveExpHelper(tokens: List[Token]):(Exp, List[Token])={
+//    var result: List[Exp] = List()
+//    var break: Boolean = true
+//    while (break) {
+//      try {
+//
+//      } catch {
+//        case _:ParserException =>
+//        break = false;
+//      }
+//    }
+//  } // parseAdditiveExpHelper
   def parseBinaryOperator(tokens: List[Token]): (Exp, List[Token])={
     val (expression,restTokens) = parseAdditiveExpression(tokens)
+
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
       case LessThanToken::EqualsToken::tail => cascadify(tail,  LTEExp.apply)
@@ -389,7 +402,6 @@ class Parser(private var input: List[Token]) {
       case AndToken::AndToken:: tail => cascadify(tail,  AndExp.apply)
       case OrToken::OrToken::tail => cascadify(tail,  OrExp.apply)
       case EqualsToken::EqualsToken::tail => cascadify(tail,  EqualsExp.apply)
-
       case _ =>(expression,restTokens)
     }
   }
@@ -400,7 +412,6 @@ class Parser(private var input: List[Token]) {
     restTokens match {
       case PlusToken::tail =>cascadify(tail,  PlusExp.apply)
       case SubtractToken:: tail =>cascadify(tail,  SubtractExp.apply)
-
       case _ => (expression,restTokens)
     }
   }
@@ -411,17 +422,15 @@ class Parser(private var input: List[Token]) {
     restTokens match {
       case MultiplicationToken::tail =>cascadify(tail,  MultiplyExp.apply)
       case DivisionToken:: tail =>cascadify(tail,  DivideExp.apply)
-
       case _ => (expression,restTokens)
     }
   }
   def parseExponentialExpression(tokens: List[Token]): (Exp, List[Token])={
     val (expression,restTokens) = parsePrimaryExpression(tokens)
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
+
     restTokens match {
-      case CaretToken::tail =>{
-        cascadify(tail,  PowerExp.apply)
-      }
+      case CaretToken::tail => cascadify(tail,  PowerExp.apply)
       case _ => (expression,restTokens)
     }
   }

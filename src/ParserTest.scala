@@ -76,7 +76,8 @@ object ParserTest {
 
 
   def main(args: Array[String]): Unit = {
-    testExps()
+//    testExps()
+    testUsingLexer()
   } // main
 } // LexerTest
 
