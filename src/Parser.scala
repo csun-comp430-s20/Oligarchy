@@ -28,6 +28,7 @@ case class VarDeclaration(t1: Types, v1: String)extends VarDec
 
 sealed trait Exp
 case class IntegerExp(value:Int) extends Exp
+case class StringExp(value:String) extends Exp
 case class BooleanExp(value: Boolean) extends Exp
 case class VariableExp(value: String) extends Exp
 case class PrintExp(e1:Exp) extends Exp
@@ -320,11 +321,15 @@ class Parser(private var input: List[Token]) {
         }
         case (method: VarToken):: LeftParenToken::tail => {
           val (baseExp, restTokens) = parseExp(tail)
-          val (parameters, restTokens2) = parseRep1(restTokens,parseExp,skipCommas)
-          restTokens2 match {
-            case RightParenToken::tail => {
-              (MethodExp(baseExp, method.name, parameters), tail)
+          restTokens match {
+            case CommaToken::afterCommaTail => {
+              val (parameters, restTokens2) = parseRep1(afterCommaTail,parseExp,skipCommas)
+              restTokens2 match {
+                case RightParenToken::tail => (MethodExp(baseExp, method.name, parameters), tail)
+                case _ => throw ParserException("not a method expression")
+              }
             }
+            case RightParenToken::tail => (MethodExp(baseExp, method.name, List()), tail)
             case _ => throw ParserException("not a method expression")
           }
         }
@@ -351,7 +356,7 @@ class Parser(private var input: List[Token]) {
               case _ => throw ParserException("is not a cast or high order function instantiation")
             }
         }
-        case HOFCToken :: tail =>{
+        case HOFCToken :: LeftParenToken::tail =>{
           val (preFunction,restTokens) =  parseExp(tail)
           restTokens match {
             case CommaToken:: tail => {
@@ -403,7 +408,7 @@ class Parser(private var input: List[Token]) {
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
       case LessThanToken::EqualsToken::tail => cascadify(tail,  LTEExp.apply)
-      case LessThanToken:: tail =>cascadify(tail,  LTEExp.apply)
+      case LessThanToken:: tail =>cascadify(tail,  LTExp.apply)
       case GreaterThanToken::EqualsToken :: tail => cascadify(tail,  GTEExp.apply)
       case GreaterThanToken:: tail => cascadify(tail,  GTExp.apply)
       case AndToken::AndToken:: tail => cascadify(tail,  AndExp.apply)
@@ -447,6 +452,8 @@ class Parser(private var input: List[Token]) {
         (IntegerExp(head.value), tail)
       case (head: BooleanToken) :: tail =>
         (BooleanExp(head.name), tail)
+      case (head: StrToken) :: tail =>
+        (StringExp(head.value), tail)
       case (head: VarToken) :: tail =>
         (VariableExp(head.name), tail)
       case LeftParenToken :: tail =>
