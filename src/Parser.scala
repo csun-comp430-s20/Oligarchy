@@ -129,6 +129,8 @@ class Parser(private var input: List[Token]) {
 
   def parseMethodDef(tokens: List[Token]): (Method, List[Token]) = {
     val (types, restTokens) = parseTypes(tokens)
+    //testing daniel
+    println(types)
     restTokens match {
       case (variable: VarToken) :: tail => {
         tail match {
@@ -162,10 +164,15 @@ class Parser(private var input: List[Token]) {
           case ConstructorToken :: LeftParenToken :: tail => {
             var (declarations: List[VarDeclaration], restTokens2: List[Token]) = parseRepeat(tail, parseVarDec)
             restTokens2 match {
+              //daniel modified: case RightParenToken :: tail => {  TODO
               case RightParenToken :: tail => {
                 val (stmt, restTokens3) = parseStmt(tail)
                 var (methods: List[Method], restTokens4: List[Token]) = parseRepeat(restTokens3, parseMethodDef)
-                (DefExtClass(classname, extendclassname, stmt, instances, declarations, methods), restTokens4)
+                restTokens4 match {
+                  case RightCurlyToken :: tail => {
+                    (DefExtClass(classname, extendclassname, stmt, instances, declarations, methods), tail)
+                  }
+                }
               }
               case _ => throw ParserException("Not a DefExtClass")
             }
