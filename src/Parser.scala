@@ -28,6 +28,7 @@ case class VarDeclaration(t1: Types, v1: String)extends VarDec
 
 sealed trait Exp
 case class IntegerExp(value:Int) extends Exp
+case class StringExp(value:String) extends Exp
 case class BooleanExp(value: Boolean) extends Exp
 case class VariableExp(value: String) extends Exp
 case class PrintExp(e1:Exp) extends Exp
@@ -53,12 +54,13 @@ case class EqualsExp(exp: Exp, value: Exp) extends Exp
 sealed trait Stmt
 case class ExpStmt(e1: Exp) extends Stmt
 case class AssignmentStmt(vd1: VarDec, exp: Exp) extends Stmt
-case class ForStmt(v1: VarDec, e1: Exp, inc: Stmt, forBody: Stmt) extends Stmt
+case class ForStmt(assign: Stmt, e1: Exp, inc: Stmt, forBody: Stmt) extends Stmt
 case object BreakStmt extends Stmt
 case class BlockStmt(s1: List[Stmt]) extends Stmt
 case class ConditionalStmt(e1: Exp, condition: Stmt, ifBody: Stmt) extends Stmt
 case class ReturnStmt(e1: Exp) extends Stmt
 case object VoidStmt extends Stmt
+case class VarStmt(name:String, e1:Exp) extends Stmt
 
 sealed trait Method
 case class DefMethod(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDec]) extends Method
@@ -89,7 +91,7 @@ object Parser {
 
 class Parser(private var input: List[Token]) {
 
-  private def parseTypes(tokens: List[Token]): (Types, List[Token]) = {
+  def parseTypes(tokens: List[Token]): (Types, List[Token]) = {
     tokens match {
       case IntTypeToken :: tail =>
         (IntTypes, tail)
@@ -105,7 +107,7 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  private def parseVarDec(tokens: List[Token]): (VarDec, List[Token]) = {
+  def parseVarDec(tokens: List[Token]): (VarDec, List[Token]) = {
     val (types, restTokens) = parseTypes(tokens)
     restTokens match {
       case (variable: VarToken) :: tail => {
@@ -115,7 +117,7 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  private def parseInstanceDec(tokens: List[Token]): (Instance, List[Token]) = {
+  def parseInstanceDec(tokens: List[Token]): (Instance, List[Token]) = {
     val (varDec, restTokens) = parseVarDec(tokens)
     restTokens match {
       case SemicolonToken::returnTokens =>(DecInstance(varDec), returnTokens)
@@ -125,7 +127,7 @@ class Parser(private var input: List[Token]) {
   }
 
 
-  private def parseMethodDef(tokens: List[Token]): (Method, List[Token]) = {
+  def parseMethodDef(tokens: List[Token]): (Method, List[Token]) = {
     val (types, restTokens) = parseTypes(tokens)
     restTokens match {
       case (variable: VarToken) :: tail => {
@@ -195,41 +197,37 @@ class Parser(private var input: List[Token]) {
     }
   } //Parse Classes
 
-  private def parseStmt(tokens: List[Token]): (Stmt, List[Token]) = {
+  def parseStmt(tokens: List[Token]): (Stmt, List[Token]) = {
     tokens match { //for (vardec; exp; stmt) stmt
       case ForToken :: LeftParenToken :: tail => {
-        val (vardec: VarDec, restTokens: List[Token]) = parseVarDec(tail)
-        restTokens match {
-          case SemicolonToken :: restTokens2 => {
-            val (exp: Exp, restTokens3: List[Token]) = parseExp(restTokens2)
-            restTokens3 match {
-              case SemicolonToken :: restTokens4 => {
-                val (stmt1: Stmt, restTokens5: List[Token]) = parseStmt(restTokens4)
-                restTokens5 match {
-                  case LeftParenToken :: restTokens6 => {
-                    val (stmt2: Stmt, finalTokens: List[Token]) = parseStmt(restTokens6)
-                    (ForStmt(vardec, exp, stmt1, stmt2), finalTokens)
-                  }
-                  case _ => throw ParserException("missing LeftParenToken in ForStatement")
-                }
+        val (stmt: Stmt, restTokens: List[Token]) = parseStmt(tail)
+        val (exp: Exp, restTokens2: List[Token]) = parseExp(restTokens)
+        restTokens2 match {
+          case SemicolonToken :: restTokens3 => {
+            val (stmt1: Stmt, restTokens4: List[Token]) = parseStmt(restTokens3)
+            restTokens4 match {
+              case RightParenToken :: restTokens5 => {
+                val (stmt2: Stmt, finalTokens: List[Token]) = parseStmt(restTokens5)
+                (ForStmt(stmt, exp, stmt1, stmt2), finalTokens)
               }
-              case _ => throw ParserException("missing semicolon after exp in ForStatement")
+              case _ => throw ParserException("missing RightParenToken in ForStatement")
             }
           }
-          case _ => throw ParserException("missing semicolon after vardec in ForStatement")
+          case _ => throw ParserException("missing semicolon after exp in ForStatement")
         }
       }
+
       case BreakToken :: SemicolonToken :: tail => {
         (BreakStmt, tail)
       }
       case IfToken :: LeftParenToken :: tail => {
-        var (exp: Exp, restTokens: List[Token]) = parseExp(tail)
+        val (exp: Exp, restTokens: List[Token]) = parseExp(tail)
         restTokens match {
           case RightParenToken :: restTokens2 => {
-            var (stmt1: Stmt, restTokens3: List[Token]) = parseStmt(restTokens2)
+            val (stmt1: Stmt, restTokens3: List[Token]) = parseStmt(restTokens2)
             restTokens3 match {
               case ElseToken :: restTokens4 => {
-                var (stmt2: Stmt, finalTokens: List[Token]) = parseStmt(restTokens4)
+                val (stmt2: Stmt, finalTokens: List[Token]) = parseStmt(restTokens4)
                 (ConditionalStmt(exp, stmt1, stmt2), finalTokens)
               }
               case _ => throw ParserException("Missing ElseToken")
@@ -260,10 +258,18 @@ class Parser(private var input: List[Token]) {
         }
       }
       case LeftCurlyToken :: tail => {
-        var (stmts: List[Stmt], restTokens: List[Token]) = parseRepeat(tail, parseStmt)
+        val (stmts: List[Stmt], restTokens: List[Token]) = parseRepeat(tail, parseStmt)
         restTokens match {
           case RightCurlyToken :: finalTokens => {
             (BlockStmt(stmts), finalTokens)
+          }
+        }
+      }
+      case (varName : VarToken) :: EqualsToken :: restTokens=>{
+        val (exp: Exp, restTokens2: List[Token]) = parseExp(restTokens)
+        restTokens2 match{
+          case SemicolonToken :: finalTokens =>{
+            (VarStmt(varName.name, exp), finalTokens)
           }
         }
       }
@@ -321,11 +327,15 @@ class Parser(private var input: List[Token]) {
         }
         case (method: VarToken):: LeftParenToken::tail => {
           val (baseExp, restTokens) = parseExp(tail)
-          val (parameters, restTokens2) = parseRep1(restTokens,parseExp,skipCommas)
-          restTokens2 match {
-            case RightParenToken::tail => {
-              (MethodExp(baseExp, method.name, parameters), tail)
+          restTokens match {
+            case CommaToken::afterCommaTail => {
+              val (parameters, restTokens2) = parseRep1(afterCommaTail,parseExp,skipCommas)
+              restTokens2 match {
+                case RightParenToken::tail => (MethodExp(baseExp, method.name, parameters), tail)
+                case _ => throw ParserException("not a method expression")
+              }
             }
+            case RightParenToken::tail => (MethodExp(baseExp, method.name, List()), tail)
             case _ => throw ParserException("not a method expression")
           }
         }
@@ -352,7 +362,7 @@ class Parser(private var input: List[Token]) {
               case _ => throw ParserException("is not a cast or high order function instantiation")
             }
         }
-        case HOFCToken :: tail =>{
+        case HOFCToken :: LeftParenToken::tail =>{
           val (preFunction,restTokens) =  parseExp(tail)
           restTokens match {
             case CommaToken:: tail => {
@@ -404,7 +414,7 @@ class Parser(private var input: List[Token]) {
     def cascadify(tokens: List[Token], mkClass: (Exp, Exp) => Exp): (Exp, List[Token]) = cascadifyHelper(expression, tokens, mkClass)
     restTokens match {
       case LessThanToken::EqualsToken::tail => cascadify(tail,  LTEExp.apply)
-      case LessThanToken:: tail =>cascadify(tail,  LTEExp.apply)
+      case LessThanToken:: tail =>cascadify(tail,  LTExp.apply)
       case GreaterThanToken::EqualsToken :: tail => cascadify(tail,  GTEExp.apply)
       case GreaterThanToken:: tail => cascadify(tail,  GTExp.apply)
       case AndToken::AndToken:: tail => cascadify(tail,  AndExp.apply)
@@ -448,6 +458,8 @@ class Parser(private var input: List[Token]) {
         (IntegerExp(head.value), tail)
       case (head: BooleanToken) :: tail =>
         (BooleanExp(head.name), tail)
+      case (head: StrToken) :: tail =>
+        (StringExp(head.value), tail)
       case (head: VarToken) :: tail =>
         (VariableExp(head.name), tail)
       case LeftParenToken :: tail =>
