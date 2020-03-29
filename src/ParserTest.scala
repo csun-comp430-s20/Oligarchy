@@ -33,16 +33,45 @@ object ParserTest {
           List(DefMethod(IntTypes,"myMethod",BlockStmt(List(ExpStmt(IntegerExp(1)))),List(VarDeclaration(StrTypes,"myString"))))
     )
 
-
     val testProgramList = parser.parseClass(receivedTokens)
 
     println(testProgramList)
     println("(" + expected)
 
     //testParses(receivedTokens, expected, parser.parseProgram)
-
   }
+  //daniel
+  def testSimpleProgram(): Unit ={
+    val lexerInput = "Class testing extends extendName { int myInt;" +
+      "constructor(bool myBool){1;}" +
+      "int myMethod(str myString){1;}" +
+      "} 1"
+    val lexer = Lexer(lexerInput)
+    val receivedTokens = lexer.tokenize()
+    //println(receivedTokens)
+    for(element<-receivedTokens)
+    {
+      println(element)
+    }
+    val parser = Parser(receivedTokens)
+    val expected = Prgm(IntegerExp(1),
+      List(
+        DefExtClass("testing", "extendName",
+          BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+          List(DecInstance(VarDeclaration(IntTypes,"myInt"))),
+          List(VarDeclaration(BoolTypes,"myBool")),
+          List(DefMethod(IntTypes,"myMethod",BlockStmt(List(ExpStmt(IntegerExp(1)))),List(VarDeclaration(StrTypes,"myString"))))
+        )
+      )
+    )
 
+    val testProgramList = parser.parseProgram(receivedTokens)
+
+    println(testProgramList)
+    println("(" + expected)
+
+    //testParses(receivedTokens, expected, parser.parseProgram)
+  }
 
 
 
@@ -500,7 +529,9 @@ object ParserTest {
     testIntegerExp()
     testBooleanExp()
     //daniel
-    testOneClass()
+    //testOneClass()
+    //daniel
+    testSimpleProgram()
   }
 } // ParserTest
 
