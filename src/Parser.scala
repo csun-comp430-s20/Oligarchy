@@ -71,11 +71,12 @@ sealed trait Class
 // Modified from: (v1: Variable, st1: Stmt, cb1: ClassBody*)  //daniel
 case class DefClass(v1: String, st1: Stmt, ins: List[Instance], dec: List[VarDec], met: List[Method]) extends Class
 // Modified from: (classname: Variable, extendedClass: Variable, st1: Stmt, cb1: ClassBody*)  //daniel
+// Modified from:  Vardec to DecInstance
 case class DefExtClass(classname: String, extendedClass: String, st1: Stmt, ins: List[Instance], dec: List[VarDec], met: List[Method]) extends Class
 
 sealed trait Program
 // Modified from: (e1: Exp, c1: DefClass*)  //daniel
-case class Prgm(e1: Exp, c1: List[Class]) extends Program
+case class Prgm(e1: Exp, c1: List[Class]) extends Program  //TODO
 
 
 case class ParserException(msg: String) extends Exception(msg)
@@ -145,7 +146,7 @@ class Parser(private var input: List[Token]) {
 
   //Daniel
   def parseProgram(tokens: List[Token]): (Prgm, List[Token]) = {
-    val (classes: List[Class], restTokens: List[Token]) = parseRepeat(tokens, parseClass)
+    val (classes: List[Class], restTokens: List[Token]) = parseRepeat(tokens, parseClass)  //TODO
     val (exp: Exp, restTokens2: List[Token]) = parseExp(restTokens)
     (Prgm(exp, classes), restTokens2)
   } //ParseProgram
