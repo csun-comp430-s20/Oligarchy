@@ -130,7 +130,7 @@ class Parser(private var input: List[Token]) {
   def parseMethodDef(tokens: List[Token]): (Method, List[Token]) = {
     val (types, restTokens) = parseTypes(tokens)
     //testing daniel
-    println(types)
+    //println(types)
     restTokens match {
       case (variable: VarToken) :: tail => {
         tail match {
