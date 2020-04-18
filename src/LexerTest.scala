@@ -1,3 +1,4 @@
+package src
 object LexerTest {
   def testTokenizes(input: String, expectedTokens: Token* ) {
     val tokenizer = Lexer(input)
