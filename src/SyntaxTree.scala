@@ -1,19 +1,4 @@
 package src
-sealed trait MathOp
-case object PlusMathOp extends MathOp
-case object MinusMathOp extends MathOp
-case object MultiplicationMathOp extends MathOp
-case object DivisionMathOp extends MathOp
-case object CaretMathOp extends MathOp
-case object LessThanMathOp extends MathOp
-case object GreatThanMathOp extends MathOp
-case object LessThanEqualsMathOp extends MathOp
-case object GreaterThanEqualsMathOp extends MathOp
-
-sealed trait Logic
-case object AndLogic extends Logic
-case object OrLogic extends Logic
-case object EqualsLogic extends Logic
 
 sealed trait Types
 case object IntTypes extends Types
@@ -21,6 +6,7 @@ case object BoolTypes extends Types
 case object StrTypes extends Types
 case object VoidTypes extends Types
 case class ClassTypes(className: String) extends Types
+case class MethodTypes(paramTypes: List[Types] , returnTypes: Types) extends Types
 
 
 sealed trait VarDec
