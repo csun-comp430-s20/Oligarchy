@@ -9,8 +9,8 @@ case class ClassTypes(className: String) extends Types
 case class MethodTypes(paramTypes: List[Types] , returnTypes: Types) extends Types
 
 
-sealed trait VarDec
-case class VarDeclaration(t1: Types, v1: String)extends VarDec
+
+case class VarDeclaration(types: Types, varName: String)
 
 
 sealed trait Exp
@@ -40,7 +40,7 @@ case class EqualsExp(exp: Exp, value: Exp) extends Exp
 
 sealed trait Stmt
 case class ExpStmt(e1: Exp) extends Stmt
-case class AssignmentStmt(vd1: VarDec, exp: Exp) extends Stmt
+case class AssignmentStmt(vd1: VarDeclaration, exp: Exp) extends Stmt
 case class ForStmt(assign: Stmt, e1: Exp, inc: Stmt, forBody: Stmt) extends Stmt
 case object BreakStmt extends Stmt
 case class BlockStmt(s1: List[Stmt]) extends Stmt
@@ -49,18 +49,23 @@ case class ReturnStmt(e1: Exp) extends Stmt
 case object VoidStmt extends Stmt
 case class VarStmt(name:String, e1:Exp) extends Stmt
 
-sealed trait Method
-case class DefMethod(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDec]) extends Method
 
+case class MethodDef(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDeclaration], returnExpression: Exp)
 
-sealed trait Instance
-case class DecInstance(v1: VarDec) extends Instance
+case class InstanceDec(v1: VarDeclaration)
 
 sealed trait Class
-// Modified from: (v1: Variable, st1: Stmt, cb1: ClassBody*)  //daniel
-case class DefClass(v1: String, st1: Stmt, ins: List[Instance], dec: List[VarDec], met: List[Method]) extends Class
-// Modified from: (classname: Variable, extendedClass: Variable, st1: Stmt, cb1: ClassBody*)  //daniel
-case class DefExtClass(classname: String, extendedClass: String, st1: Stmt, ins: List[Instance], dec: List[VarDec], met: List[Method]) extends Class
+case class DefClass(className: String,
+                    statements: Stmt,
+                    instance: List[InstanceDec],
+                    parameters: List[VarDeclaration],
+                    methods: List[MethodDef]) extends Class
+case class DefExtClass(classname: String,
+                       extendedClass: String,
+                       statements: Stmt,
+                       instance: List[InstanceDec],
+                       parameters: List[VarDeclaration],
+                       methods: List[MethodDef]) extends Class
 
 sealed trait Program
 // Modified from: (e1: Exp, c1: DefClass*)  //daniel

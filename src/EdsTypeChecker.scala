@@ -1,7 +1,49 @@
 package src
 case class IllTypedException(msg: String) extends Exception(msg)
 
+
 object Typechecker {
+  type SymbolTable = Map[String, (Types, List[Types])]
+
+  def makeSymbolTable(myClass: Class): SymbolTable = {
+    myClass match{
+      case newClass: DefClass =>  {
+        makeSymbolTableHelper(newClass.methods)
+      }
+      case newExtendClass: DefExtClass =>{
+        makeSymbolTableHelper(newExtendClass.methods)
+      }
+    }
+  }
+
+  def makeSymbolTableHelper(methods: List[MethodDef]): SymbolTable ={
+    methods.foldLeft(Map(): SymbolTable)((res, cur) => {
+      val MethodDef(returnType, methodName, _, parameters, _) = cur
+      if (res.contains(methodName)) {
+        throw IllTypedException("duplicate function name: " + methodName)
+      }
+      val paramNames = parameters.map(_.varName).toSet
+      if (paramNames.size != parameters.size) {
+        throw IllTypedException("duplicate parameter name")
+      }
+      res + (methodName -> (returnType -> parameters.map(_.types)))
+    })
+  }
+  def allDistinct[A](items: Seq[A]): Boolean = {
+    items.toSet.size == items.size
+  }
+
+  // also typechecks the input program
+  def apply(p: Program): Typechecker = {
+    val retval = new Typechecker(makeSymbolTable(p))
+    retval.typecheckProgram(p)
+    retval
+  }
+} // Typechecker
+import Typechecker.SymbolTable
+
+
+class Typechecker {
   type TypeEnv = Map[String, Types]
 
   def typeof(e: Exp, gamma: TypeEnv): Types = {
