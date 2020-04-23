@@ -105,8 +105,42 @@ class Typechecker(val st: SymbolTable){
 
   } // typecheckStatement
 
-  def typecheckClass(c: Class) {
-
+  def typecheckClass(c: Class, gamma: TypeEnv) {
+    c match{
+      case newClass: DefClass =>  {
+        //typecheck this classes Statement and list of InstanceDec, VarDeclaration, MethodDef
+        val gamma1 = typecheckStatement(newClass.statements, gamma)
+        val gamma2 = newClass.instances.foldLeft(gamma1)((res, cur) =>
+          typecheckInstanceDec(cur, res))
+        val gamma3 = newClass.parameters.foldLeft(gamma2)((res, cur) =>
+          typecheckVarDeclaration(cur, res))
+        val gamma4 = newClass.methods.foldLeft(gamma3)((res, cur) =>
+          typecheckMethodDef(cur, res))
+      }
+      case newExtendClass: DefExtClass =>{
+        //check if newExtendClass.extendedClass is in gamma
+        //  this is because Extend Class requires an existing class to extend
+        val key = newExtendClass.extendedClass
+        if (gamma contains key) {
+          val value = gamma get key
+          if (value == DefClass || value == DefExtClass) {
+            //then extended class exists in gamma and it is of type Class
+          }
+          else {
+            //then extended class DOES NOT exist in gamma
+            throw IllTypedException("extended class does not exist")
+          }
+        }
+        //typecheck this classes Statement and list of InstanceDec, VarDeclaration, MethodDef
+        val gamma1 = typecheckStatement(newClass.statements, gamma)
+        val gamma2 = newClass.instances.foldLeft(gamma1)((res, cur) =>
+          typecheckInstanceDec(cur, res))
+        val gamma3 = newClass.parameters.foldLeft(gamma2)((res, cur) =>
+          typecheckVarDeclaration(cur, res))
+        val gamma4 = newClass.methods.foldLeft(gamma3)((res, cur) =>
+          typecheckMethodDef(cur, res))
+      }
+    }
   }
 
   def typecheckProgram(input: Program, gamma: TypeEnv) {

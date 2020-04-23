@@ -62,7 +62,7 @@ case class InstanceDec(v1: VarDeclaration)
 sealed trait Class
 case class DefClass(className: String,
                     statements: Stmt,
-                    instance: List[InstanceDec],
+                    instances: List[InstanceDec],
                     parameters: List[VarDeclaration],
                     methods: List[MethodDef]) extends Class
 case class DefExtClass(classname: String,
