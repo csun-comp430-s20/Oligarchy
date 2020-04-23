@@ -67,6 +67,6 @@ case class DefExtClass(classname: String,
                        parameters: List[VarDeclaration],
                        methods: List[MethodDef]) extends Class
 
-sealed trait Program
-// Modified from: (e1: Exp, c1: DefClass*)  //daniel
-case class Prgm(e1: Exp, c1: List[Class]) extends Program
+
+
+case class Program(e1: Exp, c1: List[Class])

@@ -5,10 +5,11 @@ case class IllTypedException(msg: String) extends Exception(msg)
 object Typechecker {
   type SymbolTable = Map[String, (Types, List[Types])]
 
-  def makeSymbolTable(myClass: Class): SymbolTable = {
+  def makeSymbolTable(myClass: Class, symbolTable: SymbolTable): SymbolTable = {
     myClass match{
       case newClass: DefClass =>  {
-        makeSymbolTableHelper(newClass.methods)
+        val newTable =  makeSymbolTableHelper(newClass.methods)
+        newTable
       }
       case newExtendClass: DefExtClass =>{
         makeSymbolTableHelper(newExtendClass.methods)
@@ -34,16 +35,19 @@ object Typechecker {
   }
 
   // also typechecks the input program
-  def apply(p: Program): Typechecker = {
-    val retval = new Typechecker(makeSymbolTable(p))
-    retval.typecheckProgram(p)
+  def apply(myProgram: Program): Typechecker = {
+    var test: SymbolTable = Map()
+    myProgram.myClasses.foreach(x => {test = x :: makeSymbolTable})
+    myClass.foreach makeMethodSymbolTable(myClass)
+    val retval = new Typechecker(makeSymbolTable(myClass))
+    retval.typecheckClass(myClass)
     retval
   }
 } // Typechecker
 import Typechecker.SymbolTable
 
 
-class Typechecker {
+class Typechecker(val st: SymbolTable){
   type TypeEnv = Map[String, Types]
 
   def typeof(e: Exp, gamma: TypeEnv): Types = {
