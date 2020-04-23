@@ -1,3 +1,4 @@
+package src
 
 object ParserTest {
   def testParses(input: List[Token], expectedProgram: Prgm ) {
