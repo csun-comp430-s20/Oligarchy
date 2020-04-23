@@ -4,7 +4,7 @@ case class IllTypedException(msg: String) extends Exception(msg)
 object Typechecker {
   type SymbolTable = Map[String, (Types, List[Types])]
 
-  def makeSymbolTable(myClass: Class, symbolTable: SymbolTable): SymbolTable = {
+  def makeSymbolTable(myClass: Class): SymbolTable = {
     myClass match{
       case newClass: DefClass =>  {
         val newTable =  makeSymbolTableHelper(newClass.methods)
@@ -36,10 +36,11 @@ object Typechecker {
   // also typechecks the input program
   def apply(myProgram: Program): Typechecker = {
     var test: SymbolTable = Map()
-    myProgram.classes.foreach(x => {test = x :: makeSymbolTable})
-    myClass.foreach makeMethodSymbolTable(myClass)
-    val retval = new Typechecker(makeSymbolTable(myClass))
-    retval.typecheckClass(myClass)
+    //myProgram.classes.foreach(x => {test = x :: makeSymbolTable})
+    //myProgram.classes.foreach(makeSymbolTable)
+    myProgram.classes.foreach(x => {test = test ++ makeSymbolTable(x)})
+    val retval = new Typechecker(test)
+    //retval.typecheckClass(myClass)
     retval
   }
 } // Typechecker
@@ -101,15 +102,12 @@ class Typechecker(val st: SymbolTable){
     }
   } // typeof
 
-  def typecheckStatement(s: Stmt, gamma: TypeEnv): TypeEnv = {
-
-  } // typecheckStatement
 
   def typecheckClass(c: Class, gamma: TypeEnv) {
     c match{
       case newClass: DefClass =>  {
         //typecheck this classes Statement and list of InstanceDec, VarDeclaration, MethodDef
-        val gamma1 = typecheckStatement(newClass.statements, gamma)
+        val gamma1 = typecheckStatements(newClass.statements, gamma)
         val gamma2 = newClass.instances.foldLeft(gamma1)((res, cur) =>
           typecheckInstanceDec(cur, res))
         val gamma3 = newClass.parameters.foldLeft(gamma2)((res, cur) =>
@@ -131,6 +129,13 @@ class Typechecker(val st: SymbolTable){
             throw IllTypedException("extended class does not exist")
           }
         }
+        /*
+        //ALTERNATIVE TO CHECKING GAMMA FOR EXTENDED CLASS
+        if (!(st contains key)) {
+          //then extended class DOES NOT exist in symbol table
+          throw IllTypedException("extended class does not exist")
+        }
+        */
         //typecheck this classes Statement and list of InstanceDec, VarDeclaration, MethodDef
         val gamma1 = typecheckStatement(newClass.statements, gamma)
         val gamma2 = newClass.instances.foldLeft(gamma1)((res, cur) =>
