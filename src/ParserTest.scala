@@ -16,7 +16,7 @@ object ParserTest {
     val input = "Class testing { int myInt;" +
       "constructor(bool myBool){1;}" +
       "int myMethod(str myString){1;}" +
-      "}"
+      "Return;}"
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val program = Prgm(IntegerExp(1),
@@ -25,7 +25,7 @@ object ParserTest {
           BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
           List(DecInstance(VarDeclaration(IntTypes,"myInt"))),
           List(VarDeclaration(BoolTypes,"myBool")),
-          List(DefMethod(StrTypes,"myMethod",ExpStmt(IntegerExp(1) ),List(VarDeclaration(StrTypes,"myString"))))
+          List(DefMethod(StrTypes,"myMethod",ExpStmt(IntegerExp(1) ),List(VarDeclaration(StrTypes,"myString")), BooleanExp(false)))
         )
       )
     )
@@ -173,7 +173,7 @@ object ParserTest {
 
   def testMethodDefWithNoParameter(): Unit ={
     val input = "bool testMethod() return true;"
-    val expectedProgram = DefMethod(BoolTypes, "testMethod", ReturnStmt(BooleanExp(true)), List[VarDec]())
+    val expectedProgram = DefMethod(BoolTypes, "testMethod",null, List[VarDec](), BooleanExp(true))
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val parser = new Parser(receivedTokens)
@@ -181,9 +181,9 @@ object ParserTest {
   }
 
   def testMethodDefWith1Parameter(): Unit ={
-    val input = "bool testMethod(int foo) return true;"
-    val expectedProgram = DefMethod(BoolTypes, "testMethod", ReturnStmt(BooleanExp(true)),
-      List[VarDec](VarDeclaration(IntTypes, "foo")))
+    val input = "bool testMethod(int foo) int i =10; return true;"
+    val expectedProgram = DefMethod(BoolTypes, "testMethod", AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(10)),
+      List[VarDec](VarDeclaration(IntTypes, "foo")), BooleanExp(true))
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val parser = new Parser(receivedTokens)
@@ -192,8 +192,8 @@ object ParserTest {
 
   def testMethodDefWith2Parameter(): Unit ={
     val input = "bool testMethod(int foo, bool bar) return true;"
-    val expectedProgram = DefMethod(BoolTypes, "testMethod", ReturnStmt(BooleanExp(true)),
-      List[VarDec](VarDeclaration(IntTypes, "foo"), VarDeclaration(BoolTypes, "bar")))
+    val expectedProgram = DefMethod(BoolTypes, "testMethod", null,
+      List[VarDec](VarDeclaration(IntTypes, "foo"), VarDeclaration(BoolTypes, "bar")), BooleanExp(true))
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val parser = new Parser(receivedTokens)
@@ -373,25 +373,25 @@ object ParserTest {
     testParses(tokens, expectedProgram, parser.parseStmt)
   }
 
-  def testStmtReturnVoid(): Unit={
-    val input = "return;"
-    val tokenizer = Lexer(input)
-    val expectedProgram = VoidStmt
-    val tokens = tokenizer.tokenize()
-    val parser = Parser(tokens)
-    testParses(tokens, expectedProgram, parser.parseStmt)
-
-  }
-
-  def testStmtReturnExp(): Unit={
-    val input = "return 1 + 2;"
-    val tokenizer = Lexer(input)
-    val expectedProgram = ReturnStmt(PlusExp(IntegerExp(1),IntegerExp(2)))
-    val tokens = tokenizer.tokenize()
-    val parser = Parser(tokens)
-    testParses(tokens, expectedProgram, parser.parseStmt)
-
-  }
+//  def testStmtReturnVoid(): Unit={
+//    val input = "return;"
+//    val tokenizer = Lexer(input)
+//    val expectedProgram = VoidStmt
+//    val tokens = tokenizer.tokenize()
+//    val parser = Parser(tokens)
+//    testParses(tokens, expectedProgram, parser.parseStmt)
+//
+//  }
+//
+//  def testStmtReturnExp(): Unit={
+//    val input = "return 1 + 2;"
+//    val tokenizer = Lexer(input)
+//    val expectedProgram = ReturnStmt(PlusExp(IntegerExp(1),IntegerExp(2)))
+//    val tokens = tokenizer.tokenize()
+//    val parser = Parser(tokens)
+//    testParses(tokens, expectedProgram, parser.parseStmt)
+//
+//  }
 
   def testNewClassExp(): Unit ={
     val input = "new myClass(print(1), 1 - 2)"
@@ -426,8 +426,8 @@ object ParserTest {
     testStmtFor()
     testStmtVarDec()
     testStmtBreak()
-    testStmtReturnExp()
-    testStmtReturnVoid()
+//    testStmtReturnExp()
+//    testStmtReturnVoid()
     testBlockStmt()
     testIfStmt()
     testNewClassExp()

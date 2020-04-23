@@ -1,3 +1,5 @@
+import java.text.ParseException
+
 sealed trait MathOp
 case object PlusMathOp extends MathOp
 case object MinusMathOp extends MathOp
@@ -63,7 +65,7 @@ case object VoidStmt extends Stmt
 case class VarStmt(name:String, e1:Exp) extends Stmt
 
 sealed trait Method
-case class DefMethod(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDec]) extends Method
+case class DefMethod(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDec], returnExp: Exp) extends Method
 
 
 sealed trait Instance
@@ -135,8 +137,57 @@ class Parser(private var input: List[Token]) {
             val (vardeclarations, restokens2) = parseRep1(tail, parseVarDec, skipCommas)
             restokens2 match {
               case RightParenToken :: restokens2 => {
-                val (stmt, restokens3) = parseStmt(restokens2)
-                (DefMethod(types, variable.name, stmt, vardeclarations), restokens3)
+                try {
+                  val (stmt, restokens3) = parseStmt(restokens2)
+                  restokens3 match {
+                    case ReturnToken :: restokens4 => {
+                      restokens4 match {
+                        case SemicolonToken :: finalTokens => {
+                          (DefMethod(types, variable.name, stmt, vardeclarations, null) , finalTokens)
+                        }
+                        case _ => {
+                          try {
+                            val (exp, restokens5) = parseExp(restokens4)
+                            restokens5 match {
+                              case SemicolonToken :: finalTokens => {
+                                (DefMethod(types, variable.name, stmt, vardeclarations, exp), finalTokens)
+                              }
+                            }
+                          }
+                          catch {
+                            case _ => throw ParserException("Not a Method Definition")
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                catch {
+                  case _ : ParserException => {
+                    restokens2 match {
+                      case ReturnToken :: restokens3 => {
+                        restokens3 match {
+                          case SemicolonToken :: finalTokens => {
+                            (DefMethod(types, variable.name, null, vardeclarations, BooleanExp(false)), finalTokens)
+                          }
+                          case _ => {
+                            try {
+                              val (exp, restokens5) = parseExp(restokens3)
+                              restokens5 match {
+                                case SemicolonToken :: finalTokens => {
+                                  (DefMethod(types, variable.name, null, vardeclarations, exp), finalTokens)
+                                }
+                              }
+                            }
+                            catch {
+                              case _ => throw ParserException("Not a Method Definition")
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -235,27 +286,27 @@ class Parser(private var input: List[Token]) {
           case _ => throw ParserException("missing RightParen Token after Exp in If Statment")
         }
       }
-      case ReturnToken :: tail => {
-        tail match {
-          case SemicolonToken :: restTokens => {
-            (VoidStmt, restTokens)
-          }
-          case _ => {
-            try {
-              val (exp: Exp, restTokens: List[Token]) = parseExp(tail)
-              restTokens match {
-                case SemicolonToken :: finalTokens => {
-                  (ReturnStmt(exp), finalTokens)
-                }
-                case _ => throw ParserException("No SemicolonToken after expression in return statement")
-              }
-            }
-            catch {
-              case _ => throw ParserException("Invalid return statement")
-            }
-          }
-        }
-      }
+//      case ReturnToken :: tail => {
+//        tail match {
+//          case SemicolonToken :: restTokens => {
+//            (VoidStmt, restTokens)
+//          }
+//          case _ => {
+//            try {
+//              val (exp: Exp, restTokens: List[Token]) = parseExp(tail)
+//              restTokens match {
+//                case SemicolonToken :: finalTokens => {
+//                  (ReturnStmt(exp), finalTokens)
+//                }
+//                case _ => throw ParserException("No SemicolonToken after expression in return statement")
+//              }
+//            }
+//            catch {
+//              case _ => throw ParserException("Invalid return statement")
+//            }
+//          }
+//        }
+//      }
       case LeftCurlyToken :: tail => {
         val (stmts: List[Stmt], restTokens: List[Token]) = parseRepeat(tail, parseStmt)
         restTokens match {
