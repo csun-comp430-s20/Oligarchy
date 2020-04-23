@@ -1,7 +1,8 @@
+package src
 case class IllTypedException(msg: String) extends Exception(msg)
 
 object Typechecker {
-  type TypeEnv = Map[Variable, Type]
+  type TypeEnv = Map[, Type]
 
   def typeof(e: Exp, gamma: TypeEnv): Type = {
 
