@@ -1,84 +1,152 @@
-sealed trait MathOp
-case object PlusMathOp extends MathOp
-case object MinusMathOp extends MathOp
-case object MultiplicationMathOp extends MathOp
-case object DivisionMathOp extends MathOp
-case object CaretMathOp extends MathOp
-case object LessThanMathOp extends MathOp
-case object GreatThanMathOp extends MathOp
-case object LessThanEqualsMathOp extends MathOp
-case object GreaterThanEqualsMathOp extends MathOp
-
-sealed trait Logic
-case object AndLogic extends Logic
-case object OrLogic extends Logic
-case object EqualsLogic extends Logic
-
 sealed trait Types
+
 case object IntTypes extends Types
+
 case object BoolTypes extends Types
+
 case object StrTypes extends Types
-case object VoidTypes extends Types
+
+case object VoidTypes extends Types // should be removed
+
 case class ClassTypes(className: String) extends Types
 
+case class MethodTypes(paramTypes: List[Types] , returnTypes: Types) extends Types
 
-sealed trait VarDec
-case class VarDeclaration(t1: Types, v1: String)extends VarDec
+
+
+
+
+
+
+case class VarDeclaration(types: Types, varName: String)
+
+
+
 
 
 sealed trait Exp
+
 case class IntegerExp(value:Int) extends Exp
+
 case class StringExp(value:String) extends Exp
+
 case class BooleanExp(value: Boolean) extends Exp
+
 case class VariableExp(value: String) extends Exp
+
 case class PrintExp(e1:Exp) extends Exp
+
 case class MethodExp(e1:Exp , methodName: String, e2: List[Exp]) extends Exp
+
+//@todo lets covert it so that it is just a list of expressions IE parameters
+
+//case class MethodExp(methodName: String, parameters: List[Exp]) extends Exp
+
 case class NewClassExp(className: String, e1:List[Exp] ) extends Exp
-case class CastExp(t1: Types , e2: Exp) extends Exp
+
+//@todo changed t1 to newTypes
+
+case class CastExp(newTypes: Types , e2: Exp) extends Exp
+
 case class GroupedExp(e: Exp) extends Exp
-case class HighOrderExp(t1: Types , v1: String, e2: Exp) extends Exp
-case class CallHighOrderExp(e1:Exp , e2: Exp) extends Exp
-case class LTEExp(exp: Exp, value: Exp) extends Exp
-case class LTExp(exp: Exp, value: Exp) extends Exp
-case class GTEExp(exp: Exp, value: Exp) extends Exp
-case class GTExp(exp: Exp, value: Exp) extends Exp
-case class AndExp(exp: Exp, value: Exp) extends Exp
-case class OrExp(exp: Exp, value: Exp) extends Exp
-case class PlusExp(exp: Exp, value: Exp) extends Exp
-case class SubtractExp(exp: Exp, value: Exp) extends Exp
-case class MultiplyExp(exp: Exp, value: Exp) extends Exp
-case class DivideExp(exp: Exp, value: Exp) extends Exp
-case class PowerExp(exp: Exp, value: Exp) extends Exp
-case class EqualsExp(exp: Exp, value: Exp) extends Exp
+
+//@todo changed to have parameters declared followed by the experession
+
+case class HighOrderExp(params: Seq[VarDeclaration], exp: Exp) extends Exp
+
+//@todo changed exp1  to function and exp2 to params and so that it takes multiple parameters
+
+case class CallHighOrderExp(function: Exp, params: Seq[Exp]) extends Exp
+
+case class LTEExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+case class LTExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+case class GTEExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+case class GTExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+case class AndExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+case class OrExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+case class PlusExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+case class SubtractExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+case class MultiplyExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+case class DivideExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+case class PowerExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+case class EqualsExp(leftExp: Exp, rightExp: Exp) extends Exp
+
+
 
 sealed trait Stmt
+
 case class ExpStmt(e1: Exp) extends Stmt
-case class AssignmentStmt(vd1: VarDec, exp: Exp) extends Stmt
+
+case class AssignmentStmt(varDec: VarDeclaration, exp: Exp) extends Stmt
+
 case class ForStmt(assign: Stmt, e1: Exp, inc: Stmt, forBody: Stmt) extends Stmt
+
 case object BreakStmt extends Stmt
-case class BlockStmt(s1: List[Stmt]) extends Stmt
-case class ConditionalStmt(e1: Exp, condition: Stmt, ifBody: Stmt) extends Stmt
-case class ReturnStmt(e1: Exp) extends Stmt
+
+case class BlockStmt(statements: List[Stmt]) extends Stmt
+
+case class ConditionalStmt(condition: Exp, ifTrue: Stmt, ifFalse: Stmt) extends Stmt
+
+case class ReturnStmt(returnExp: Exp) extends Stmt
+
 case object VoidStmt extends Stmt
-case class VarStmt(name:String, e1:Exp) extends Stmt
 
-sealed trait Method
-case class DefMethod(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDec]) extends Method
+case class VarStmt(variableName:String, newValue:Exp) extends Stmt
 
 
-sealed trait Instance
-case class DecInstance(v1: VarDec) extends Instance
+
+
+
+case class MethodDef(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDeclaration], returnExpression: Exp)
+
+
+
+case class InstanceDec(v1: VarDeclaration)
+
+
 
 sealed trait Class
-// Modified from: (v1: Variable, st1: Stmt, cb1: ClassBody*)  //daniel
-case class DefClass(v1: String, st1: Stmt, ins: List[Instance], dec: List[VarDec], met: List[Method]) extends Class
-// Modified from: (classname: Variable, extendedClass: Variable, st1: Stmt, cb1: ClassBody*)  //daniel
-// Modified from:  Vardec to DecInstance
-case class DefExtClass(classname: String, extendedClass: String, st1: Stmt, ins: List[Instance], dec: List[VarDec], met: List[Method]) extends Class
 
-sealed trait Program
-// Modified from: (e1: Exp, c1: DefClass*)  //daniel
-case class Prgm(e1: Exp, c1: List[Class]) extends Program  //TODO
+case class DefClass(className: String,
+
+                    statements: Stmt,
+
+                    instance: List[InstanceDec],
+
+                    parameters: List[VarDeclaration],
+
+                    methods: List[MethodDef]) extends Class
+
+case class DefExtClass(classname: String,
+
+                       extendedClass: String,
+
+                       statements: Stmt,
+
+                       instances: List[InstanceDec],
+
+                       parameters: List[VarDeclaration],
+
+                       methods: List[MethodDef]) extends Class
+
+
+
+
+
+
+
+case class Program(entryPoint: Exp, classes: List[Class])
 
 
 case class ParserException(msg: String) extends Exception(msg)
