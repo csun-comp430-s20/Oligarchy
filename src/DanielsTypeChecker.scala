@@ -1,3 +1,4 @@
+package src
 case class IllTypedException(msg: String) extends Exception(msg)
 
 object Typechecker {
@@ -35,7 +36,7 @@ object Typechecker {
   // also typechecks the input program
   def apply(myProgram: Program): Typechecker = {
     var test: SymbolTable = Map()
-    myProgram.myClasses.foreach(x => {test = x :: makeSymbolTable})
+    myProgram.classes.foreach(x => {test = x :: makeSymbolTable})
     myClass.foreach makeMethodSymbolTable(myClass)
     val retval = new Typechecker(makeSymbolTable(myClass))
     retval.typecheckClass(myClass)
@@ -108,8 +109,8 @@ class Typechecker(val st: SymbolTable){
 
   }
 
-  def typecheckProgram(input: Prgm, gamma: TypeEnv) {
-    input.c1.foreach(typecheckClass)
-    typeof(input.e1, gamma)
+  def typecheckProgram(input: Program, gamma: TypeEnv) {
+    input.classes.foreach(typecheckClass)
+    typeof(input.entryPoint, gamma)
   } // typecheckProgram
 } // Typechecker
