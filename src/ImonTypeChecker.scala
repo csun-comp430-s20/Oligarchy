@@ -2,7 +2,7 @@ package src
 case class IllTypedException(msg: String) extends Exception(msg)
 
 object Typechecker {
-  type TypeEnv = Map[, Type]
+  type TypeEnv = Map[String, Type]
 
   def typeof(e: Exp, gamma: TypeEnv): Type = {
     e match{
@@ -51,7 +51,9 @@ object Typechecker {
           case _ => throw IllTypedException("less than equals")
         }
       }
-    } // match
+      
+    }
+
   } // typeof
 
   def typecheckStatement(s: Stmt, gamma: TypeEnv): TypeEnv = {
