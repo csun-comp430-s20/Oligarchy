@@ -53,35 +53,6 @@ object Typechecker {
     })
   }
 
-  def makeSymbolTableHelper(methods: List[MethodDef]): SymbolTable ={
-    methods.foldLeft(Map(): SymbolTable)((res, cur) => {
-      val MethodDef(returnType, methodName, _, parameters, _) = cur
-      if (res.contains(methodName)) {
-        throw IllTypedException("duplicate function name: " + methodName)
-      }
-      val paramNames = parameters.map(_.varName).toSet
-      if (paramNames.size != parameters.size) {
-        throw IllTypedException("duplicate parameter name")
-      }
-      res + (methodName -> (returnType -> parameters.map(_.types)))
-    })
-  }
-
-
-  def makeSymbolTableHelper(methods: List[MethodDef]): SymbolTable ={
-    methods.foldLeft(Map(): SymbolTable)((res, cur) => {
-      val MethodDef(returnType, methodName, _, parameters, _) = cur
-      if (res.contains(methodName)) {
-        throw IllTypedException("duplicate function name: " + methodName)
-      }
-      val paramNames = parameters.map(_.varName).toSet
-      if (paramNames.size != parameters.size) {
-        throw IllTypedException("duplicate parameter name")
-      }
-      res + (methodName -> (returnType -> parameters.map(_.types)))
-    })
-  }
-
   def makeSymbolTable(myClass: Class, symbolTable: SymbolTable): SymbolTable = {
     myClass match{
       case newClass: DefClass =>  {
@@ -115,7 +86,7 @@ object Typechecker {
   def apply(myProgram: Program): Typechecker = {
     val (classSymbolTable,functionSymbolTable) = makeSymbolTables(myProgram.classes,Map(),Map())
     val retval = new Typechecker(classSymbolTable,functionSymbolTable)
-    retval.typecheckProgram(myProgram)
+    retval.typecheckProgram(myProgram, Map())
     retval
   }
 } // Typechecker
