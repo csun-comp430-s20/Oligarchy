@@ -1,10 +1,11 @@
 package src
+
 case class IllTypedException(msg: String) extends Exception(msg)
 
 object Typechecker {
-  type TypeEnv = Map[, Type]
+  type TypeEnv = Map[String, Types]
 
-  def typeof(e: Exp, gamma: TypeEnv): Type = {
+  def typeof(e: Exp, gamma: TypeEnv): Types = {
     e match{
       case VariableExp(x) if gamma.contains(x) => gamma(x)
       case IntegerExp(_) => IntTypes
@@ -66,11 +67,80 @@ object Typechecker {
       }
       case _ => throw IllTypedException("other-exp")
     }
+      case VarDeclaration(t1: Types) =>{
+        (typeof(t1, gamma)) match{
+          case (Types) => t1
+          case _ => throw IllTypedException("Variable Declaration")
+        }
+      }
     } // match
   } // typeof
 
-  def typecheckStatement(s: Stmt, gamma: TypeEnv): TypeEnv = {
-
+  def typecheckStatements(s: Stmt, gamma: TypeEnv): TypeEnv = {
+    s match {
+      case ExpStmt(e1: Exp) =>{
+        if(typeof(e1, gamma) Types){
+          gamma
+        }
+        else{
+          throw IllTypedException("Expression")
+        }
+      }
+      case BreakStmt => gamma
+      //      case VoidStmt => VoidTypes
+      case ReturnStmt(e1: Exp)=>{
+        if(typeof(e1, gamma) == Types){
+          gamma
+        }
+        else{
+          throw IllTypedException("Return")
+        }
+      }
+      case AssignmentStmt(vd1:VarDeclaration, e1:Exp) =>{
+        val tau = vd1.types
+        if(typeof(e1, gamma) == tau){
+          gamma + (vd1.varName -> tau)
+        }
+        else{
+          throw IllTypedException("Assignment")
+        }
+      }
+      case VarStmt(name: String, e1: Exp) if gamma.contains(name) =>{
+        val tau = gamma(name)
+        if(typeof(e1, gamma) == tau){
+          gamma
+        }
+        else{
+          throw IllTypedException("Var Statement")
+        }
+      }
+      case ForStmt(s1: Stmt, e1:Exp, s2: Stmt, forBody: Stmt)=>{
+        val gamma2 = typecheckStatements(s1, gamma)
+        if(typeof(e1,gamma2) == BoolTypes) {
+          val gamma3 = typecheckStatements(s2, gamma2)
+          typecheckStatements(forBody, gamma3)
+          gamma
+        }
+        else{
+          throw IllTypedException("For Statement")
+        }
+      }
+      case ConditionalStmt(e1: Exp, stmtTrue: Stmt, stmtFalse: Stmt)=>{
+        if(typeof(e1, gamma) == BoolTypes) {
+          typecheckStatements(stmtTrue, gamma)
+          typecheckStatements(stmtFalse, gamma)
+          gamma
+        }
+      }
+      case BlockStmt(st: List[Stmt])=>{
+        st.foreach{
+          currentStatement => {
+            st.foldLeft(gamma)((currentGamma, currentStatement) => typecheckStatements(currentStatement, gamma))
+          }
+        }
+        gamma
+      }
+    }
   } // typecheckStatement
 
   def typecheckProgram(input: Program, gamma: TypeEnv): TypeEnv = {
