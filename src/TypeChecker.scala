@@ -5,7 +5,7 @@ import Typechecker.{typecheckStatement, typeof}
 case class IllTypedException(msg: String) extends Exception(msg)
 
 object Typechecker {
-  type TypeEnv = Map[, Types]
+  type TypeEnv = Map[String, Types]
 
   def typeof(e: Exp, gamma: TypeEnv): Types = {
     e match{
@@ -57,16 +57,16 @@ object Typechecker {
       case VarDeclaration(t1: Types) =>{
         (typeof(t1, gamma)) match{
           case (Types) => t1
-          case _ => throw IllTypedException("Types")
+          case _ => throw IllTypedException("Variable Declaration")
         }
       }
     } // match
   } // typeof
 
-  def typecheckStatement(s: Stmt, gamma: TypeEnv): TypeEnv = {
+  def typecheckStatements(s: Stmt, gamma: TypeEnv): TypeEnv = {
     s match {
       case ExpStmt(e1: Exp) =>{
-        if(typeof(e1, gamma)== Types){
+        if(typeof(e1, gamma) Types){
           gamma
         }
         else{
@@ -74,7 +74,7 @@ object Typechecker {
         }
       }
       case BreakStmt => gamma
-//      case VoidStmt => VoidTypes
+      //      case VoidStmt => VoidTypes
       case ReturnStmt(e1: Exp)=>{
         if(typeof(e1, gamma) == Types){
           gamma
@@ -83,10 +83,10 @@ object Typechecker {
           throw IllTypedException("Return")
         }
       }
-        //dont know what type tau should be
-      case AssignmentStmt(vd1:VarDeclaration, tau, e1:Exp) =>{
-        if(typeof(vd1, e1) == tau){
-          gamma + (vd1->tau)
+      case AssignmentStmt(vd1:VarDeclaration, e1:Exp) =>{
+        val tau = vd1.types
+        if(typeof(e1, gamma) == tau){
+          gamma + (vd1.varName -> tau)
         }
         else{
           throw IllTypedException("Assignment")
@@ -102,10 +102,10 @@ object Typechecker {
         }
       }
       case ForStmt(s1: Stmt, e1:Exp, s2: Stmt, forBody: Stmt)=>{
-        var gamma2 = typecheckStatement(s1, gamma)
+        val gamma2 = typecheckStatements(s1, gamma)
         if(typeof(e1,gamma2) == BoolTypes) {
-          var gamma3 = typecheckStatement(s2, gamma2)
-          var gamma4 = typecheckStatement(forBody, gamma3)
+          val gamma3 = typecheckStatements(s2, gamma2)
+          typecheckStatements(forBody, gamma3)
           gamma
         }
         else{
@@ -114,14 +114,16 @@ object Typechecker {
       }
       case ConditionalStmt(e1: Exp, stmtTrue: Stmt, stmtFalse: Stmt)=>{
         if(typeof(e1, gamma) == BoolTypes) {
-          var gamma2 = typecheckStatement(stmtTrue, gamma)
-          var gamma3 = typecheckStatement(stmtFalse, gamma2)
+          typecheckStatements(stmtTrue, gamma)
+          typecheckStatements(stmtFalse, gamma)
           gamma
         }
       }
       case BlockStmt(st: List[Stmt])=>{
         st.foreach{
-          typecheckStatement(_, gamma)
+          currentStatement => {
+            st.foldLeft(gamma)((currentGamma, currentStatement) => typecheckStatements(currentStatement, gamma))
+          }
         }
         gamma
       }
