@@ -1,12 +1,9 @@
 package src
 
-import Typechecker.{typecheckStatement, typeof}
-
 case class IllTypedException(msg: String) extends Exception(msg)
 
 object Typechecker {
   type TypeEnv = Map[String, Types]
-
   def typeof(e: Exp, gamma: TypeEnv): Types = {
     e match{
       case VariableExp(x) if gamma.contains(x) => gamma(x)
@@ -63,7 +60,7 @@ object Typechecker {
     } // match
   } // typeof
 
-  def typecheckStatements(s: Stmt, gamma: TypeEnv): TypeEnv = {
+  def typecheckStatements(s: Stmt, gamma: TypeEnv, forLoopBool: Boolean): TypeEnv = {
     s match {
       case ExpStmt(e1: Exp) =>{
         if(typeof(e1, gamma) Types){
@@ -73,7 +70,14 @@ object Typechecker {
           throw IllTypedException("Expression")
         }
       }
-      case BreakStmt => gamma
+      case BreakStmt => {
+        if(forLoopBool == true){
+          gamma
+        }
+        else{
+          throw IllTypedException("Break")
+        }
+      }
       //      case VoidStmt => VoidTypes
       case ReturnStmt(e1: Exp)=>{
         if(typeof(e1, gamma) == Types){
@@ -102,10 +106,11 @@ object Typechecker {
         }
       }
       case ForStmt(s1: Stmt, e1:Exp, s2: Stmt, forBody: Stmt)=>{
-        val gamma2 = typecheckStatements(s1, gamma)
+       val breakBool = true
+        val gamma2 = typecheckStatements(s1, gamma, false)
         if(typeof(e1,gamma2) == BoolTypes) {
-          val gamma3 = typecheckStatements(s2, gamma2)
-          typecheckStatements(forBody, gamma3)
+          val gamma3 = typecheckStatements(s2, gamma2, false)
+          typecheckStatements(forBody, gamma3, breakBool)
           gamma
         }
         else{
@@ -114,15 +119,15 @@ object Typechecker {
       }
       case ConditionalStmt(e1: Exp, stmtTrue: Stmt, stmtFalse: Stmt)=>{
         if(typeof(e1, gamma) == BoolTypes) {
-          typecheckStatements(stmtTrue, gamma)
-          typecheckStatements(stmtFalse, gamma)
+          typecheckStatements(stmtTrue, gamma, false)
+          typecheckStatements(stmtFalse, gamma, false)
           gamma
         }
       }
       case BlockStmt(st: List[Stmt])=>{
         st.foreach{
           currentStatement => {
-            st.foldLeft(gamma)((currentGamma, currentStatement) => typecheckStatements(currentStatement, gamma))
+            st.foldLeft(gamma)((currentGamma, currentStatement) => typecheckStatements(currentStatement, gamma,false))
           }
         }
         gamma
