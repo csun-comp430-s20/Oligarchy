@@ -133,6 +133,7 @@ class Typechecker(val stc: SymbolTableClass, val stf:SymbolTable ){
           case _ => throw IllTypedException("GroupedExp")
         }
       }
+        // method call will need to check
       case MethodExp(e1, methodName, params) if stf contains methodName=> {
         val (tau1, tau2) = stf(methodName)
         if (typeof(e1,gamma)== StrTypes) {
@@ -182,6 +183,7 @@ class Typechecker(val stc: SymbolTableClass, val stf:SymbolTable ){
   }
 
   def typecheckMethodDef(className:String, methodDef: MethodDef): Unit ={
+    checkForDuplicatesParameters(methodDef.parameters)
     val gamma1 = methodDef.parameters.map(pair => (pair.varName -> pair.types)).toMap
     val gamma2 = typecheckStatement(methodDef.stmt, gamma1)
     if (typeof(methodDef.returnExpression, gamma2) != methodDef.types) {
@@ -212,6 +214,12 @@ class Typechecker(val stc: SymbolTableClass, val stf:SymbolTable ){
   def checkForDuplicatesInstanceVars(instanceVars: List[InstanceDec]): Unit ={
     val varNames = instanceVars.map(_.v1.varName).toSet
     if (varNames.size != instanceVars.size) {
+      throw IllTypedException("duplicate instance variable")
+    }
+  }
+  def checkForDuplicatesParameters(parameters: List[VarDeclaration]): Unit ={
+    val varNames = parameters.map(_.varName).toSet
+    if (varNames.size != parameters.size) {
       throw IllTypedException("duplicate instance variable")
     }
   }
