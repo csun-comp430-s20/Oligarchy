@@ -1,7 +1,5 @@
 package src
 
-import Typechecker.{typecheckStatement, typeof}
-
 case class IllTypedException(msg: String) extends Exception(msg)
 
 object Typechecker {
@@ -54,6 +52,21 @@ object Typechecker {
           case _ => throw IllTypedException("less than equals")
         }
       }
+      case CallHighOrderExp(e1, e2) => {
+        typeof(e1, gamma) match {
+          case MethodTypes(tau1, tau2) if tau1.size ==e2.size => {
+            if (e2.map(e => typeof(e, gamma)) == tau1) {
+              tau2
+            }
+            else{
+              throw IllTypedException("parameter type mismatch")
+            }
+          }
+          case _ => throw IllTypedException("not a higher-order function")
+        }
+      }
+      case _ => throw IllTypedException("other-exp")
+    }
       case VarDeclaration(t1: Types) =>{
         (typeof(t1, gamma)) match{
           case (Types) => t1
