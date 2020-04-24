@@ -4,44 +4,44 @@ case class IllTypedException(msg: String) extends Exception(msg)
 
 object Typechecker {
   type SymbolTable = Map[String, (Types, List[Types])]
-  type SymbolTableClass = Map[String, List[Types]]
+  type SymbolTableClass = Map[String, DefExtClass]
 
-  def makeSymbolTables(myClass: List[Class], stClass: SymbolTableClass, stFunctions: SymbolTable): (SymbolTableClass, SymbolTable )= {
-    myClass match {
-      case (_:DefClass)::_ =>
-        val newClassSymbolTable = makeSymbolTableDefClassHelper(myClass,stClass)
-        val newMethodSymbolTable = myClass.foldLeft(stFunctions)((res,cur) => makeSymbolTable(cur,res))
-        (newClassSymbolTable,newMethodSymbolTable)
-      case (_:DefExtClass)::_ =>
-        val newClassSymbolTable = makeSymbolTableClassExtHelper(myClass,stClass)
-        val newMethodSymbolTable = myClass.foldLeft(stFunctions)((res,cur) => makeSymbolTable(cur,res))
-        (newClassSymbolTable,newMethodSymbolTable)
-    }
-
+  def makeSymbolTables(myClasses: List[Class], stClass: SymbolTableClass, stFunctions: SymbolTable): (SymbolTableClass, SymbolTable )= {
+    myClasses.foldLeft(stClass) ((res, cur) =>{
+      case head: DefClass =>
+        val newClassSymbolTable = makeSymbolTableDefClassHelper(head, stClass)
+      case head: DefExtClass =>
+        val newClassSymbolTable = makeSymbolTableClassExtHelper(head, stClass)
+      newClassSymbolTable
+    })
   }
 
-  def makeSymbolTableClassExtHelper(myClass: List[Class], symbolTableClass: SymbolTableClass): SymbolTableClass ={
+  def makeSymbolTableClassExtHelper(myClass: DefExtClass, symbolTableClass: SymbolTableClass): SymbolTableClass ={
     myClass.foldLeft(symbolTableClass)((res, cur) => {
       val DefExtClass(classname, extendedClass, statements, instances,parameters,methods) = cur
-      if (res.contains(classname)) {
-        throw IllTypedException("duplicate Class name: " + classname)
+      val methodNames = methods.map(_.methodName).toSet
+      if (methodNames.size != methods.size) {
+        throw IllTypedException("duplicate methods ")
       }
       val paramNames = instances.map(_.v1.varName).toSet
       if (paramNames.size != parameters.size) {
         throw IllTypedException("duplicate instance variable")
       }
-      res + (classname -> instances.map(_.v1.types))
+      if (res.contains(classname)) {
+        throw IllTypedException("duplicate Class name: " + classname)
+      }
+      res + (classname -> cur)
     })
 
   }
 
-  def makeSymbolTableDefClassHelper(myClass: List[Class], symbolTableClass: SymbolTableClass): SymbolTableClass={
+  def makeSymbolTableDefClassHelper(myClass: DefClass, symbolTableClass: SymbolTableClass): SymbolTableClass={
     myClass.foldLeft(symbolTableClass)((res, cur) => {
       val DefClass(classname,
-      _,
+      statements,
       instances,
-      _,
-      _) = cur
+      parameters,
+      methods) = cur
       if (res.contains(classname)) {
         throw IllTypedException("duplicate Class name: " + classname)
       }
@@ -49,24 +49,23 @@ object Typechecker {
       if (paramNames.size != instances.size) {
         throw IllTypedException("duplicate instance variable")
       }
-      res + (classname -> instances.map(_.v1.types))
+      res + (classname -> DefExtClass(classname,"",statements,instances,parameters,methods))
     })
   }
 
   def makeSymbolTable(myClass: Class, symbolTable: SymbolTable): SymbolTable = {
     myClass match{
       case newClass: DefClass =>  {
-        val newTable =  makeSymbolTableHelper(newClass.methods)
-        newTable
+        makeSymbolTableHelper(newClass.methods, symbolTable)
       }
       case newExtendClass: DefExtClass =>{
-        makeSymbolTableHelper(newExtendClass.methods)
+        makeSymbolTableHelper(newExtendClass.methods, symbolTable)
       }
     }
   }
 
-  def makeSymbolTableHelper(methods: List[MethodDef]): SymbolTable ={
-    methods.foldLeft(Map(): SymbolTable)((res, cur) => {
+  def makeSymbolTableHelper(methods: List[MethodDef], symbolTable: SymbolTable): SymbolTable ={
+    methods.foldLeft(symbolTable)((res, cur) => {
       val MethodDef(returnType, methodName, _, parameters, _) = cur
       if (res.contains(methodName)) {
         throw IllTypedException("duplicate function name: " + methodName)
@@ -130,6 +129,7 @@ class Typechecker(val stc: SymbolTableClass, val stf:SymbolTable ){
           case _ => throw IllTypedException("GroupedExp")
         }
       }
+      // method call will need to check
       case MethodExp(e1, methodName, params) if stf contains methodName=> {
         val (tau1, tau2) = stf(methodName)
         if (typeof(e1,gamma)== StrTypes) {
@@ -174,36 +174,92 @@ class Typechecker(val stc: SymbolTableClass, val stf:SymbolTable ){
     }
   } // typeof
 
-  def typecheckInstance(dec: InstanceDec, env: TypeEnv): TypeEnv={
-      // we dont need this since these are just variable declarations and not instantiations
-  }
 
-  def typecheckMethodDef(methodDef: MethodDef, env: TypeEnv): TypeEnv ={
-    val gamma1 = env ++ methodDef.parameters.map(pair => (pair.varName -> pair.types)).toMap
+  def typecheckMethodDef(className:String, methodDef: MethodDef): Unit ={
+    checkForDuplicatesParameters(methodDef.parameters)
+    val gamma1 = methodDef.parameters.map(pair => (pair.varName -> pair.types)).toMap
     val gamma2 = typecheckStatement(methodDef.stmt, gamma1)
     if (typeof(methodDef.returnExpression, gamma2) != methodDef.types) {
       throw IllTypedException("return type mismatch")
-    }else{
-      env
     }
   }
-  def typecheckClasses(myClass: Class , gamma: TypeEnv): TypeEnv ={
-    myClass match{
-      case newClass: DefClass =>  {
-        // if we get rid of the constructor method then we dont need to type check params or statement
-        val gamma2 = newClass.instance.foldLeft(gamma)((res, cur) => typecheckInstance(cur, res))
-        newClass.methods.foldLeft(gamma2)((res, cur) => typecheckMethodDef(cur, res))
-    }
-      case newExtendClass: DefExtClass =>{
-        if (stc contains newExtendClass.extendedClass ){
-          val gamma2 = newExtendClass.instances.foldLeft(gamma)((res, cur) => typecheckInstance(cur, res))
-          newExtendClass.methods.foldLeft(gamma2)((res, cur) => typecheckMethodDef(cur, res))
-        }else {
-          throw IllTypedException("Extended Class Does not exist")
-        }
+
+  def typecheckClasses(): Unit ={
+    stc.foreach(myClass => {
+      checkForCycles(myClass._1, List()) // pass an empty list because you havent seen anything
+      typecheckClass(myClass._1)
+    })
+  }
+
+  def checkForCycles(className: String, seen: List[String]): Unit ={
+    if (className == "") {
+      // if you see "" it is our make shift terminator ie a base class with no extends
+    }else{
+      if (seen contains className){
+        throw  IllTypedException("Cyclic inheritance on " + className)
+      }else{
+        val newSeen: List[String] = seen.:+(className)
+        val nextClassName = stc(className).extendedClass
+        checkForCycles(nextClassName,newSeen)
       }
     }
   }
+  def checkForDuplicatesInstanceVars(instanceVars: List[InstanceDec]): Unit ={
+    val varNames = instanceVars.map(_.v1.varName).toSet
+    if (varNames.size != instanceVars.size) {
+      throw IllTypedException("duplicate instance variable")
+    }
+  }
+  def checkForDuplicatesParameters(parameters: List[VarDeclaration]): Unit ={
+    val varNames = parameters.map(_.varName).toSet
+    if (varNames.size != parameters.size) {
+      throw IllTypedException("duplicate instance variable")
+    }
+  }
+
+  def typecheckClass(className: String): Unit ={
+    val myClass = stc(className)
+    def checkForDuplicatesMethods(methods: List[MethodDef]): Unit ={
+      val methodNames = methods.map(_.methodName).toSet
+      if (methodNames.size != methods.size) {
+        throw IllTypedException("duplicate method Name")
+      }
+    }
+
+    @scala.annotation.tailrec
+    def instanceVarsDoNotOverride(className: String, seen: List[String]): Unit ={
+      if (className != "") {
+        val classDef = stc(className);
+        classDef.instances.foldLeft(seen)((res,cur) =>{
+          if(seen contains cur.v1.varName){
+            throw IllTypedException("Instance variable has been overrided")
+          }else{
+            res :+ cur.v1.varName
+          }
+        })
+        instanceVarsDoNotOverride(classDef.extendedClass,seen);
+      }
+    }
+    //    myClass match{
+    // I was able to get rid of this case by making non extending classes extend ""
+    //      case newClass: DefClass =>  {
+    //        // if we get rid of the constructor method then we dont need to type check params or statement
+    //        val gamma2 = newClass.instance.foldLeft(gamma)((res, cur) => typecheckInstance(cur, res))
+    //        newClass.methods.foldLeft(gamma2)((res, cur) => typecheckMethodDef(cur, res))
+    //      }
+    //      case newExtendClass: DefExtClass =>{
+    // make sure extended class is valid
+    if (myClass.extendedClass != "" || stc.contains( myClass.extendedClass )){
+      checkForDuplicatesMethods(myClass.methods)
+      checkForDuplicatesInstanceVars(myClass.instances)
+      instanceVarsDoNotOverride(className,List())
+      myClass.methods.foreach(x => typecheckMethodDef(x,Map()))
+    }else {
+      throw IllTypedException("Extended Class Does not exist")
+    }
+  }
+
+
 
 
   def typecheckStatement(s: Stmt, gamma: TypeEnv): TypeEnv = {
@@ -211,7 +267,16 @@ class Typechecker(val stc: SymbolTableClass, val stf:SymbolTable ){
   } // typecheckStatement
 
   def typecheckProgram(input: Program, gamma: TypeEnv) {
-    input.classes.foreach(myClass=> typecheckClasses(myClass,gamma))
+    typecheckClasses()
     typeof(input.entryPoint,gamma)
   } // typecheckProgram
 } // Typechecker
+
+
+/*
+class Base {  int b;  void initializeBase(int x) { b = x; }}class Sub extends Base {  int s;  void initializeSub(int x, int y) {    initializeBase(x);    s = y;  }}
+adding
+ */
+
+
+

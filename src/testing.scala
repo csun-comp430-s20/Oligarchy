@@ -17,7 +17,6 @@ object Typechecker {
         val newMethodSymbolTable = myClass.foldLeft(stFunctions)((res,cur) => makeSymbolTable(cur,res))
         (newClassSymbolTable,newMethodSymbolTable)
     }
-
   }
 
   def makeSymbolTableClassExtHelper(myClass: List[DefExtClass], symbolTableClass: SymbolTableClass): SymbolTableClass ={
@@ -281,3 +280,9 @@ class Typechecker(val stc: SymbolTableClass, val stf:SymbolTable ){
     typeof(input.entryPoint,gamma)
   } // typecheckProgram
 } // Typechecker
+
+
+/*
+class Base {  int b;  void initializeBase(int x) { b = x; }}class Sub extends Base {  int s;  void initializeSub(int x, int y) {    initializeBase(x);    s = y;  }}
+adding
+ */
