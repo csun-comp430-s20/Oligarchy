@@ -181,7 +181,7 @@ class Typechecker(val stc: SymbolTableClass, val stf:SymbolTable ){
           throw IllTypedException("Class is not in string format")
         }
       }
-      case HighOrderExp(params, exp) =>{
+      case HighOrderExp(params, exp) if Typechecker.allDistinct(params.map(_.varName)) =>{
         val gamma2 = gamma ++ params.map(pair => (pair.varName -> pair.types))
         val tau2 = typeof(exp, gamma2)
         MethodTypes(params.map(_.types), tau2)
@@ -239,7 +239,8 @@ class Typechecker(val stc: SymbolTableClass, val stf:SymbolTable ){
 
   } // typecheckStatement
 
-  def typecheckProgram(input: Program, gamma: TypeEnv): TypeEnv = {
-    input.classes.foreach(typecheckClasses)
+  def typecheckProgram(input: Program, gamma: TypeEnv) {
+    input.classes.foreach(myClass=> typecheckClasses(myClass,gamma))
+    typeof(input.entryPoint,gamma)
   } // typecheckProgram
 } // Typechecker
