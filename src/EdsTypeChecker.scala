@@ -4,6 +4,83 @@ case class IllTypedException(msg: String) extends Exception(msg)
 
 object Typechecker {
   type SymbolTable = Map[String, (Types, List[Types])]
+  type SymbolTableClass = Map[String, List[Types]]
+
+  def makeSymbolTables(myClass: List[Class], stClass: SymbolTableClass, stFunctions: SymbolTable): (SymbolTableClass, SymbolTable )= {
+    myClass match {
+      case (_:DefClass)::_ =>
+        val newClassSymbolTable = makeSymbolTableDefClassHelper(myClass,stClass)
+        val newMethodSymbolTable = myClass.foldLeft(stFunctions)((res,cur) => makeSymbolTable(cur,res))
+        (newClassSymbolTable,newMethodSymbolTable)
+      case (_:DefExtClass)::_ =>
+        val newClassSymbolTable = makeSymbolTableClassExtHelper(myClass,stClass)
+        val newMethodSymbolTable = myClass.foldLeft(stFunctions)((res,cur) => makeSymbolTable(cur,res))
+        (newClassSymbolTable,newMethodSymbolTable)
+    }
+
+  }
+
+  def makeSymbolTableClassExtHelper(myClass: List[Class], symbolTableClass: SymbolTableClass): SymbolTableClass ={
+    myClass.foldLeft(symbolTableClass)((res, cur) => {
+      val DefExtClass(classname, extendedClass, statements, instances,parameters,methods) = cur
+      if (res.contains(classname)) {
+        throw IllTypedException("duplicate Class name: " + classname)
+      }
+      val paramNames = instances.map(_.v1.varName).toSet
+      if (paramNames.size != parameters.size) {
+        throw IllTypedException("duplicate instance variable")
+      }
+      res + (classname -> instances.map(_.v1.types))
+    })
+
+  }
+
+  def makeSymbolTableDefClassHelper(myClass: List[Class], symbolTableClass: SymbolTableClass): SymbolTableClass={
+    myClass.foldLeft(symbolTableClass)((res, cur) => {
+      val DefClass(classname,
+      _,
+      instances,
+      _,
+      _) = cur
+      if (res.contains(classname)) {
+        throw IllTypedException("duplicate Class name: " + classname)
+      }
+      val paramNames = instances.map(_.v1.varName).toSet
+      if (paramNames.size != instances.size) {
+        throw IllTypedException("duplicate instance variable")
+      }
+      res + (classname -> instances.map(_.v1.types))
+    })
+  }
+
+  def makeSymbolTableHelper(methods: List[MethodDef]): SymbolTable ={
+    methods.foldLeft(Map(): SymbolTable)((res, cur) => {
+      val MethodDef(returnType, methodName, _, parameters, _) = cur
+      if (res.contains(methodName)) {
+        throw IllTypedException("duplicate function name: " + methodName)
+      }
+      val paramNames = parameters.map(_.varName).toSet
+      if (paramNames.size != parameters.size) {
+        throw IllTypedException("duplicate parameter name")
+      }
+      res + (methodName -> (returnType -> parameters.map(_.types)))
+    })
+  }
+
+
+  def makeSymbolTableHelper(methods: List[MethodDef]): SymbolTable ={
+    methods.foldLeft(Map(): SymbolTable)((res, cur) => {
+      val MethodDef(returnType, methodName, _, parameters, _) = cur
+      if (res.contains(methodName)) {
+        throw IllTypedException("duplicate function name: " + methodName)
+      }
+      val paramNames = parameters.map(_.varName).toSet
+      if (paramNames.size != parameters.size) {
+        throw IllTypedException("duplicate parameter name")
+      }
+      res + (methodName -> (returnType -> parameters.map(_.types)))
+    })
+  }
 
   def makeSymbolTable(myClass: Class, symbolTable: SymbolTable): SymbolTable = {
     myClass match{
