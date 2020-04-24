@@ -113,18 +113,16 @@ object Typechecker {
 
   // also typechecks the input program
   def apply(myProgram: Program): Typechecker = {
-    var test: SymbolTable = Map()
-    myProgram.myClasses.foreach(x => {test = x :: makeSymbolTable})
-    myClass.foreach makeMethodSymbolTable(myClass)
-    val retval = new Typechecker(makeSymbolTable(myClass))
-    retval.typecheckClass(myClass)
+    val (classSymbolTable,functionSymbolTable) = makeSymbolTables(myProgram.classes,Map(),Map())
+    val retval = new Typechecker(classSymbolTable,functionSymbolTable)
+    retval.typecheckProgram(myProgram)
     retval
   }
 } // Typechecker
-import Typechecker.SymbolTable
+import Typechecker.{SymbolTable, SymbolTableClass}
 
 
-class Typechecker(val st: SymbolTable){
+class Typechecker(val stc: SymbolTableClass, val stf:SymbolTable ){
   type TypeEnv = Map[String, Types]
 
   def typeof(e: Exp, gamma: TypeEnv): Types = {
@@ -161,29 +159,87 @@ class Typechecker(val st: SymbolTable){
           case _ => throw IllTypedException("GroupedExp")
         }
       }
-//      case MethodExp(e1, methodName, e2) => {
-//        //        (typeof(e1, gamma), typeof(e2, gamma)) match {
-//        //          case (IntTypes, IntTypes) => BoolTypes
-//        //          case _ => throw IllTypedException("less than")
-//        //        }
-//      }
-//
-//      case HighOrderExp(t1, v1, e2) =>{
-//        t1
-//      }
-//      case CallHighOrderExp(e1,e2) =>{
-//
-//      }
+      case MethodExp(e1, methodName, params) if stf contains methodName=> {
+        val (tau1, tau2) = stf(methodName)
+        if (typeof(e1,gamma)== StrTypes) {
+          val className = e1.asInstanceOf[StringExp]
+          if (stc contains className.value) {
+            if (params.size != tau2.size) {
+              throw IllTypedException("wrong number of params")
+            } else {
+              if (params.map(curE => typeof(curE, gamma)) != tau2) {
+                throw IllTypedException("parameter type mismatch")
+              } else {
+                tau1
+              }
+            }
+          }else {
+            throw IllTypedException("class does not exist")
+          }
+        }
+        else{
+          throw IllTypedException("Class is not in string format")
+        }
+      }
+      case HighOrderExp(params, exp) =>{
+        val gamma2 = gamma ++ params.map(pair => (pair.varName -> pair.types))
+        val tau2 = typeof(exp, gamma2)
+        MethodTypes(params.map(_.types), tau2)
+      }
+      case CallHighOrderExp(func,params) =>{
+        typeof(func, gamma) match {
+          case MethodTypes(tau1, tau2) if tau1.size == params.size => {
+            if (params.map(e => typeof(e, gamma)) == tau1) {
+              tau2
+            } else {
+              throw IllTypedException("parameter type mismatch")
+            }
+          }
+          case _ => throw IllTypedException("not a higher-order function")
+        }
+      }
 
       case _ => throw IllTypedException("other-exp")
     }
   } // typeof
+
+  def typecheckInstance(dec: InstanceDec, env: TypeEnv): TypeEnv={
+      // we dont need this since these are just variable declarations and not instantiations
+  }
+
+  def typecheckMethodDef(methodDef: MethodDef, env: TypeEnv): TypeEnv ={
+    val gamma1 = env ++ methodDef.parameters.map(pair => (pair.varName -> pair.types)).toMap
+    val gamma2 = typecheckStatement(methodDef.stmt, gamma1)
+    if (typeof(methodDef.returnExpression, gamma2) != methodDef.types) {
+      throw IllTypedException("return type mismatch")
+    }else{
+      env
+    }
+  }
+  def typecheckClasses(myClass: Class , gamma: TypeEnv): TypeEnv ={
+    myClass match{
+      case newClass: DefClass =>  {
+        // if we get rid of the constructor method then we dont need to type check params or statement
+        val gamma2 = newClass.instance.foldLeft(gamma)((res, cur) => typecheckInstance(cur, res))
+        newClass.methods.foldLeft(gamma2)((res, cur) => typecheckMethodDef(cur, res))
+    }
+      case newExtendClass: DefExtClass =>{
+        if (stc contains newExtendClass.extendedClass ){
+          val gamma2 = newExtendClass.instances.foldLeft(gamma)((res, cur) => typecheckInstance(cur, res))
+          newExtendClass.methods.foldLeft(gamma2)((res, cur) => typecheckMethodDef(cur, res))
+        }else {
+          throw IllTypedException("Extended Class Does not exist")
+        }
+      }
+    }
+  }
+
 
   def typecheckStatement(s: Stmt, gamma: TypeEnv): TypeEnv = {
 
   } // typecheckStatement
 
   def typecheckProgram(input: Program, gamma: TypeEnv): TypeEnv = {
-
+    input.classes.foreach(typecheckClasses)
   } // typecheckProgram
 } // Typechecker
