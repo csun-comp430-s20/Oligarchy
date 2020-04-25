@@ -6,51 +6,56 @@ object Typechecker {
   type SymbolTable = Map[String, (Types, List[Types])]
   type SymbolTableClass = Map[String, DefExtClass]
 
-  def makeSymbolTables(myClasses: List[Class], stClass: SymbolTableClass, stFunctions: SymbolTable): (SymbolTableClass, SymbolTable )= {
+  def makeSymbolTables(myClasses: List[Class], stClass: SymbolTableClass, stFunctions: SymbolTable): SymbolTableClass= {
     myClasses.foldLeft(stClass) ((res, cur) =>{
-      case head: DefClass =>
-        val newClassSymbolTable = makeSymbolTableDefClassHelper(head, stClass)
-      case head: DefExtClass =>
-        val newClassSymbolTable = makeSymbolTableClassExtHelper(head, stClass)
-      newClassSymbolTable
+      cur match{
+        case head: DefClass =>
+          res ++ makeSymbolTableDefClassHelper(head, stClass)
+        case head: DefExtClass =>
+          res ++  makeSymbolTableClassExtHelper(head, stClass)
+      }
     })
   }
 
   def makeSymbolTableClassExtHelper(myClass: DefExtClass, symbolTableClass: SymbolTableClass): SymbolTableClass ={
-    myClass.foldLeft(symbolTableClass)((res, cur) => {
-      val DefExtClass(classname, extendedClass, statements, instances,parameters,methods) = cur
-      val methodNames = methods.map(_.methodName).toSet
-      if (methodNames.size != methods.size) {
-        throw IllTypedException("duplicate methods ")
-      }
-      val paramNames = instances.map(_.v1.varName).toSet
-      if (paramNames.size != parameters.size) {
-        throw IllTypedException("duplicate instance variable")
-      }
-      if (res.contains(classname)) {
-        throw IllTypedException("duplicate Class name: " + classname)
-      }
-      res + (classname -> cur)
-    })
-
+    val DefExtClass(classname, extendedClass, statements, instances,parameters,methods) = myClass
+    val methodNames = methods.map(_.methodName).toSet
+    if (methodNames.size != methods.size) {
+      throw IllTypedException("duplicate methods ")
+    }
+    val instanceParamNames = instances.map(_.v1.varName).toSet
+    if (instanceParamNames.size != instances.size) {
+      throw IllTypedException("duplicate instance variable")
+    }
+    val paramNames = parameters.map(_.varName).toSet
+    if (paramNames.size != parameters.size) {
+      throw IllTypedException("duplicate constructor parameters")
+    }
+    if (symbolTableClass.contains(classname)) {
+      throw IllTypedException("duplicate Class name: " + classname)
+    }
+    symbolTableClass + (classname -> myClass)
   }
 
   def makeSymbolTableDefClassHelper(myClass: DefClass, symbolTableClass: SymbolTableClass): SymbolTableClass={
-    myClass.foldLeft(symbolTableClass)((res, cur) => {
-      val DefClass(classname,
-      statements,
-      instances,
-      parameters,
-      methods) = cur
-      if (res.contains(classname)) {
-        throw IllTypedException("duplicate Class name: " + classname)
-      }
-      val paramNames = instances.map(_.v1.varName).toSet
-      if (paramNames.size != instances.size) {
-        throw IllTypedException("duplicate instance variable")
-      }
-      res + (classname -> DefExtClass(classname,"",statements,instances,parameters,methods))
-    })
+    val DefClass(classname, statements, instances, parameters, methods) = myClass
+    val methodNames = methods.map(_.methodName).toSet
+    if (methodNames.size != methods.size) {
+      throw IllTypedException("duplicate methods ")
+    }
+    val instanceParamNames = instances.map(_.v1.varName).toSet
+    if (instanceParamNames.size != instances.size) {
+      throw IllTypedException("duplicate instance variable")
+    }
+    val paramNames = parameters.map(_.varName).toSet
+    if (paramNames.size != parameters.size) {
+      throw IllTypedException("duplicate constructor parameters")
+    }
+    if (symbolTableClass.contains(classname)) {
+      throw IllTypedException("duplicate Class name: " + classname)
+    }
+
+    symbolTableClass + (classname -> DefExtClass(classname,"",statements,instances,parameters,methods))
   }
 
   def makeSymbolTable(myClass: Class, symbolTable: SymbolTable): SymbolTable = {
@@ -83,8 +88,8 @@ object Typechecker {
 
   // also typechecks the input program
   def apply(myProgram: Program): Typechecker = {
-    val (classSymbolTable,functionSymbolTable) = makeSymbolTables(myProgram.classes,Map(),Map())
-    val retval = new Typechecker(classSymbolTable,functionSymbolTable)
+    val classSymbolTable = makeSymbolTables(myProgram.classes,Map(),Map())
+    val retval = new Typechecker(classSymbolTable)
     retval.typecheckProgram(myProgram, Map())
     retval
   }
@@ -92,7 +97,7 @@ object Typechecker {
 import Typechecker.{SymbolTable, SymbolTableClass}
 
 
-class Typechecker(val stc: SymbolTableClass, val stf:SymbolTable ){
+class Typechecker(val stc: SymbolTableClass){
   type TypeEnv = Map[String, Types]
 
   def typeof(e: Exp, gamma: TypeEnv): Types = {
