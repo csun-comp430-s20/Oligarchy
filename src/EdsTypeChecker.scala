@@ -121,8 +121,9 @@ class Typechecker(val stc: SymbolTableClass){
                   if (params.size != paramVardecs.size) {
                     throw IllTypedException("wrong number of params")
                   } else {
-                    val paramTypes = paramVardecs.foldLeft(List(): List[Types])((res,cur)=>{res :+ cur.types})
-                    if (params.map(curE => typeof(curE, gamma)) != paramTypes) {
+                    val expectedTypes = paramVardecs.foldLeft(List(): List[Types])((res,cur)=>{res :+ cur.types})
+                    val actualTypes = params.foldLeft(List(): List[Types])((res,cur)=>{res :+ typeof(cur,gamma)})
+                    if (expectedTypes != actualTypes) {
                       throw IllTypedException("parameter type mismatch")
                     } else {
                       returnTypes
