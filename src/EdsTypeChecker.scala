@@ -3,10 +3,9 @@ case class IllTypedException(msg: String) extends Exception(msg)
 
 
 object Typechecker {
-  type SymbolTable = Map[String, (Types, List[Types])]
   type SymbolTableClass = Map[String, DefExtClass]
 
-  def makeSymbolTables(myClasses: List[Class], stClass: SymbolTableClass, stFunctions: SymbolTable): SymbolTableClass= {
+  def makeSymbolTables(myClasses: List[Class], stClass: SymbolTableClass): SymbolTableClass= {
     myClasses.foldLeft(stClass) ((res, cur) =>{
       cur match{
         case head: DefClass =>
@@ -58,43 +57,19 @@ object Typechecker {
     symbolTableClass + (classname -> DefExtClass(classname,"",statements,instances,parameters,methods))
   }
 
-  def makeSymbolTable(myClass: Class, symbolTable: SymbolTable): SymbolTable = {
-    myClass match{
-      case newClass: DefClass =>  {
-        makeSymbolTableHelper(newClass.methods, symbolTable)
-      }
-      case newExtendClass: DefExtClass =>{
-        makeSymbolTableHelper(newExtendClass.methods, symbolTable)
-      }
-    }
-  }
-
-  def makeSymbolTableHelper(methods: List[MethodDef], symbolTable: SymbolTable): SymbolTable ={
-    methods.foldLeft(symbolTable)((res, cur) => {
-      val MethodDef(returnType, methodName, _, parameters, _) = cur
-      if (res.contains(methodName)) {
-        throw IllTypedException("duplicate function name: " + methodName)
-      }
-      val paramNames = parameters.map(_.varName).toSet
-      if (paramNames.size != parameters.size) {
-        throw IllTypedException("duplicate parameter name")
-      }
-      res + (methodName -> (returnType -> parameters.map(_.types)))
-    })
-  }
   def allDistinct[A](items: Seq[A]): Boolean = {
     items.toSet.size == items.size
   }
 
   // also typechecks the input program
   def apply(myProgram: Program): Typechecker = {
-    val classSymbolTable = makeSymbolTables(myProgram.classes,Map(),Map())
+    val classSymbolTable = makeSymbolTables(myProgram.classes,Map())
     val retval = new Typechecker(classSymbolTable)
     retval.typecheckProgram(myProgram, Map())
     retval
   }
 } // Typechecker
-import Typechecker.{SymbolTable, SymbolTableClass}
+import Typechecker.SymbolTableClass
 
 
 class Typechecker(val stc: SymbolTableClass){
@@ -135,22 +110,26 @@ class Typechecker(val stc: SymbolTableClass){
         }
       }
       // method call will need to check
-      case MethodExp(e1, methodName, params) if stf contains methodName=> {
-        val (tau1, tau2) = stf(methodName)
+      case MethodExp(e1, methodName, params) => {
         if (typeof(e1,gamma)== StrTypes) {
           val className = e1.asInstanceOf[StringExp]
-          if (stc contains className.value) {
-            if (params.size != tau2.size) {
-              throw IllTypedException("wrong number of params")
-            } else {
-              if (params.map(curE => typeof(curE, gamma)) != tau2) {
-                throw IllTypedException("parameter type mismatch")
-              } else {
-                tau1
+          stc(className.value) match{
+            case myClass:DefExtClass =>{
+              myClass.methods(methodName) match{
+                case myMethod:MethodDef =>{
+                  val (returnTypes, paramTypes) = (myMethod.types, myMethod.parameters)
+                  if (params.size != paramTypes.size) {
+                    throw IllTypedException("wrong number of params")
+                  } else {
+                    if (params.map(curE => typeof(curE, gamma)) != paramTypes) {
+                      throw IllTypedException("parameter type mismatch")
+                    } else {
+                      returnTypes
+                    }
+                  }
+                }
               }
             }
-          }else {
-            throw IllTypedException("class does not exist")
           }
         }
         else{
@@ -230,7 +209,6 @@ class Typechecker(val stc: SymbolTableClass){
         throw IllTypedException("duplicate method Name")
       }
     }
-
     @scala.annotation.tailrec
     def instanceVarsDoNotOverride(className: String, seen: List[String]): Unit ={
       if (className != "") {
@@ -245,20 +223,13 @@ class Typechecker(val stc: SymbolTableClass){
         instanceVarsDoNotOverride(classDef.extendedClass,seen);
       }
     }
-    //    myClass match{
-    // I was able to get rid of this case by making non extending classes extend ""
-    //      case newClass: DefClass =>  {
-    //        // if we get rid of the constructor method then we dont need to type check params or statement
-    //        val gamma2 = newClass.instance.foldLeft(gamma)((res, cur) => typecheckInstance(cur, res))
-    //        newClass.methods.foldLeft(gamma2)((res, cur) => typecheckMethodDef(cur, res))
-    //      }
-    //      case newExtendClass: DefExtClass =>{
-    // make sure extended class is valid
+
+
     if (myClass.extendedClass != "" || stc.contains( myClass.extendedClass )){
       checkForDuplicatesMethods(myClass.methods)
       checkForDuplicatesInstanceVars(myClass.instances)
       instanceVarsDoNotOverride(className,List())
-      myClass.methods.foreach(x => typecheckMethodDef(x,Map()))
+      myClass.methods.foreach(myMethod => typecheckMethodDef(className,myMethod))
     }else {
       throw IllTypedException("Extended Class Does not exist")
     }
@@ -277,11 +248,6 @@ class Typechecker(val stc: SymbolTableClass){
   } // typecheckProgram
 } // Typechecker
 
-
-/*
-class Base {  int b;  void initializeBase(int x) { b = x; }}class Sub extends Base {  int s;  void initializeSub(int x, int y) {    initializeBase(x);    s = y;  }}
-adding
- */
 
 
 
