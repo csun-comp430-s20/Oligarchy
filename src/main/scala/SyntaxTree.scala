@@ -1,4 +1,3 @@
-package src
 
 sealed trait Types
 case object IntTypes extends Types

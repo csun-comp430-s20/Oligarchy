@@ -1,5 +1,3 @@
-package src
-
 case class ParserException(msg: String) extends Exception(msg)
 
 object Parser {

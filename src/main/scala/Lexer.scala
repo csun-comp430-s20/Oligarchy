@@ -1,4 +1,3 @@
-package src
 
 case class LexerException(msg: String) extends Exception(msg)
 

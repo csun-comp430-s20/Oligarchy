@@ -1,4 +1,3 @@
-package src
 case class IllTypedException(msg: String) extends Exception(msg)
 
 
@@ -20,18 +19,18 @@ object Typechecker {
     val DefExtClass(classname, extendedClass, statements, instances,parameters,methods) = myClass
     val methodNames = methods.map(_.methodName).toSet
     if (methodNames.size != methods.size) {
-      throw IllTypedException("duplicate methods ")
+      throw _root_.IllTypedException("duplicate methods ")
     }
     val instanceParamNames = instances.map(_.v1.varName).toSet
     if (instanceParamNames.size != instances.size) {
-      throw IllTypedException("duplicate instance variable")
+      throw _root_.IllTypedException("duplicate instance variable")
     }
     val paramNames = parameters.map(_.varName).toSet
     if (paramNames.size != parameters.size) {
-      throw IllTypedException("duplicate constructor parameters")
+      throw _root_.IllTypedException("duplicate constructor parameters")
     }
     if (symbolTableClass.contains(classname)) {
-      throw IllTypedException("duplicate Class name: " + classname)
+      throw _root_.IllTypedException("duplicate Class name: " + classname)
     }
     symbolTableClass + (classname -> myClass)
   }
@@ -40,18 +39,18 @@ object Typechecker {
     val DefClass(classname, statements, instances, parameters, methods) = myClass
     val methodNames = methods.map(_.methodName).toSet
     if (methodNames.size != methods.size) {
-      throw IllTypedException("duplicate methods ")
+      throw _root_.IllTypedException("duplicate methods ")
     }
     val instanceParamNames = instances.map(_.v1.varName).toSet
     if (instanceParamNames.size != instances.size) {
-      throw IllTypedException("duplicate instance variable")
+      throw _root_.IllTypedException("duplicate instance variable")
     }
     val paramNames = parameters.map(_.varName).toSet
     if (paramNames.size != parameters.size) {
-      throw IllTypedException("duplicate constructor parameters")
+      throw _root_.IllTypedException("duplicate constructor parameters")
     }
     if (symbolTableClass.contains(classname)) {
-      throw IllTypedException("duplicate Class name: " + classname)
+      throw _root_.IllTypedException("duplicate Class name: " + classname)
     }
 
     symbolTableClass + (classname -> DefExtClass(classname,"",statements,instances,parameters,methods))
@@ -62,9 +61,9 @@ object Typechecker {
   }
 
   // also typechecks the input program
-  def apply(myProgram: Program): Typechecker = {
+  def apply(myProgram: Program): _root_.Typechecker = {
     val classSymbolTable = makeSymbolTables(myProgram.classes,Map())
-    val retval = new Typechecker(classSymbolTable)
+    val retval = new _root_.Typechecker(classSymbolTable)
     retval.typecheckProgram(myProgram, Map())
     retval
   }
@@ -84,49 +83,49 @@ class Typechecker(val stc: SymbolTableClass){
       case AndExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (BoolTypes, BoolTypes) => BoolTypes
-          case _ => throw IllTypedException("and")
+          case _ => throw _root_.IllTypedException("and")
         }
       }
       case PrintExp(e1) => {
         typeof(e1, gamma) match {
           case StrTypes => StrTypes
-          case _ => throw IllTypedException("print")
+          case _ => throw _root_.IllTypedException("print")
         }
       }
       case PlusExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => IntTypes
-          case _ => throw IllTypedException("add")
+          case _ => throw _root_.IllTypedException("add")
         }
       }
       case OrExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (BoolTypes, BoolTypes) => BoolTypes
-          case _ => throw IllTypedException("or")
+          case _ => throw _root_.IllTypedException("or")
         }
       }
       case GTExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => BoolTypes
-          case _ => throw IllTypedException("greater than")
+          case _ => throw _root_.IllTypedException("greater than")
         }
       }
       case GTEExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => BoolTypes
-          case _ => throw IllTypedException("greater than equals")
+          case _ => throw _root_.IllTypedException("greater than equals")
         }
       }
       case LTExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => BoolTypes
-          case _ => throw IllTypedException("less than")
+          case _ => throw _root_.IllTypedException("less than")
         }
       }
       case LTEExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => BoolTypes
-          case _ => throw IllTypedException("less than equals")
+          case _ => throw _root_.IllTypedException("less than equals")
         }
       }
       case CastExp(t1, e1) => { // assumes the user knows how to cast exp ?
@@ -134,7 +133,7 @@ class Typechecker(val stc: SymbolTableClass){
           case x:Types => {
             x
           }
-          case _ => throw IllTypedException("cast exp")
+          case _ => throw _root_.IllTypedException("cast exp")
         }
       }
       case GroupedExp(e1) => { // assumes the user knows how to cast exp ?
@@ -142,7 +141,7 @@ class Typechecker(val stc: SymbolTableClass){
           case x:Types => {
             x
           }
-          case _ => throw IllTypedException("GroupedExp")
+          case _ => throw _root_.IllTypedException("GroupedExp")
         }
       }
       // method call will need to check
@@ -155,12 +154,12 @@ class Typechecker(val stc: SymbolTableClass){
                 case myMethod:MethodDef =>{
                   val (returnTypes, paramVardecs) = (myMethod.types, myMethod.parameters)
                   if (params.size != paramVardecs.size) {
-                    throw IllTypedException("wrong number of params")
+                    throw _root_.IllTypedException("wrong number of params")
                   } else {
                     val expectedTypes = paramVardecs.foldLeft(List(): List[Types])((res,cur)=>{res :+ cur.types})
                     val actualTypes = params.foldLeft(List(): List[Types])((res,cur)=>{res :+ typeof(cur,gamma)})
                     if (expectedTypes != actualTypes) {
-                      throw IllTypedException("parameter type mismatch")
+                      throw _root_.IllTypedException("parameter type mismatch")
                     } else {
                       returnTypes
                     }
@@ -171,30 +170,30 @@ class Typechecker(val stc: SymbolTableClass){
           }
         }
         else{
-          throw IllTypedException("Class is not in string format")
+          throw _root_.IllTypedException("Class is not in string format")
         }
       }
       case NewClassExp(className: String , e1:List[Exp])=>{
         if(stc contains className) {
           val myClass = stc(className)
           if(e1.size != myClass.parameters.size){
-            throw IllTypedException("Missing Parameters")
+            throw _root_.IllTypedException("Missing Parameters")
           }
           else{
             val actualTypes = e1.foldLeft(List(): List[Types])((res,cur)=>{res :+ typeof(cur,gamma)})
             val expectedTypes = myClass.parameters.foldLeft(List(): List[Types])((res,cur)=>{res :+ cur.types })
             if(expectedTypes != actualTypes) {
-              throw IllTypedException("parameters for new class don't match")
+              throw _root_.IllTypedException("parameters for new class don't match")
             }
             else{
               ClassTypes(className)
             }
           }
         }else{
-          throw IllTypedException("class not defined")
+          throw _root_.IllTypedException("class not defined")
         }
       }
-      case HighOrderExp(params, exp) if Typechecker.allDistinct(params.map(_.varName)) =>{
+      case HighOrderExp(params, exp) if _root_.Typechecker.allDistinct(params.map(_.varName)) =>{
         val gamma2 = gamma ++ params.map(pair => (pair.varName -> pair.types))
         val tau2 = typeof(exp, gamma2)
         MethodTypes(params.map(_.types), tau2)
@@ -205,14 +204,14 @@ class Typechecker(val stc: SymbolTableClass){
             if (params.map(e => typeof(e, gamma)) == tau1) {
               tau2
             } else {
-              throw IllTypedException("parameter type mismatch")
+              throw _root_.IllTypedException("parameter type mismatch")
             }
           }
-          case _ => throw IllTypedException("not a higher-order function")
+          case _ => throw _root_.IllTypedException("not a higher-order function")
         }
       }
 
-      case _ => throw IllTypedException("other-exp")
+      case _ => throw _root_.IllTypedException("other-exp")
     }
   } // typeof
 
@@ -222,7 +221,7 @@ class Typechecker(val stc: SymbolTableClass){
     val gamma1 = methodDef.parameters.map(pair => (pair.varName -> pair.types)).toMap
     val gamma2 = typecheckStatement(methodDef.stmt, gamma1,false)
     if (typeof(methodDef.returnExpression, gamma2) != methodDef.types) {
-      throw IllTypedException("return type mismatch")
+      throw _root_.IllTypedException("return type mismatch")
     }
   }
 
@@ -238,7 +237,7 @@ class Typechecker(val stc: SymbolTableClass){
       // if you see "" it is our make shift terminator ie a base class with no extends
     }else{
       if (seen contains className){
-        throw  IllTypedException("Cyclic inheritance on " + className)
+        throw  _root_.IllTypedException("Cyclic inheritance on " + className)
       }else{
         val newSeen: List[String] = seen.:+(className)
         val nextClassName = stc(className).extendedClass
@@ -249,13 +248,13 @@ class Typechecker(val stc: SymbolTableClass){
   def checkForDuplicatesInstanceVars(instanceVars: List[InstanceDec]): Unit ={
     val varNames = instanceVars.map(_.v1.varName).toSet
     if (varNames.size != instanceVars.size) {
-      throw IllTypedException("duplicate instance variable")
+      throw _root_.IllTypedException("duplicate instance variable")
     }
   }
   def checkForDuplicatesParameters(parameters: List[VarDeclaration]): Unit ={
     val varNames = parameters.map(_.varName).toSet
     if (varNames.size != parameters.size) {
-      throw IllTypedException("duplicate instance variable")
+      throw _root_.IllTypedException("duplicate instance variable")
     }
   }
 
@@ -264,7 +263,7 @@ class Typechecker(val stc: SymbolTableClass){
     def checkForDuplicatesMethods(methods: List[MethodDef]): Unit ={
       val methodNames = methods.map(_.methodName).toSet
       if (methodNames.size != methods.size) {
-        throw IllTypedException("duplicate method Name")
+        throw _root_.IllTypedException("duplicate method Name")
       }
     }
     @scala.annotation.tailrec
@@ -273,7 +272,7 @@ class Typechecker(val stc: SymbolTableClass){
         val classDef = stc(className);
         classDef.instances.foldLeft(seen)((res,cur) =>{
           if(seen contains cur.v1.varName){
-            throw IllTypedException("Instance variable has been overrided")
+            throw _root_.IllTypedException("Instance variable has been overrided")
           }else{
             res :+ cur.v1.varName
           }
@@ -289,7 +288,7 @@ class Typechecker(val stc: SymbolTableClass){
       instanceVarsDoNotOverride(className,List())
       myClass.methods.foreach(myMethod => typecheckMethodDef(className,myMethod))
     }else {
-      throw IllTypedException("Extended Class Does not exist")
+      throw _root_.IllTypedException("Extended Class Does not exist")
     }
   }
 
@@ -307,7 +306,7 @@ class Typechecker(val stc: SymbolTableClass){
           gamma
         }
         else{
-          throw IllTypedException("Break")
+          throw _root_.IllTypedException("Break")
         }
       }
         // we got rid of this
@@ -325,7 +324,7 @@ class Typechecker(val stc: SymbolTableClass){
           gamma + (vd1.varName -> tau)
         }
         else{
-          throw IllTypedException("Assignment")
+          throw _root_.IllTypedException("Assignment")
         }
       }
       case VarStmt(name: String, e1: Exp) if gamma.contains(name) =>{
@@ -334,7 +333,7 @@ class Typechecker(val stc: SymbolTableClass){
           gamma
         }
         else{
-          throw IllTypedException("Var Statement")
+          throw _root_.IllTypedException("Var Statement")
         }
       }
       case ForStmt(s1: Stmt, e1:Exp, s2: Stmt, forBody: Stmt)=>{
@@ -346,7 +345,7 @@ class Typechecker(val stc: SymbolTableClass){
           gamma
         }
         else{
-          throw IllTypedException("For Statement")
+          throw _root_.IllTypedException("For Statement")
         }
       }
       case ConditionalStmt(e1: Exp, stmtTrue: Stmt, stmtFalse: Stmt)=>{
@@ -355,7 +354,7 @@ class Typechecker(val stc: SymbolTableClass){
           typecheckStatement(stmtFalse, gamma, false)
           gamma
         }else{
-          throw IllTypedException("conditional statement")
+          throw _root_.IllTypedException("conditional statement")
         }
       }
       case BlockStmt(st: List[Stmt])=>{

@@ -1,5 +1,3 @@
-package src
-
 case class IllTypedException(msg: String) extends Exception(msg)
 
 object Typechecker {
@@ -12,7 +10,7 @@ object Typechecker {
           gamma
         }
         else{
-          throw IllTypedException("Expression")
+          throw _root_.IllTypedException("Expression")
         }
       }
       case BreakStmt => gamma
@@ -22,7 +20,7 @@ object Typechecker {
           gamma
         }
         else{
-          throw IllTypedException("Return")
+          throw _root_.IllTypedException("Return")
         }
       }
       case AssignmentStmt(vd1:VarDeclaration, e1:Exp) =>{
@@ -31,7 +29,7 @@ object Typechecker {
           gamma + (vd1.varName -> tau)
         }
         else{
-          throw IllTypedException("Assignment")
+          throw _root_.IllTypedException("Assignment")
         }
       }
       case VarStmt(name: String, e1: Exp) if gamma.contains(name) =>{
@@ -40,7 +38,7 @@ object Typechecker {
           gamma
         }
         else{
-         throw IllTypedException("Var Statement")
+         throw _root_.IllTypedException("Var Statement")
         }
       }
       case ForStmt(s1: Stmt, e1:Exp, s2: Stmt, forBody: Stmt)=>{
@@ -51,7 +49,7 @@ object Typechecker {
           gamma
          }
         else{
-          throw IllTypedException("For Statement")
+          throw _root_.IllTypedException("For Statement")
          }
       }
       case ConditionalStmt(e1: Exp, stmtTrue: Stmt, stmtFalse: Stmt)=>{

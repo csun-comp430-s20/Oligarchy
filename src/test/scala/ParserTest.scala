@@ -1,5 +1,3 @@
-package src
-
 object ParserTest {
   def testParses(input: List[Token], expectedProgram: Program ) {
     val parser = Parser(input)
@@ -467,5 +465,4 @@ object ParserTest {
     testIntegerExp()
     testBooleanExp()
   }
-} // ParserTest
-
+}
