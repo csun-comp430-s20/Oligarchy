@@ -4,7 +4,6 @@ case class IllTypedException(msg: String) extends Exception(msg)
 
 object Typechecker {
   type TypeEnv = Map[String, Types]
-
   def typeof(e: Exp, gamma: TypeEnv): Types = {
     e match{
       case VariableExp(x) if gamma.contains(x) => gamma(x)
@@ -65,18 +64,29 @@ object Typechecker {
           case _ => throw IllTypedException("not a higher-order function")
         }
       }
-      case _ => throw IllTypedException("other-exp")
-    }
-      case VarDeclaration(t1: Types) =>{
-        (typeof(t1, gamma)) match{
-          case (Types) => t1
-          case _ => throw IllTypedException("Variable Declaration")
-        }
+      case NewClassExp(className: String , e1:List[Exp])=>{
+          if(stc constains className) {
+            val myClass = stc(className)
+            if(e1.size != myClass.parameters.size){
+              throw IllTypedException("Missing Parameters")
+            }
+            else{
+              val expectedTypes = e1.foldLeft(List(): List[Types])((res,cur)=>{res :+ cur.types})
+              val actualTypes = myClass.parameters.foldLeft(List(): List[Types])((res,cur)=>{res :+ typeof(cur,gamma)})
+              if(expectedTypes != actualTypes) {
+                  throw IllTypedException("parameters for new class don't match")
+                }
+              else{
+                  ClassTypes
+              }
+            }
+          }
       }
+      case _ => throw IllTypedException("other-exp")
     } // match
   } // typeof
 
-  def typecheckStatements(s: Stmt, gamma: TypeEnv): TypeEnv = {
+  def typecheckStatements(s: Stmt, gamma: TypeEnv, forLoopBool: Boolean): TypeEnv = {
     s match {
       case ExpStmt(e1: Exp) =>{
         if(typeof(e1, gamma) Types){
@@ -86,7 +96,14 @@ object Typechecker {
           throw IllTypedException("Expression")
         }
       }
-      case BreakStmt => gamma
+      case BreakStmt => {
+        if(forLoopBool == true){
+          gamma
+        }
+        else{
+          throw IllTypedException("Break")
+        }
+      }
       //      case VoidStmt => VoidTypes
       case ReturnStmt(e1: Exp)=>{
         if(typeof(e1, gamma) == Types){
@@ -115,10 +132,11 @@ object Typechecker {
         }
       }
       case ForStmt(s1: Stmt, e1:Exp, s2: Stmt, forBody: Stmt)=>{
-        val gamma2 = typecheckStatements(s1, gamma)
+       val breakBool = true
+        val gamma2 = typecheckStatements(s1, gamma, false)
         if(typeof(e1,gamma2) == BoolTypes) {
-          val gamma3 = typecheckStatements(s2, gamma2)
-          typecheckStatements(forBody, gamma3)
+          val gamma3 = typecheckStatements(s2, gamma2, false)
+          typecheckStatements(forBody, gamma3, breakBool)
           gamma
         }
         else{
@@ -127,15 +145,15 @@ object Typechecker {
       }
       case ConditionalStmt(e1: Exp, stmtTrue: Stmt, stmtFalse: Stmt)=>{
         if(typeof(e1, gamma) == BoolTypes) {
-          typecheckStatements(stmtTrue, gamma)
-          typecheckStatements(stmtFalse, gamma)
+          typecheckStatements(stmtTrue, gamma, false)
+          typecheckStatements(stmtFalse, gamma, false)
           gamma
         }
       }
       case BlockStmt(st: List[Stmt])=>{
         st.foreach{
           currentStatement => {
-            st.foldLeft(gamma)((currentGamma, currentStatement) => typecheckStatements(currentStatement, gamma))
+            st.foldLeft(gamma)((currentGamma, currentStatement) => typecheckStatements(currentStatement, gamma,false))
           }
         }
         gamma
