@@ -6,7 +6,7 @@ case object BoolTypes extends Types
 case object StrTypes extends Types
 case object VoidTypes extends Types // should be removed
 case class ClassTypes(className: String) extends Types
-case class MethodTypes(paramTypes: List[Types] , returnTypes: Types) extends Types
+case class MethodTypes(paramTypes: Seq[Types] , returnTypes: Types) extends Types
 
 
 
@@ -20,16 +20,11 @@ case class BooleanExp(value: Boolean) extends Exp
 case class VariableExp(value: String) extends Exp
 case class PrintExp(e1:Exp) extends Exp
 case class MethodExp(e1:Exp , methodName: String, e2: List[Exp]) extends Exp
-//@todo lets covert it so that it is just a list of expressions IE parameters
-//case class MethodExp(methodName: String, parameters: List[Exp]) extends Exp
 case class NewClassExp(className: String, e1:List[Exp] ) extends Exp
-//@todo changed t1 to newTypes
 case class CastExp(newTypes: Types , e2: Exp) extends Exp
 case class GroupedExp(e: Exp) extends Exp
-//@todo changed to have parameters declared followed by the experession
-case class HighOrderExp(params: Seq[VarDeclaration], exp: Exp) extends Exp
-//@todo changed exp1  to function and exp2 to params and so that it takes multiple parameters
-case class CallHighOrderExp(function: Exp, params: Seq[Exp]) extends Exp
+case class HighOrderExp(params: List[VarDeclaration], exp: Exp) extends Exp
+case class CallHighOrderExp(function: Exp, params: List[Exp]) extends Exp
 case class LTEExp(leftExp: Exp, rightExp: Exp) extends Exp
 case class LTExp(leftExp: Exp, rightExp: Exp) extends Exp
 case class GTEExp(leftExp: Exp, rightExp: Exp) extends Exp
