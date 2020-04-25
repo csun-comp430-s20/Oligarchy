@@ -64,14 +64,25 @@ object Typechecker {
           case _ => throw IllTypedException("not a higher-order function")
         }
       }
-      case _ => throw IllTypedException("other-exp")
-    }
-      case VarDeclaration(t1: Types) =>{
-        (typeof(t1, gamma)) match{
-          case (Types) => t1
-          case _ => throw IllTypedException("Variable Declaration")
-        }
+      case NewClassExp(className: String , e1:List[Exp])=>{
+          if(stc constains className) {
+            val myClass = stc(className)
+            if(e1.size != myClass.parameters.size){
+              throw IllTypedException("Missing Parameters")
+            }
+            else{
+              val expectedTypes = e1.foldLeft(List(): List[Types])((res,cur)=>{res :+ cur.types})
+              val actualTypes = myClass.parameters.foldLeft(List(): List[Types])((res,cur)=>{res :+ typeof(cur,gamma)})
+              if(expectedTypes != actualTypes) {
+                  throw IllTypedException("parameters for new class don't match")
+                }
+              else{
+                  ClassTypes
+              }
+            }
+          }
       }
+      case _ => throw IllTypedException("other-exp")
     } // match
   } // typeof
 
