@@ -319,25 +319,39 @@ class Parser(private var input: List[Token]) {
         case LeftParenToken ::tail=> {
             val (nextType, restTokens)= parseTypes(tail)
             restTokens match {
-              case RightParenToken::tail => {
-                val(expToBeCasted, restTokens2) =  parseExp(tail)
-                (CastExp(nextType,expToBeCasted),restTokens2)
+              case RightParenToken :: tail => {
+                val (expToBeCasted, restTokens2) = parseExp(tail)
+                (CastExp(nextType, expToBeCasted), restTokens2)
               }
-              case (highOrderFunction: VarToken)::RightParenToken:: EqualsToken:: GreaterThanToken::tail => {
-                val (innerExp, restTokens2) = parseExp(tail)
-                (HighOrderExp(nextType,highOrderFunction.name,innerExp),restTokens2)
+              //              case (params: List[VarDeclaration])::RightParenToken:: EqualsToken:: GreaterThanToken::tail => {
+              //                val (innerExp, restTokens2) = parseExp(tail)
+              //                (HighOrderExp(params,innerExp),restTokens2)
+              //              }
+              case _ => {
+                try {
+                  val (list, restTokens2) = parseRepeat(restTokens, parseVarDec)
+                  restTokens2 match {
+                    case RightParenToken :: EqualsToken :: GreaterThanToken :: tail => {
+                      val (innerExp, finalTokens) = parseExp(tail)
+                      (HighOrderExp(list, innerExp), finalTokens)
+                    }
+                  }
+                }
+                  catch {
+                    case _ => throw ParserException("is not a cast or high order function instantiation")
+                  }
+                //              case _ => throw ParserException("is not a cast or high order function instantiation")
               }
-              case _ => throw ParserException("is not a cast or high order function instantiation")
             }
         }
         case HOFCToken :: LeftParenToken::tail =>{
-          val (preFunction,restTokens) =  parseExp(tail)
+          val (preFunction,restTokens) =  parseRepeat(tail,parseExp)
           restTokens match {
             case CommaToken:: tail => {
               val (postFunction,restTokens2) = parseExp(tail)
               restTokens2 match {
                 case RightParenToken:: tail => {
-                  (CallHighOrderExp(preFunction,postFunction), tail)
+                  (CallHighOrderExp(postFunction, preFunction), tail)
                 }
                 case _ => throw ParserException("not a high order function call")
               }

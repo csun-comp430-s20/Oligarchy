@@ -151,14 +151,19 @@ class Typechecker(val stc: SymbolTableClass){
           val className = e1.asInstanceOf[StringExp]
           stc(className.value) match{
             case myClass:DefExtClass =>{
-              myClass.methods(methodName) match{
+              //error when doing myClass.methods(methodName)
+              myClass.methods match{
                 case myMethod:MethodDef =>{
                   val (returnTypes, paramVardecs) = (myMethod.types, myMethod.parameters)
                   if (params.size != paramVardecs.size) {
                     throw IllTypedException("wrong number of params")
                   } else {
-                    val expectedTypes = paramVardecs.foldLeft(List(): List[Types])((res,cur)=>{res :+ cur.types})
-                    val actualTypes = params.foldLeft(List(): List[Types])((res,cur)=>{res :+ typeof(cur,gamma)})
+                    val expectedTypes = paramVardecs.foldLeft(List(): List[Types])((res, cur) => {
+                      res :+ cur.types
+                    })
+                    val actualTypes = params.foldLeft(List(): List[Types])((res, cur) => {
+                      res :+ typeof(cur, gamma)
+                    })
                     if (expectedTypes != actualTypes) {
                       throw IllTypedException("parameter type mismatch")
                     } else {
