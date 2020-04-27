@@ -323,10 +323,11 @@ class Parser(private var input: List[Token]) {
                 val(expToBeCasted, restTokens2) =  parseExp(tail)
                 (CastExp(nextType,expToBeCasted),restTokens2)
               }
+                /*
               case (highOrderFunction: VarToken)::RightParenToken:: EqualsToken:: GreaterThanToken::tail => {
                 val (innerExp, restTokens2) = parseExp(tail)
                 (HighOrderExp(nextType,highOrderFunction.name,innerExp),restTokens2)
-              }
+              }  */
               case _ => throw ParserException("is not a cast or high order function instantiation")
             }
         }
@@ -335,10 +336,10 @@ class Parser(private var input: List[Token]) {
           restTokens match {
             case CommaToken:: tail => {
               val (postFunction,restTokens2) = parseExp(tail)
-              restTokens2 match {
+              restTokens2 match {  /*
                 case RightParenToken:: tail => {
                   (CallHighOrderExp(preFunction,postFunction), tail)
-                }
+                }  */
                 case _ => throw ParserException("not a high order function call")
               }
             }

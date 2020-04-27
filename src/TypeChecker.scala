@@ -99,6 +99,37 @@ class Typechecker(val stc: SymbolTableClass){
           case _ => throw IllTypedException("add")
         }
       }
+      case SubtractExp(e1, e2) => {
+        (typeof(e1, gamma), typeof(e2, gamma)) match {
+          case (IntTypes, IntTypes) => IntTypes
+          case _ => throw IllTypedException("subtract")
+        }
+      }
+      case MultiplyExp(e1, e2) => {
+        (typeof(e1, gamma), typeof(e2, gamma)) match {
+          case (IntTypes, IntTypes) => IntTypes
+          case _ => throw IllTypedException("multiply")
+        }
+      }
+      case DivideExp(e1, e2) => {
+        (typeof(e1, gamma), typeof(e2, gamma)) match {
+          case (IntTypes, IntTypes) => IntTypes
+          case _ => throw IllTypedException("divide")
+        }
+      }
+      case PowerExp(e1, e2) => {
+        (typeof(e1, gamma), typeof(e2, gamma)) match {
+          case (IntTypes, IntTypes) => IntTypes
+          case _ => throw IllTypedException("power")
+        }
+      }
+      case EqualsExp(e1, e2) => {
+        (typeof(e1, gamma), typeof(e2, gamma)) match {
+          case (IntTypes, IntTypes) => BoolTypes
+          case (StrTypes, StrTypes) => BoolTypes
+          case _ => throw IllTypedException("equals")
+        }
+      }
       case OrExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (BoolTypes, BoolTypes) => BoolTypes
@@ -146,6 +177,7 @@ class Typechecker(val stc: SymbolTableClass){
         }
       }
       // method call will need to check
+        /*
       case MethodExp(e1, methodName, params) => {
         if (typeof(e1,gamma)== StrTypes) {
           val className = e1.asInstanceOf[StringExp]
@@ -173,7 +205,7 @@ class Typechecker(val stc: SymbolTableClass){
         else{
           throw IllTypedException("Class is not in string format")
         }
-      }
+      }  */
       case NewClassExp(className: String , e1:List[Exp])=>{
         if(stc contains className) {
           val myClass = stc(className)
