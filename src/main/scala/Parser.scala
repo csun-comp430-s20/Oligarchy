@@ -315,27 +315,36 @@ class Parser(private var input: List[Token]) {
           }
         }
         case LeftParenToken ::tail=> {
-            val (nextType, restTokens)= parseTypes(tail)
+          val (nextType, restTokens)= parseTypes(tail)
+          try{
             restTokens match {
               case RightParenToken::tail => {
                 val(expToBeCasted, restTokens2) =  parseExp(tail)
                 (CastExp(nextType,expToBeCasted),restTokens2)
               }
-              case (highOrderFunction: VarToken)::RightParenToken:: EqualsToken:: GreaterThanToken::tail => {
-                val (innerExp, restTokens2) = parseExp(tail)
-                (HighOrderExp(nextType,highOrderFunction.name,innerExp),restTokens2)
-              }
-              case _ => throw ParserException("is not a cast or high order function instantiation")
+              case _ => throw ParserException("is not a cast")
             }
+          }catch{
+            case _: Exception =>{
+                val (highOrderVardecs, afterVardecs) = parseRep1(tail,parseVarDec,skipCommas)
+                afterVardecs match {
+                case RightParenToken::tail => {
+                val(body, restTokens2) =  parseExp(tail)
+                (HighOrderExp(highOrderVardecs,body),restTokens2)
+              }
+                case _ => throw ParserException("is not a high order function instantiation")
+              }
+            }
+          }
         }
         case HOFCToken :: LeftParenToken::tail =>{
-          val (preFunction,restTokens) =  parseExp(tail)
+          val (function,restTokens) =  parseExp(tail)
           restTokens match {
             case CommaToken:: tail => {
-              val (postFunction,restTokens2) = parseExp(tail)
+              val (parameters,restTokens2) = parseRep1(tail ,parseExp,skipCommas)
               restTokens2 match {
                 case RightParenToken:: tail => {
-                  (CallHighOrderExp(preFunction,postFunction), tail)
+                  (CallHighOrderExp(function,parameters), tail)
                 }
                 case _ => throw ParserException("not a high order function call")
               }
