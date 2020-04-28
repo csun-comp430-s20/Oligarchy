@@ -107,4 +107,29 @@ class TypeCheckerTest extends AnyFunSuite {
     val received = mynonEmptyTypechecker.typeof(EqualsExp(IntegerExp(2), IntegerExp(2)), Map())
     assert(expected == received)
   }
+  test("testing assignment statement returns type"){
+    val expected = Map("x" -> IntTypes)
+    val received = mynonEmptyTypechecker.typecheckStatement(AssignmentStmt((VarDeclaration(IntTypes, "x")), IntegerExp(1)), Map("x" -> IntTypes), false)
+    assert(expected == received)
+  }
+  test("testing assignment statement returns Illed Typed Exception") {
+    assertThrows[IllTypedException] {
+     val received =  mynonEmptyTypechecker.typecheckStatement(AssignmentStmt((VarDeclaration(IntTypes, "x")), BooleanExp(false)), Map(), false)
+    }
+  }
+  test("testing var statement returns a type"){
+    val expected = Map( "i"-> IntTypes)
+    val recieved = mynonEmptyTypechecker.typecheckStatement(VarStmt("i" , IntegerExp(1)), Map( "i" -> IntTypes), false)
+    assert(recieved == expected)
+  }
+  test("testing var statement returns Illed Typed Exception"){
+    assertThrows[IllTypedException]{
+      mynonEmptyTypechecker.typecheckStatement(VarStmt( "x", IntegerExp(1)), Map("x" -> StrTypes), false)
+    }
+  }
+  test("testing break statement outside of for loop"){
+    assertThrows[IllTypedException]{
+      mynonEmptyTypechecker.typecheckStatement(BreakStmt, Map(),false)
+    }
+  }
 }
