@@ -258,7 +258,9 @@ class Typechecker(val stc: SymbolTableClass){
       }else{
         val newSeen: List[String] = seen.:+(className)
         val nextClassName = stc(className).extendedClass
-        checkForCycles(nextClassName,newSeen)
+        if (nextClassName != ""){
+          checkForCycles(nextClassName,newSeen)
+        }// else no more cycles
       }
     }
   }
@@ -297,9 +299,7 @@ class Typechecker(val stc: SymbolTableClass){
         instanceVarsDoNotOverride(classDef.extendedClass,seen);
       }
     }
-
-
-    if (myClass.extendedClass != "" || stc.contains( myClass.extendedClass )){
+    if (myClass.extendedClass == "" || stc.contains( myClass.extendedClass )){
       checkForDuplicatesMethods(myClass.methods)
       checkForDuplicatesInstanceVars(myClass.instances)
       instanceVarsDoNotOverride(className,List())
