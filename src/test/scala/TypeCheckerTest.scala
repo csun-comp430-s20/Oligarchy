@@ -64,6 +64,31 @@ class TypeCheckerTest extends AnyFunSuite {
     val received = mynonEmptyTypechecker.typeof(AndExp(BooleanExp(true),BooleanExp(false)), Map())
     assert(expected == received)
   }
+  test("Makes sure an And expression returns an BoolTypes") {
+    val expected = BoolTypes
+    val received = mynonEmptyTypechecker.typeof(AndExp(BooleanExp(true),BooleanExp(false)), Map())
+    assert(expected == received)
+  }
+  test("Make sure a 'Greater Than' expression takes returns a BoolTypes"){
+    val expected = BoolTypes
+    val received = mynonEmptyTypechecker.typeof(GTExp(IntegerExp(2), IntegerExp(1)), Map())
+    assert(expected == received)
+  }
+  test("Make sure a 'Greater Than or Equals' expression takes returns a BoolTypes"){
+    val expected = BoolTypes
+    val received = mynonEmptyTypechecker.typeof(GTEExp(IntegerExp(2), IntegerExp(1)), Map())
+    assert(expected == received)
+  }
+  test("Make sure a 'Less Than' expression takes returns a BoolTypes"){
+    val expected = BoolTypes
+    val received = mynonEmptyTypechecker.typeof(LTExp(IntegerExp(2), IntegerExp(1)), Map())
+    assert(expected == received)
+  }
+  test("Make sure a 'Less Than or Equals' expression takes returns a BoolTypes"){
+    val expected = BoolTypes
+    val received = mynonEmptyTypechecker.typeof(LTEExp(IntegerExp(2), IntegerExp(1)), Map())
+    assert(expected == received)
+  }
   def testVariableExp(): Unit ={
     //type TypeEnv = Map[String, Types]
     val gamma = Map("x" -> StrTypes)

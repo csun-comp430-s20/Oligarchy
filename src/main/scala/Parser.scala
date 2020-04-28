@@ -318,9 +318,9 @@ class Parser(private var input: List[Token]) {
           val (nextType, restTokens)= parseTypes(tail)
           try{
             restTokens match {
-              case RightParenToken::tail => {
-                val(expToBeCasted, restTokens2) =  parseExp(tail)
-                (CastExp(nextType,expToBeCasted),restTokens2)
+              case RightParenToken :: tail => {
+                val (expToBeCasted, restTokens2) = parseExp(tail)
+                (CastExp(nextType, expToBeCasted), restTokens2)
               }
               case _ => throw ParserException("is not a cast")
             }
