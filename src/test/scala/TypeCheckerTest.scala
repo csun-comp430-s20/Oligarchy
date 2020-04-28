@@ -1,3 +1,4 @@
+import com.sun.jdi.IntegerType
 import org.scalatest.funsuite.AnyFunSuite
 
 class TypeCheckerTest extends AnyFunSuite {
@@ -57,11 +58,6 @@ class TypeCheckerTest extends AnyFunSuite {
   test("Makes sure an Boolean expression returns an booleanTypes") {
     val expected = BoolTypes
     val received = mynonEmptyTypechecker.typeof(BooleanExp(true), Map())
-    assert(expected == received)
-  }
-  test("Makes sure an And expression returns an BoolTypes") {
-    val expected = BoolTypes
-    val received = mynonEmptyTypechecker.typeof(AndExp(BooleanExp(true),BooleanExp(false)), Map())
     assert(expected == received)
   }
   test("Makes sure an And expression returns an BoolTypes") {
@@ -137,7 +133,7 @@ class TypeCheckerTest extends AnyFunSuite {
     val received = mynonEmptyTypechecker.typecheckStatement(AssignmentStmt((VarDeclaration(IntTypes, "x")), IntegerExp(1)), Map("x" -> IntTypes), false)
     assert(expected == received)
   }
-  test("testing assignment statement returns Illed Typed Exception") {
+  test("testing assignment statement returns Ill Typed Exception") {
     assertThrows[IllTypedException] {
      val received =  mynonEmptyTypechecker.typecheckStatement(AssignmentStmt((VarDeclaration(IntTypes, "x")), BooleanExp(false)), Map(), false)
     }
@@ -147,7 +143,7 @@ class TypeCheckerTest extends AnyFunSuite {
     val recieved = mynonEmptyTypechecker.typecheckStatement(VarStmt("i" , IntegerExp(1)), Map( "i" -> IntTypes), false)
     assert(recieved == expected)
   }
-  test("testing var statement returns Illed Typed Exception"){
+  test("testing var statement returns Ill Typed Exception"){
     assertThrows[IllTypedException]{
       mynonEmptyTypechecker.typecheckStatement(VarStmt( "x", IntegerExp(1)), Map("x" -> StrTypes), false)
     }
@@ -156,5 +152,86 @@ class TypeCheckerTest extends AnyFunSuite {
     assertThrows[IllTypedException]{
       mynonEmptyTypechecker.typecheckStatement(BreakStmt, Map(),false)
     }
+  }
+  test("testing for loop statement with break statement"){
+      val expected = Map()
+      val recieved = mynonEmptyTypechecker.typecheckStatement(ForStmt(AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(1)), LTEExp(IntegerExp(10), IntegerExp(30)), VarStmt("i", IntegerExp(2)), BreakStmt), Map(), false)
+      assert(recieved == expected)
+  }
+  test("testing ill typed for loop statement with break statement"){
+    assertThrows[IllTypedException] {
+      mynonEmptyTypechecker.typecheckStatement(ForStmt(AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(1)), IntegerExp(0), VarStmt("i", IntegerExp(2)), BreakStmt), Map(), false)
+    }
+  }
+  test("testing conditional statements"){
+    val expected = Map()
+    val recieved = mynonEmptyTypechecker.typecheckStatement(ConditionalStmt(GTEExp(IntegerExp(10), IntegerExp(0)), AssignmentStmt(VarDeclaration(BoolTypes,"bool"), BooleanExp(false)), AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(1))) , Map(), false)
+    assert(recieved == expected)
+  }
+  test("testing ill typed conditional statements"){
+    assertThrows[IllTypedException] {
+     mynonEmptyTypechecker.typecheckStatement(ConditionalStmt(IntegerExp(10), VarStmt("bool", BooleanExp(false)), VarStmt("i", IntegerExp(0))), Map(), false)
+    }
+  }
+  test("testing block statements"){
+    val expected = Map("bool" -> BoolTypes, "bool2" -> BoolTypes)
+    val list:List[Stmt] = List(AssignmentStmt(VarDeclaration(BoolTypes,"bool"), BooleanExp(false)),  AssignmentStmt(VarDeclaration(BoolTypes,"bool2"), BooleanExp(true)))
+    val recieved = mynonEmptyTypechecker.typecheckStatement(BlockStmt(list), Map("bool" -> BoolTypes, "bool2" -> BoolTypes), false)
+    assert(recieved == expected)
+  }
+  test("testing print expression"){
+    val expected = StrTypes
+     val recieved = mynonEmptyTypechecker.typeof(PrintExp(StringExp("printing")), Map())
+    assert(recieved == expected)
+  }
+  test("testing print expression returns ill typed"){
+    assertThrows[IllTypedException] {
+      mynonEmptyTypechecker.typeof(PrintExp(IntegerExp(0)), Map())
+    }
+  }
+  test("testing plus expression"){
+    val expected = IntTypes
+    val recieved = mynonEmptyTypechecker.typeof(PlusExp(IntegerExp(5), IntegerExp(10)), Map())
+    assert(recieved == expected)
+  }
+  test("testing plus expression returns ill typed"){
+    assertThrows[IllTypedException] {
+      mynonEmptyTypechecker.typeof(PlusExp(BooleanExp(false), IntegerExp(10)), Map())
+    }
+  }
+  test("testing or expression returns ill typed"){
+    assertThrows[IllTypedException] {
+      mynonEmptyTypechecker.typeof(OrExp(IntegerExp(0), BooleanExp(false)), Map())
+    }
+  }
+  test("testing GT expression returns ill typed"){
+    assertThrows[IllTypedException] {
+      mynonEmptyTypechecker.typeof(GTExp(IntegerExp(0), BooleanExp(false)), Map())
+    }
+  }
+  test("testing GTE expression returns ill typed"){
+    assertThrows[IllTypedException] {
+      mynonEmptyTypechecker.typeof(GTEExp(IntegerExp(0), BooleanExp(false)), Map())
+    }
+  }
+  test("testing LT expression returns ill typed"){
+    assertThrows[IllTypedException] {
+      mynonEmptyTypechecker.typeof(LTExp(IntegerExp(0), BooleanExp(false)), Map())
+    }
+  }
+  test("testing LTE expression returns ill typed"){
+    assertThrows[IllTypedException] {
+      mynonEmptyTypechecker.typeof(LTEExp(IntegerExp(0), BooleanExp(false)), Map())
+    }
+  }
+  test("testing and expression returns ill typed"){
+    assertThrows[IllTypedException] {
+      mynonEmptyTypechecker.typeof(AndExp(IntegerExp(0), BooleanExp(false)), Map())
+    }
+  }
+  test("testing variable expression"){
+    val expected = StrTypes
+    val recieved = mynonEmptyTypechecker.typeof(VariableExp("i"), Map("i"-> StrTypes))
+    assert(recieved == expected)
   }
 }
