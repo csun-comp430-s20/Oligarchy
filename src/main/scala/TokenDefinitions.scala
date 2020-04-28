@@ -1,4 +1,4 @@
-package src
+
 sealed trait Token
 
 case class ClassNameToken(value: String) extends Token
