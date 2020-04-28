@@ -1,6 +1,6 @@
 # Language Design Proposal
 
-**Student Name(s):** Eduardo Preciado, Imon Daneshmand, Daniel Cardenas, Jiamin Zhu, Stephanie Contrerras
+**Student Name(s):** Eduardo Preciado, Imon Daneshmand, Daniel Cardenas, Jiamin Zhu, Stephanie Contreras
 
 **Language Name:** Oligarchy
 
