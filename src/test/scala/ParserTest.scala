@@ -1,5 +1,3 @@
-package src
-
 object ParserTest {
   def testParses(input: List[Token], expectedProgram: Program ) {
     val parser = Parser(input)
@@ -306,7 +304,7 @@ object ParserTest {
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
     val parser = Parser(receivedTokens)
-    val expected = CallHighOrderExp(VariableExp("myHighOrderFunction"),VariableExp("mySecondExp"))
+    val expected = CallHighOrderExp(VariableExp("myHighOrderFunction"),List(StringExp("myVariable")))
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
@@ -315,7 +313,7 @@ object ParserTest {
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
     val parser = Parser(receivedTokens)
-    val expected = HighOrderExp(IntTypes,"myVariable",PlusExp(VariableExp("myVariable"),IntegerExp(2)))
+    val expected = HighOrderExp(List(VarDeclaration(IntTypes,"myVariable")) ,PlusExp(VariableExp("myVariable"),IntegerExp(2)))
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
@@ -467,5 +465,4 @@ object ParserTest {
     testIntegerExp()
     testBooleanExp()
   }
-} // ParserTest
-
+}

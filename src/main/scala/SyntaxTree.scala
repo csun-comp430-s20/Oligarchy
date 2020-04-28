@@ -1,4 +1,3 @@
-package src
 
 sealed trait Types
 case object IntTypes extends Types
@@ -23,7 +22,7 @@ case class MethodExp(e1:Exp , methodName: String, e2: List[Exp]) extends Exp
 case class NewClassExp(className: String, e1:List[Exp] ) extends Exp
 case class CastExp(newTypes: Types , e2: Exp) extends Exp
 case class GroupedExp(e: Exp) extends Exp
-case class HighOrderExp(params: List[VarDeclaration], exp: Exp) extends Exp
+case class HighOrderExp(params: List[VarDeclaration], body: Exp) extends Exp
 case class CallHighOrderExp(function: Exp, params: List[Exp]) extends Exp
 case class LTEExp(leftExp: Exp, rightExp: Exp) extends Exp
 case class LTExp(leftExp: Exp, rightExp: Exp) extends Exp
