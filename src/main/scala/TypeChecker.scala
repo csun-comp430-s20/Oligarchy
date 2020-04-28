@@ -234,11 +234,19 @@ class Typechecker(val stc: SymbolTableClass){
     }
   }
 
-  def typecheckClasses(): Unit ={
-    stc.foreach(myClass => {
-      checkForCycles(myClass._1, List()) // pass an empty list because you havent seen anything
-      typecheckClass(myClass._1)
-    })
+  def typecheckClasses(myClasses: List[Class]): Unit ={
+    myClasses.foldLeft(List(): List[String])((res,cur)=>{
+      cur match {
+      case myClass: DefClass =>
+        checkForCycles(myClass.className, res) // pass an empty list because you havent seen anything
+        typecheckClass(myClass.className)
+        res
+      case myClass: DefExtClass =>
+        checkForCycles(myClass.classname,res)
+        typecheckClass(myClass.classname)
+        res
+      }}
+    )
   }
 
   def checkForCycles(className: String, seen: List[String]): Unit ={
@@ -367,18 +375,13 @@ class Typechecker(val stc: SymbolTableClass){
         }
       }
       case BlockStmt(st: List[Stmt])=>{
-        st.foreach{
-          currentStatement => {
-            st.foldLeft(gamma)((currentGamma, currentStatement) => typecheckStatement(currentStatement, gamma,false))
-          }
-        }
-        gamma
+        st.foldLeft(gamma)((currentGamma, currentStatement) => typecheckStatement(currentStatement, currentGamma,false))
       }
     }
   } // typecheckStatement
 
   def typecheckProgram(input: Program, gamma: TypeEnv) {
-    typecheckClasses()
+    typecheckClasses(input.classes)
     typeof(input.entryPoint,gamma)
   } // typecheckProgram
 } // Typechecker

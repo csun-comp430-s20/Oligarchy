@@ -299,23 +299,23 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-//  def testHighOrderFunctionCallExp(): Unit ={
-//    val lexerInput = "hofc(myHighOrderFunction, mySecondExp)"
-//    val tokenizer = Lexer(lexerInput)
-//    val receivedTokens = tokenizer.tokenize()
-//    val parser = Parser(receivedTokens)
-//    val expected = CallHighOrderExp(VariableExp("myHighOrderFunction"),VariableExp("mySecondExp"))
-//    testParses(receivedTokens,expected, parser.parseExp)
-//  }
+  def testHighOrderFunctionCallExp(): Unit ={
+    val lexerInput = "hofc(myHighOrderFunction, mySecondExp)"
+    val tokenizer = Lexer(lexerInput)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val expected = CallHighOrderExp(VariableExp("myHighOrderFunction"),List(StringExp("myVariable")))
+    testParses(receivedTokens,expected, parser.parseExp)
+  }
 
-//  def testCreateHighOrderFunctionExp(): Unit ={
-//    val lexerInput = "(int myVariable ) => myVariable + 2"
-//    val tokenizer = Lexer(lexerInput)
-//    val receivedTokens = tokenizer.tokenize()
-//    val parser = Parser(receivedTokens)
-//    val expected = HighOrderExp(IntTypes,"myVariable",PlusExp(VariableExp("myVariable"),IntegerExp(2)))
-//    testParses(receivedTokens,expected, parser.parseExp)
-//  }
+  def testCreateHighOrderFunctionExp(): Unit ={
+    val lexerInput = "(int myVariable ) => myVariable + 2"
+    val tokenizer = Lexer(lexerInput)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val expected = HighOrderExp(List(VarDeclaration(IntTypes,"myVariable")) ,PlusExp(VariableExp("myVariable"),IntegerExp(2)))
+    testParses(receivedTokens,expected, parser.parseExp)
+  }
 
   def testMethodNameExp1(): Unit ={
     val input = "foobar(5, 6)"
