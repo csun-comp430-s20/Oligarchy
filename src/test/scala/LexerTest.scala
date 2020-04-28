@@ -1,205 +1,207 @@
-object LexerTest {
+import org.scalatest.funsuite.AnyFunSuite
+
+class LexerTest extends AnyFunSuite {
   def testTokenizes(input: String, expectedTokens: Token* ) {
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     assert(receivedTokens == expectedTokens.toSeq)
   }
 
-  def testEx() {
+  test("example test name") {
     testTokenizes("})", RightCurlyToken, RightParenToken)
   }
 
-  def testRightCurly() {
+  test("testRightCurly()") {
     testTokenizes("}", RightCurlyToken)
   }
 
-  def testGreaterThan() {
+  test("testGreaterThan()") {
     testTokenizes(">", GreaterThanToken)
   }
 
-  def testPlus(){
+  test("testPlus()"){
     testTokenizes("+", PlusToken)
   }
 
-  def testPrint(){
+  test("testPrint()"){
     testTokenizes("print", PrintToken)
   }
 
-  def testPositiveLargeInt() {
+  test("testPositiveLargeInt()") {
     testTokenizes("2147483647", IntegerToken(2147483647))
   }
 
-  def testPositiveInt() {
+  test("testPositiveInt()") {
     testTokenizes("0", IntegerToken(0))
   }
 
-//  def testNegativeInt() {
+//  test("testNegativeInt()") {
 //    testTokenizes("-1", SubtractToken, IntegerToken(1))
 //  }
 //
-//  def testNegativeLargeInt() {
+//  test("testNegativeLargeInt()") {
 //    testTokenizes("-2147483648", IntegerToken(-2147483648))
 //  }
 
-  def testStringToken(){
+  test("testStringToken()"){
     testTokenizes("\"testString\"", StrToken("testString"))
   }
-  def testInitializeString(){
+  test("testInitializeString()"){
     testTokenizes(" str s = \"string\";", StringTypeToken, VarToken("s"), EqualsToken,  StrToken("string"),SemicolonToken)
   }
-  def testFuncPrintString(){
+  test("testFuncPrintString()"){
     testTokenizes("func toString(){" +
       "print(\"hello, \n world \")" +
       "}",FuncToken, VarToken("toString"), LeftParenToken,RightParenToken,LeftCurlyToken,PrintToken,
         LeftParenToken, StrToken("hello, \n world "),RightParenToken,RightCurlyToken)
   }
 
-  def testLeftParen() {
+  test("testLeftParen()") {
     testTokenizes("(", LeftParenToken)
   }
 
 
-  def testRightParen() {
+  test("testRightParen()") {
     testTokenizes(")", RightParenToken)
   }
 
-  def testVariableAlone() {
+  test("testVariableAlone()") {
     testTokenizes("x", VarToken("x"))
   }
 
-  def testVariableWithWhitespaceBefore() {
+  test("testVariableWithWhitespaceBefore()") {
     testTokenizes(" x", VarToken("x"))
   }
 
-  def testVariableWithWhitespaceAfter() {
+  test("testVariableWithWhitespaceAfter()") {
     testTokenizes("x ", VarToken("x"))
   }
 
-  def testVariableContainingReservedWords() {
+  test("testVariableContainingReservedWords()") {
     testTokenizes("ifelse", VarToken("ifelse"))
   }
 
-  def testTwoReservedWords() {
+  test("testTwoReservedWords()") {
     testTokenizes("if else", IfToken, ElseToken)
   }
 
-  def testAnd() {
+  test("testAnd()") {
     testTokenizes("&", AndToken)
   }
 
-  def testMultiplication() {
+  test("testMultiplication()") {
     testTokenizes("*", MultiplicationToken)
   }
 
-  def testBreak() {
+  test("testBreak()") {
     testTokenizes("break", BreakToken)
   }
 
-  def testLessThan(){
+  test("testLessThan()"){
     testTokenizes("<", LessThanToken)
   }
 
-  def testFunc(){
+  test("testFunc()"){
     testTokenizes("func", FuncToken)
   }
 
-  def testFor(){
+  test("testFor()"){
     testTokenizes("for", ForToken)
   }
 
-  def testSubtract(){
+  test("testSubtract()"){
     testTokenizes("-", SubtractToken)
   }
 
-  def testLeftCurly(){
+  test("testLeftCurly()"){
     testTokenizes("{", LeftCurlyToken)
   }
 
-  def testConstructor(){
+  test("testConstructor()"){
     testTokenizes("constructor", ConstructorToken)
   }
 
-  def testPeriod(): Unit = {
+  test("testPeriod()") {
     testTokenizes(".", PeriodToken)
   }
 
-  def testSemiColon(): Unit = {
+  test("testSemiColon()") {
     testTokenizes(";", SemicolonToken)
   }
 
-  def testDivision(): Unit = {
+  test("testDivision()") {
     testTokenizes("/", DivisionToken)
   }
 
-  def testOr(): Unit = {
+  test("testOr()") {
     testTokenizes("|", OrToken)
   }
 
-  def testPeriodWithWhitespaceBefore(): Unit = {
+  test("testPeriodWithWhitespaceBefore()") {
     testTokenizes(" .", PeriodToken)
   }
 
-  def testPeriodWithWhitespaceAfter(): Unit = {
+  test("testPeriodWithWhitespaceAfter()") {
     testTokenizes(". ", PeriodToken)
   }
 
-  def testSemiColonWithWhitespaceBefore(): Unit = {
+  test("testSemiColonWithWhitespaceBefore()") {
     testTokenizes(" ;", SemicolonToken)
   }
 
-  def testSemicolonWithWhitespaceAfter(): Unit = {
+  test("testSemicolonWithWhitespaceAfter()") {
     testTokenizes("; ", SemicolonToken)
   }
 
-  def testDivisionWithWhitespaceBefore(): Unit = {
+  test("testDivisionWithWhitespaceBefore()") {
     testTokenizes(" /", DivisionToken)
   }
 
-  def testDivisionWithWhitespaceAfter(): Unit = {
+  test("testDivisionWithWhitespaceAfter()") {
     testTokenizes("/ ", DivisionToken)
   }
 
-  def testOrWithWhitespaceBefore(): Unit = {
+  test("testOrWithWhitespaceBefore()") {
     testTokenizes(" |", OrToken)
   }
 
-  def testOrWithWhitespaceAfter(): Unit = {
+  test("testOrWithWhitespaceAfter()") {
     testTokenizes("| ", OrToken)
   }
 
-  def testBooleanTrue(){
+  test("testBooleanTrue()"){
     testTokenizes("true", BooleanToken(true))
   }
 
-  def testBooleanFalse(){
+  test("testBooleanFalse()"){
     testTokenizes("false", BooleanToken(false))
   }
 
-  def testBooleanWithWhiteSpaces(){
+  test("testBooleanWithWhiteSpaces()"){
     testTokenizes(" true ", BooleanToken(true))
   }
 
-  def testBooleanWithLeadingWhiteSpace(){
+  test("testBooleanWithLeadingWhiteSpace()"){
     testTokenizes(" false", BooleanToken(false))
   }
 
-  def testBooleanWithEndingWhiteSpace(){
+  test("testBooleanWithEndingWhiteSpace()"){
     testTokenizes("true ", BooleanToken(true))
   }
 
-  def testClass(){
+  test("testClass()"){
     testTokenizes("Class", ClassToken)
   }
 
-  def testClassWithWhiteSpaces(){
+  test("testClassWithWhiteSpaces()"){
     testTokenizes(" Class ", ClassToken)
   }
 
-  def testEquals(){
+  test("testEquals()"){
     testTokenizes("=", EqualsToken)
   }
 
-  def testingStatementIf(){
+  test("testingStatementIf()"){
     testTokenizes("if (i = 10){" +
                             "return true;" +
                           "}",
@@ -207,7 +209,7 @@ object LexerTest {
       ReturnToken, BooleanToken(true),SemicolonToken,
       RightCurlyToken)
   }
-  def testingStatementIfElse(){
+  test("testingStatementIfElse()"){
     testTokenizes("if (i = 10 | i = 5){" +
                             "return true;" +
                           "} " +
@@ -222,28 +224,28 @@ object LexerTest {
       RightCurlyToken)
   }
 
-  def testForLoop(){
+  test("testForLoop()"){
       testTokenizes("for (int i = 0; i <= 10; i++){ w = 10 }", ForToken, LeftParenToken,IntTypeToken, VarToken("i"), EqualsToken,
         IntegerToken(0), SemicolonToken, VarToken("i"), LessThanToken, EqualsToken, IntegerToken(10), SemicolonToken,
         VarToken("i") , PlusToken, PlusToken, RightParenToken, LeftCurlyToken, VarToken("w"), EqualsToken, IntegerToken(10),
         RightCurlyToken)
   }
 
-  def testPrintWithInteger(){
+  test("testPrintWithInteger()"){
     testTokenizes("print(10);", PrintToken, LeftParenToken, IntegerToken(10), RightParenToken, SemicolonToken)
   }
 
-  def testExp1(){
+  test("testExp1()"){
 //    testTokenizes("int i = 50;", TypeToken("int"), VarToken("i"), EqualsToken,IntegerToken(50), SemicolonToken)
   }
 
-  def testMath1(){     // (5 * 10) + 3*(7) / 10 + 12-10
+  test("testMath1()"){     // (5 * 10) + 3*(7) / 10 + 12-10
     testTokenizes("(5 * 10) + 3*(7) / 10 + 12-10", LeftParenToken, IntegerToken(5), MultiplicationToken,
       IntegerToken(10), RightParenToken, PlusToken, IntegerToken(3), MultiplicationToken, LeftParenToken,
       IntegerToken(7), RightParenToken, DivisionToken, IntegerToken(10), PlusToken, IntegerToken(12), SubtractToken,
       IntegerToken(10))
   }
-  def testSubtraction1(){
+  test("testSubtraction1()"){
     //testTokenizes("5-10", IntegerToken(5), SubtractToken, IntegerToken(10))
     testTokenizes("5-10", IntegerToken(5),  SubtractToken, IntegerToken(10))
   }

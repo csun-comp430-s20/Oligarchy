@@ -1,4 +1,5 @@
-object ParserTest {
+import org.scalatest.funsuite.AnyFunSuite
+class ParserTest extends AnyFunSuite {
   def testParses(input: List[Token], expectedProgram: Program ) {
     val parser = Parser(input)
     val (received, _) = parser.parseProgram(input)
@@ -10,12 +11,12 @@ object ParserTest {
     assert(received == expectedProgram)
   }
 
-
-  def testClass(): Unit ={
+//@todo this errors out please fix
+  test("testClass()"){
     val input = "Class testing { int myInt;" +
       "constructor(bool myBool){1;}" +
       "int myMethod(str myString){1;}" +
-      "Return;}"
+      "return;}"
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val program = Program(IntegerExp(1),
@@ -31,7 +32,7 @@ object ParserTest {
     testParses(receivedTokens,program)
   }
 
-  def testIntegerExp(): Unit ={
+  test("testIntegerExp()"){
     val lexerInput = "35"
     val lexer = Lexer(lexerInput)
     val receivedTokens = lexer.tokenize()
@@ -40,7 +41,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testBooleanExp(): Unit ={
+  test("testBooleanExp()"){
     val lexerInput = "true"
     val lexer = Lexer(lexerInput)
     val receivedTokens = lexer.tokenize()
@@ -48,7 +49,7 @@ object ParserTest {
     val expected = BooleanExp(true)
     testParses(receivedTokens,expected, parser.parseExp)
   }
-  def testStringExp(): Unit ={
+  test("testStringExp()"){
     val lexerInput = "\"testString\""
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -56,7 +57,7 @@ object ParserTest {
     val expected = StringExp("testString")
     testParses(receivedTokens,expected, parser.parseExp)
   }
-  def testVariableExp(): Unit ={
+  test("testVariableExp()"){
     val lexerInput = "variableCheck"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -64,7 +65,7 @@ object ParserTest {
     val expected = VariableExp("variableCheck")
     testParses(receivedTokens,expected, parser.parseExp)
   }
-  def testSimpleGroupedExp(): Unit ={
+  test("testSimpleGroupedExp()"){
     val lexerInput = "(14)"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -72,7 +73,7 @@ object ParserTest {
     val expected = GroupedExp(IntegerExp(14))
     testParses(receivedTokens,expected, parser.parseExp)
   }
-  def testPowerExp(): Unit ={
+  test("testPowerExp()"){
     val lexerInput = "2^3"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -82,7 +83,7 @@ object ParserTest {
   }
 
 
-  def testMultiplyExp(): Unit ={
+  test("testMultiplyExp()"){
     val lexerInput = "5*3"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -90,7 +91,7 @@ object ParserTest {
     val expected = MultiplyExp(IntegerExp(5),IntegerExp(3))
     testParses(receivedTokens,expected, parser.parseExp)
   }
-  def testDivideExp(): Unit ={
+  test("testDivideExp()"){
     val lexerInput = "4/2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -99,7 +100,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testPlusExp(): Unit ={
+  test("testPlusExp()"){
     val lexerInput = "4+2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -108,7 +109,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testSubtractExp(): Unit ={
+  test("testSubtractExp()"){
     val lexerInput = "4-2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -117,7 +118,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testEqualsExp(): Unit = {
+  test("testEqualsExp()") {
     val lexerInput = "4==2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -125,7 +126,7 @@ object ParserTest {
     val expected = EqualsExp(IntegerExp(4), IntegerExp(2))
     testParses(receivedTokens, expected, parser.parseExp)
   }
-  def testIntType(): Unit ={
+  test("testIntType()"){
     val input = "int "
     val expectedProgram = IntTypes
     val tokenizer = Lexer(input)
@@ -134,7 +135,7 @@ object ParserTest {
     testParses(receivedTokens, expectedProgram, parser.parseTypes)
   }
 
-  def testStrType(): Unit ={
+  test("testStrType()"){
     val input = "str "
     val expectedProgram = StrTypes
     val tokenizer = Lexer(input)
@@ -143,7 +144,7 @@ object ParserTest {
     testParses(receivedTokens, expectedProgram, parser.parseTypes)
   }
 
-  def testBooleanType(): Unit ={
+  test("testBooleanType()"){
     val input = "bool "
     val expectedProgram = BoolTypes
     val tokenizer = Lexer(input)
@@ -152,7 +153,7 @@ object ParserTest {
     testParses(receivedTokens, expectedProgram, parser.parseTypes)
   }
 
-  def testClassNameType(): Unit ={
+  test("testClassNameType()"){
     val input = "className "
     val expectedProgram = ClassTypes("className")
     val tokenizer = Lexer(input)
@@ -161,7 +162,7 @@ object ParserTest {
     testParses(receivedTokens, expectedProgram, parser.parseTypes)
   }
 
-  def testVarDec(): Unit ={
+  test("testVarDec()"){
     val input = "int num "
     val expectedProgram = VarDeclaration(IntTypes, "num")
     val tokenizer = Lexer(input)
@@ -170,7 +171,7 @@ object ParserTest {
     testParses(receivedTokens, expectedProgram, parser.parseVarDec)
   }
 
-  def testMethodDefWithNoParameter(): Unit ={
+  test("testMethodDefWithNoParameter()"){
     val input = "bool testMethod() return true;"
     val expectedProgram = MethodDef(BoolTypes, "testMethod",null, List[VarDeclaration](), BooleanExp(true))
     val tokenizer = Lexer(input)
@@ -179,7 +180,7 @@ object ParserTest {
     testParses(receivedTokens, expectedProgram, parser.parseMethodDef)
   }
 
-  def testMethodDefWith1Parameter(): Unit ={
+  test("testMethodDefWith1Parameter()"){
     val input = "bool testMethod(int foo) int i =10; return true;"
     val expectedProgram = MethodDef(BoolTypes, "testMethod", AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(10)),
       List[VarDeclaration](VarDeclaration(IntTypes, "foo")), BooleanExp(true))
@@ -189,7 +190,7 @@ object ParserTest {
     testParses(receivedTokens, expectedProgram, parser.parseMethodDef)
   }
 
-  def testMethodDefWith2Parameter(): Unit ={
+  test("testMethodDefWith2Parameter()"){
     val input = "bool testMethod(int foo, bool bar) return true;"
     val expectedProgram = MethodDef(BoolTypes, "testMethod", null,
       List[VarDeclaration](VarDeclaration(IntTypes, "foo"), VarDeclaration(BoolTypes, "bar")), BooleanExp(true))
@@ -199,7 +200,7 @@ object ParserTest {
     testParses(receivedTokens, expectedProgram, parser.parseMethodDef)
   }
 
-  def testInstanceDec(): Unit ={
+  test("testInstanceDec()"){
     val input = "bool foobar;"
     val expectedProgram = InstanceDec(VarDeclaration(BoolTypes, "foobar"))
     val tokenizer = Lexer(input)
@@ -208,7 +209,7 @@ object ParserTest {
     testParses(receivedTokens, expectedProgram, parser.parseInstanceDec)
   }
 
-  def testMethodNameExp(): Unit ={
+  test("testMethodNameExp()"){
     val input = "foobar(5)"
     val expectedProgram = MethodExp(IntegerExp(5), "foobar", List[Exp]())
     val tokenizer = Lexer(input)
@@ -218,7 +219,7 @@ object ParserTest {
   }
 
 
-  def testMethodNameExp2(): Unit ={
+  test("testMethodNameExp2()"){
     val input = "foobar(5, 6, 7)"
     val expectedProgram = MethodExp(IntegerExp(5), "foobar", List[Exp](IntegerExp(6), IntegerExp(7)))
     val tokenizer = Lexer(input)
@@ -227,7 +228,7 @@ object ParserTest {
     testParses(receivedTokens, expectedProgram, parser.parseExp)
   }
 
-  def testOrExp(): Unit ={
+  test("testOrExp()"){
     val lexerInput = "4||2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -236,7 +237,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testAndExp(): Unit ={
+  test("testAndExp()"){
     val lexerInput = "4&&2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -245,7 +246,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testGreaterThanExp(): Unit ={
+  test("testGreaterThanExp()"){
     val lexerInput = "4>2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -254,7 +255,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testGreaterThanEqualToExp(): Unit ={
+  test("testGreaterThanEqualToExp()"){
     val lexerInput = "4>=2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -263,7 +264,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testLessThanExp(): Unit ={
+  test("testLessThanExp()"){
     val lexerInput = "4<2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -272,7 +273,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testLessThanEqualToExp(): Unit ={
+  test("testLessThanEqualToExp()"){
     val lexerInput = "4<=2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -281,34 +282,35 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testPrecendenceExp(): Unit ={
-    val lexerInput = "1+2*5^6"
+
+//  test("testPrecendenceExp()"){
+//    val lexerInput = "1+2*5^6"
+//    val tokenizer = Lexer(lexerInput)
+//    val receivedTokens = tokenizer.tokenize()
+//    val parser = Parser(receivedTokens)
+//    val expected = PlusExp(IntegerExp(1),MultiplyExp(IntegerExp(2),PowerExp(IntegerExp(5),IntegerExp(6))))
+//    testParses(receivedTokens,expected, parser.parseExp)
+//  }
+
+//  test("testPrecendenceLeftToRightExp()"){
+//    val lexerInput = "1^2*5+6"
+//    val tokenizer = Lexer(lexerInput)
+//    val receivedTokens = tokenizer.tokenize()
+//    val parser = Parser(receivedTokens)
+//    val expected = PlusExp(MultiplyExp(PowerExp(IntegerExp(1),IntegerExp(2)),IntegerExp(5)),IntegerExp(6))
+//    testParses(receivedTokens,expected, parser.parseExp)
+//  }
+
+  test("testHighOrderFunctionCallExp()"){
+    val lexerInput = "hofc( myHighOrderFunction, \"mySecondExp\")"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
     val parser = Parser(receivedTokens)
-    val expected = PlusExp(IntegerExp(1),MultiplyExp(IntegerExp(2),PowerExp(IntegerExp(5),IntegerExp(6))))
+    val expected = CallHighOrderExp(VariableExp("myHighOrderFunction"),List(StringExp("mySecondExp")))
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testPrecendenceLeftToRightExp(): Unit ={
-    val lexerInput = "1^2*5+6"
-    val tokenizer = Lexer(lexerInput)
-    val receivedTokens = tokenizer.tokenize()
-    val parser = Parser(receivedTokens)
-    val expected = PlusExp(MultiplyExp(PowerExp(IntegerExp(1),IntegerExp(2)),IntegerExp(5)),IntegerExp(6))
-    testParses(receivedTokens,expected, parser.parseExp)
-  }
-
-  def testHighOrderFunctionCallExp(): Unit ={
-    val lexerInput = "hofc(myHighOrderFunction, mySecondExp)"
-    val tokenizer = Lexer(lexerInput)
-    val receivedTokens = tokenizer.tokenize()
-    val parser = Parser(receivedTokens)
-    val expected = CallHighOrderExp(VariableExp("myHighOrderFunction"),List(StringExp("myVariable")))
-    testParses(receivedTokens,expected, parser.parseExp)
-  }
-
-  def testCreateHighOrderFunctionExp(): Unit ={
+  test("testCreateHighOrderFunctionExp()"){
     val lexerInput = "(int myVariable ) => myVariable + 2"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
@@ -317,7 +319,7 @@ object ParserTest {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
-  def testMethodNameExp1(): Unit ={
+  test("testMethodNameExp1()"){
     val input = "foobar(5, 6)"
     val expectedProgram = MethodExp(IntegerExp(5), "foobar", List[Exp](IntegerExp(6)))
     val tokenizer = Lexer(input)
@@ -327,7 +329,7 @@ object ParserTest {
   }
 
 
-  def testStmtVarDec(): Unit={
+  test("testStmtVarDec()"){
     val input = "int i = 0;"
     val expectedProgram = AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(0))
     val tokenizer = Lexer(input)
@@ -336,7 +338,7 @@ object ParserTest {
     testParses(tokens, expectedProgram, parser.parseStmt)
 
   }
-  def testStmtFor(): Unit={
+  test("testStmtFor()"){
     val input = "for(i = 0; i < 10; i = i + 10;) 1;"
     val expectedProgram = ForStmt(VarStmt("i", IntegerExp(0)), LTExp(VariableExp("i"),IntegerExp(10)), VarStmt("i", PlusExp(VariableExp("i"), IntegerExp(10))), ExpStmt(IntegerExp(1)))
     val tokenizer = Lexer(input)
@@ -345,7 +347,7 @@ object ParserTest {
     testParses(tokens, expectedProgram, parser.parseStmt)
   }
 
-  def testStmtBreak(): Unit={
+  test("testStmtBreak()"){
     val input = "break;"
     val expectedProgram = BreakStmt
     val tokenizer = Lexer(input)
@@ -354,7 +356,7 @@ object ParserTest {
     testParses(tokens, expectedProgram, parser.parseStmt)
   }
 
-  def testBlockStmt(): Unit ={
+  test("testBlockStmt()"){
     val input = "{int myInt = 10;}"
     val tokenizer = Lexer(input)
     val expectedProgram = BlockStmt(List[Stmt](AssignmentStmt(VarDeclaration(IntTypes, "myInt"), IntegerExp(10))))
@@ -363,7 +365,7 @@ object ParserTest {
     testParses(tokens, expectedProgram, parser.parseStmt)
   }
 
-  def testIfStmt(): Unit ={
+  test("testIfStmt()"){
     val input = "if (x == 10) int w = 10; else  int w = 11;"
     val tokenizer = Lexer(input)
     val expectedProgram = ConditionalStmt(EqualsExp(VariableExp("x"), IntegerExp(10)) ,AssignmentStmt(VarDeclaration(IntTypes, "w"), IntegerExp(10)), AssignmentStmt(VarDeclaration(IntTypes, "w"), IntegerExp(11)))
@@ -372,7 +374,7 @@ object ParserTest {
     testParses(tokens, expectedProgram, parser.parseStmt)
   }
 
-//  def testStmtReturnVoid(): Unit={
+//  test("testStmtReturnVoid()"){
 //    val input = "return;"
 //    val tokenizer = Lexer(input)
 //    val expectedProgram = VoidStmt
@@ -382,7 +384,7 @@ object ParserTest {
 //
 //  }
 //
-//  def testStmtReturnExp(): Unit={
+//  test("testStmtReturnExp()"){
 //    val input = "return 1 + 2;"
 //    val tokenizer = Lexer(input)
 //    val expectedProgram = ReturnStmt(PlusExp(IntegerExp(1),IntegerExp(2)))
@@ -392,7 +394,7 @@ object ParserTest {
 //
 //  }
 
-  def testNewClassExp(): Unit ={
+  test("testNewClassExp()"){
     val input = "new myClass(print(1), 1 - 2)"
     val tokenizer = Lexer(input)
     val expectedProgram = NewClassExp("myClass", List[Exp](PrintExp(IntegerExp(1)), SubtractExp(IntegerExp(1), IntegerExp(2))))
@@ -401,7 +403,7 @@ object ParserTest {
     testParses(tokens, expectedProgram, parser.parseExp)
   }
 
-  def testCastExp(): Unit ={
+  test("testCastExp()"){
     val input = "(int) true"
     val tokenizer = Lexer(input)
     val expectedProgram = CastExp(IntTypes, BooleanExp(true))
@@ -411,7 +413,7 @@ object ParserTest {
   }
 
 
-  def testPrintExp(): Unit ={
+  test("testPrintExp()"){
     val input = "print(45) "
     val expectedProgram = PrintExp(IntegerExp(45))
     val tokenizer = Lexer(input)
@@ -420,49 +422,49 @@ object ParserTest {
     testParses(receivedTokens, expectedProgram, parser.parseExp)
   }
 
-  def main(args: Array[String]): Unit = {
-    //    testPrecendenceLeftToRightExp()
-    testStmtFor()
-    testStmtVarDec()
-    testStmtBreak()
-//    testStmtReturnExp()
-//    testStmtReturnVoid()
-    testBlockStmt()
-    testIfStmt()
-    testNewClassExp()
-    testCastExp()
-    testIntType()
-    testStrType()
-    testBooleanType()
-    testClassNameType()
-    testVarDec()
-    testMethodDefWithNoParameter()
-    testMethodDefWith1Parameter()
-    testMethodDefWith2Parameter()
-    testInstanceDec()
-    testMethodNameExp()
-    testMethodNameExp1()
-    testMethodNameExp2()
-    testPrintExp()
-    testCreateHighOrderFunctionExp()
-    testHighOrderFunctionCallExp()
-    testPrecendenceExp()
-    testLessThanEqualToExp()
-    testLessThanExp()
-    testGreaterThanEqualToExp()
-    testGreaterThanExp()
-    testAndExp()
-    testOrExp()
-    testEqualsExp()
-    testSubtractExp()
-    testPlusExp()
-    testDivideExp()
-    testMultiplyExp()
-    testPowerExp()
-    testSimpleGroupedExp()
-    testVariableExp()
-    testStringExp()
-    testIntegerExp()
-    testBooleanExp()
-  }
+//  def main(args: Array[String]) {
+//    //    testPrecendenceLeftToRightExp()
+//    testStmtFor()
+//    testStmtVarDec()
+//    testStmtBreak()
+////    testStmtReturnExp()
+////    testStmtReturnVoid()
+//    testBlockStmt()
+//    testIfStmt()
+//    testNewClassExp()
+//    testCastExp()
+//    testIntType()
+//    testStrType()
+//    testBooleanType()
+//    testClassNameType()
+//    testVarDec()
+//    testMethodDefWithNoParameter()
+//    testMethodDefWith1Parameter()
+//    testMethodDefWith2Parameter()
+//    testInstanceDec()
+//    testMethodNameExp()
+//    testMethodNameExp1()
+//    testMethodNameExp2()
+//    testPrintExp()
+//    testCreateHighOrderFunctionExp()
+//    testHighOrderFunctionCallExp()
+//    testPrecendenceExp()
+//    testLessThanEqualToExp()
+//    testLessThanExp()
+//    testGreaterThanEqualToExp()
+//    testGreaterThanExp()
+//    testAndExp()
+//    testOrExp()
+//    testEqualsExp()
+//    testSubtractExp()
+//    testPlusExp()
+//    testDivideExp()
+//    testMultiplyExp()
+//    testPowerExp()
+//    testSimpleGroupedExp()
+//    testVariableExp()
+//    testStringExp()
+//    testIntegerExp()
+//    testBooleanExp()
+//  }
 }

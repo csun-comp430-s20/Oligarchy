@@ -328,7 +328,7 @@ class Parser(private var input: List[Token]) {
             case _: Exception =>{
                 val (highOrderVardecs, afterVardecs) = parseRep1(tail,parseVarDec,skipCommas)
                 afterVardecs match {
-                case RightParenToken::tail => {
+                case RightParenToken::EqualsToken::GreaterThanToken::tail => {
                 val(body, restTokens2) =  parseExp(tail)
                 (HighOrderExp(highOrderVardecs,body),restTokens2)
               }
