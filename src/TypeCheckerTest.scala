@@ -34,10 +34,59 @@ object TypeCheckerTest {
     assert(expected != received)
   }
 
+  def testPlusExp(): Unit ={
+    val expected = IntTypes
+    val received = myTypechecker.typeof(PlusExp(IntegerExp(2), IntegerExp(1)), Map())
+    assert(expected == received)
+  }
+
+  def testOrExp(): Unit ={
+    val expected = BoolTypes
+    val received = myTypechecker.typeof(OrExp(BooleanExp(true), BooleanExp(false)), Map())
+    assert(expected == received)
+  }
+
+  def testAndExp(): Unit ={
+    val expected = BoolTypes
+    val received = myTypechecker.typeof(AndExp(BooleanExp(true), BooleanExp(false)), Map())
+    assert(expected == received)
+  }
+
+  def testGTExp(): Unit ={
+    val expected = BoolTypes
+    val received = myTypechecker.typeof(GTExp(IntegerExp(2), IntegerExp(1)), Map())
+    assert(expected == received)
+  }
+
+  def testGTEExp(): Unit ={
+    val expected = BoolTypes
+    val received = myTypechecker.typeof(GTEExp(IntegerExp(2), IntegerExp(1)), Map())
+    assert(expected == received)
+  }
+
+  def testLTExp(): Unit ={
+    val expected = BoolTypes
+    val received = myTypechecker.typeof(LTExp(IntegerExp(2), IntegerExp(1)), Map())
+    assert(expected == received)
+  }
+
+  def testLTEExp(): Unit ={
+    val expected = BoolTypes
+    val received = myTypechecker.typeof(LTEExp(IntegerExp(2), IntegerExp(1)), Map())
+    assert(expected == received)
+  }
+  
   def main(args: Array[String]): Unit = {
     testIntegerExp()
     testAssingmentStatementTrue()
     testAssingmentStatementFalse()
+    testPlusExp()
+    testOrExp()
+    testAndExp()
+    testGTExp()
+    testGTEExp()
+    testLTExp()
+    testLTEExp()
   }
 
 }
