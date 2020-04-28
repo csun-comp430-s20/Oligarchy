@@ -1,4 +1,3 @@
-//package src
 //case class IllTypedException(msg: String) extends Exception(msg)
 //
 //
