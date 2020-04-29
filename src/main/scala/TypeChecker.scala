@@ -84,31 +84,31 @@ class Typechecker(val stc: SymbolTableClass){
       case AndExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (BoolTypes, BoolTypes) => BoolTypes
-          case _ => throw IllTypedException("and")
+          case _ => throw IllTypedException("and expression")
         }
       }
       case SubtractExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => IntTypes
-          case _ => throw IllTypedException("and")
+          case _ => throw IllTypedException("Subtract expression")
         }
       }
       case MultiplyExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => IntTypes
-          case _ => throw IllTypedException("and")
+          case _ => throw IllTypedException("multiply expression")
         }
       }
       case DivideExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => IntTypes
-          case _ => throw IllTypedException("and")
+          case _ => throw IllTypedException("divide expression")
         }
       }
       case PowerExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => IntTypes
-          case _ => throw IllTypedException("and")
+          case _ => throw IllTypedException("power expression")
         }
       }
       case EqualsExp(e1, e2) => {
@@ -116,19 +116,19 @@ class Typechecker(val stc: SymbolTableClass){
           case (IntTypes, IntTypes) => BoolTypes
           case (StrTypes, StrTypes) => BoolTypes
           case (BoolTypes, BoolTypes) => BoolTypes
-          case _ => throw IllTypedException("and")
+          case _ => throw IllTypedException("equals expression")
         }
       }
       case PrintExp(e1) => {
         typeof(e1, gamma) match {
           case StrTypes => StrTypes
-          case _ => throw IllTypedException("print")
+          case _ => throw IllTypedException("print expression")
         }
       }
       case PlusExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => IntTypes
-          case _ => throw IllTypedException("add")
+          case _ => throw IllTypedException("add expression")
         }
       }
       case OrExp(e1, e2) => {
@@ -174,7 +174,7 @@ class Typechecker(val stc: SymbolTableClass){
           case x:Types => {
             x
           }
-          case _ => throw IllTypedException("GroupedExp")
+          case _ => throw IllTypedException("Grouped Exp")
         }
       }
       // method call will need to check
