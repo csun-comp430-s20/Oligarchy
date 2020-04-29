@@ -121,6 +121,11 @@ class TypeCheckerTest extends AnyFunSuite {
     val received = mynonEmptyTypechecker.typeof(EqualsExp(StringExp("x"), StringExp("x")), Map())
     assert(expected == received)
   }
+  test("TypeofBoolEqualsExp()"){
+    val expected = BoolTypes
+    val received = mynonEmptyTypechecker.typeof(EqualsExp(BooleanExp(true), BooleanExp(true)), Map())
+    assert(expected == received)
+  }
 
   test("TypeofIntEqualsExp()"){
     val expected = BoolTypes

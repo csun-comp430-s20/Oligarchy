@@ -87,6 +87,38 @@ class Typechecker(val stc: SymbolTableClass){
           case _ => throw IllTypedException("and")
         }
       }
+      case SubtractExp(e1, e2) => {
+        (typeof(e1, gamma), typeof(e2, gamma)) match {
+          case (IntTypes, IntTypes) => IntTypes
+          case _ => throw IllTypedException("and")
+        }
+      }
+      case MultiplyExp(e1, e2) => {
+        (typeof(e1, gamma), typeof(e2, gamma)) match {
+          case (IntTypes, IntTypes) => IntTypes
+          case _ => throw IllTypedException("and")
+        }
+      }
+      case DivideExp(e1, e2) => {
+        (typeof(e1, gamma), typeof(e2, gamma)) match {
+          case (IntTypes, IntTypes) => IntTypes
+          case _ => throw IllTypedException("and")
+        }
+      }
+      case PowerExp(e1, e2) => {
+        (typeof(e1, gamma), typeof(e2, gamma)) match {
+          case (IntTypes, IntTypes) => IntTypes
+          case _ => throw IllTypedException("and")
+        }
+      }
+      case EqualsExp(e1, e2) => {
+        (typeof(e1, gamma), typeof(e2, gamma)) match {
+          case (IntTypes, IntTypes) => BoolTypes
+          case (StrTypes, StrTypes) => BoolTypes
+          case (BoolTypes, BoolTypes) => BoolTypes
+          case _ => throw IllTypedException("and")
+        }
+      }
       case PrintExp(e1) => {
         typeof(e1, gamma) match {
           case StrTypes => StrTypes
