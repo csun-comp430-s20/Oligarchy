@@ -188,6 +188,9 @@ class Typechecker(val stc: SymbolTableClass){
       case MethodExp(e1, methodName, params) => {
         e1 match {
           case e1: VariableExp => {
+            try {stc(e1.value)}catch{
+              case e:NoSuchElementException=> throw IllTypedException("Class name not found")
+            }
             stc(e1.value) match{
               case myClass:DefExtClass =>{
                 myClass.methods.foreach {
@@ -213,8 +216,6 @@ class Typechecker(val stc: SymbolTableClass){
                 }
                 throw IllTypedException("no Methods were defined")
               }
-              case _ =>
-                throw IllTypedException("Class name not found")
             }
           }
           case _=> throw IllTypedException("trying to call a method on a non variable")
