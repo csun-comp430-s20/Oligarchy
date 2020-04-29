@@ -554,22 +554,13 @@ class TypeCheckerTest extends AnyFunSuite {
   }
   test("MethodExp throws Class is not in string format"){
     assertThrows[IllTypedException] {
-      val fooMethod = MethodDef(BoolTypes, "5", ExpStmt(IntegerExp(1)),
-        List(VarDeclaration(StrTypes, "myString")), BooleanExp(false))
-
-      val barClass = DefClass("bar",
-        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
-        List(instanceVar),
-        List(parameter),
-        List(fooMethod))
-
-      val program = Program(IntegerExp(1), List(barClass))
-      Typechecker(program)
+      mynonEmptyTypechecker.typeof(MethodExp(IntegerExp(0), "foo", List(IntegerExp(1))), Map())
     }
-  }/*
+  }
+  /*
   test("MethodExp throws Class name not found") {
     assertThrows[IllTypedException] {
-      val fooMethod = MethodDef(BoolTypes, "foo", ExpStmt(IntegerExp(1)),
+      val fooMethod = MethodDef(BoolTypes, "fooMethod", ExpStmt(IntegerExp(1)),
         List(VarDeclaration(StrTypes, "myString")), BooleanExp(false))
 
       val barClass = DefClass("bar",
