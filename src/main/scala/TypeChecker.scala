@@ -193,28 +193,31 @@ class Typechecker(val stc: SymbolTableClass){
             }
             stc(e1.value) match{
               case myClass:DefExtClass =>{
-                myClass.methods.foreach {
-                  case myMethod: MethodDef  if myMethod.methodName == methodName => {
-                    val (returnTypes, paramVardecs) = (myMethod.types, myMethod.parameters)
-                    if (params.size != paramVardecs.size) {
-                      throw IllTypedException("wrong number of params")
-                    } else {
-                      val expectedTypes = paramVardecs.foldLeft(List(): List[Types])((res, cur) => {
-                        res :+ cur.types
-                      })
-                      val actualTypes = params.foldLeft(List(): List[Types])((res, cur) => {
-                        res :+ typeof(cur, gamma)
-                      })
-                      if (expectedTypes != actualTypes) {
-                        throw IllTypedException("parameter type mismatch")
+                if(myClass.methods.nonEmpty){
+                  val method = myClass.methods.find(p =  _.methodName == methodName).getOrElse(throw IllTypedException("Method Name not found"))
+                  method match {
+                    case myMethod: MethodDef  => {
+                      val (returnTypes, paramVardecs) = (myMethod.types, myMethod.parameters)
+                      if (params.size != paramVardecs.size) {
+                        throw IllTypedException("wrong number of params")
                       } else {
-                        returnTypes
+                        val expectedTypes = paramVardecs.foldLeft(List(): List[Types])((res, cur) => {
+                          res :+ cur.types
+                        })
+                        val actualTypes = params.foldLeft(List(): List[Types])((res, cur) => {
+                          res :+ typeof(cur, gamma)
+                        })
+                        if (expectedTypes != actualTypes) {
+                          throw IllTypedException("parameter type mismatch")
+                        } else {
+                          returnTypes
+                        }
                       }
                     }
-                  }case _ =>
-                    throw IllTypedException("Method Name not found")
+                  }
+                }else{
+                  throw IllTypedException("no Methods were defined")
                 }
-                throw IllTypedException("no Methods were defined")
               }
             }
           }
