@@ -1,19 +1,20 @@
+import org.scalatest.Ignore
 import org.scalatest.funsuite.AnyFunSuite
 
 class TypeCheckerTest extends AnyFunSuite {
-  //val something = new Typechecker()
-  //val myInstanceDec = ;
-  //val myVarDeclaration = ;
-  //val myMethodDef = MethodDef()
-  //val myClass = DefClass("ClassName", ExpStmt(IntegerExp(2)), )
 
+  val myMethod = MethodDef(BoolTypes, "myMethod", ExpStmt(IntegerExp(1)),
+    List(VarDeclaration(StrTypes, "myString")), BooleanExp(false))
+  val instanceVar = InstanceDec(VarDeclaration(IntTypes, "myInt"))
+  val parameter = VarDeclaration(IntTypes, "myInt")
   val myExpression = IntegerExp(1)
-  val emptyClassList: List[Class] = List(DefClass("testing",
+  val singleClassList: List[Class] = List(DefClass("testing",
     BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
     List(InstanceDec(VarDeclaration(IntTypes,"myInt"))),
     List(VarDeclaration(BoolTypes,"myBool")),
     List(MethodDef(BoolTypes,"myMethod",ExpStmt(IntegerExp(1) ),List(VarDeclaration(StrTypes,"myString")), BooleanExp(false)))
   ))
+  val emptyClassList: List[Class] = List()
   val myEmptyProgram = Program(myExpression, emptyClassList)
   //serves to typecheck Empty Program
   val mynonEmptyTypechecker = Typechecker.apply(myEmptyProgram)
@@ -238,4 +239,112 @@ class TypeCheckerTest extends AnyFunSuite {
     val recieved = mynonEmptyTypechecker.typeof(VariableExp("i"), Map("i"-> StrTypes))
     assert(recieved == expected)
   }
+  test("make symbol tables def class ext"){
+    val child = DefExtClass("child",
+      "parent",
+      BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+      List(InstanceDec(VarDeclaration(IntTypes,"myInt"))),
+      List(VarDeclaration(BoolTypes,"myBool")),
+      List(MethodDef(BoolTypes,"myMethod",ExpStmt(IntegerExp(1) ),List(VarDeclaration(StrTypes,"myString")), BooleanExp(false)))
+    )
+    val parent = DefClass("parent",
+      BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+      List(InstanceDec(VarDeclaration(IntTypes,"myInt"))),
+      List(VarDeclaration(BoolTypes,"myBool")),
+      List(MethodDef(BoolTypes,"myMethod",ExpStmt(IntegerExp(1) ),List(VarDeclaration(StrTypes,"myString")), BooleanExp(false)))
+    )
+    val extendedClassList: List[Class] = List(child, parent)
+    val programThatExtendsAClass = Program(IntegerExp(1),extendedClassList)
+    Typechecker(programThatExtendsAClass)
+
+  }
+  test("extended Class throws duplicate methods"){
+    assertThrows[IllTypedException] {
+      val duplicateMethod = MethodDef(BoolTypes, "myMethod", ExpStmt(IntegerExp(1)),
+        List(VarDeclaration(StrTypes, "myString")), BooleanExp(false))
+      val child = DefExtClass("child",
+        "parent",
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(InstanceDec(VarDeclaration(IntTypes, "myInt"))),
+        List(VarDeclaration(BoolTypes, "myBool")),
+        List(duplicateMethod, duplicateMethod))
+      val parent = DefClass("parent",
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(InstanceDec(VarDeclaration(IntTypes, "myInt"))),
+        List(VarDeclaration(BoolTypes, "myBool")),
+        List(MethodDef(BoolTypes, "myMethod", ExpStmt(IntegerExp(1)), List(VarDeclaration(StrTypes, "myString")), BooleanExp(false)))
+      )
+      val extendedClassList: List[Class] = List(child, parent)
+      val programThatExtendsAClass = Program(IntegerExp(1), extendedClassList)
+      Typechecker(programThatExtendsAClass)
+    }
+  }
+  test("extended Class throws duplicate instance variable"){
+    assertThrows[IllTypedException] {
+      val myMethod = MethodDef(BoolTypes, "myMethod", ExpStmt(IntegerExp(1)),
+        List(VarDeclaration(StrTypes, "myString")), BooleanExp(false))
+      val duplicateInstanceVariable = instanceVar
+      val child = DefExtClass("child",
+        "parent",
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(duplicateInstanceVariable,duplicateInstanceVariable),
+        List(VarDeclaration(BoolTypes, "myBool")),
+        List(myMethod))
+      val parent = DefClass("parent",
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(InstanceDec(VarDeclaration(IntTypes, "myInt"))),
+        List(VarDeclaration(BoolTypes, "myBool")),
+        List(MethodDef(BoolTypes, "myMethod2", ExpStmt(IntegerExp(1)), List(VarDeclaration(StrTypes, "myString")), BooleanExp(false)))
+      )
+      val extendedClassList: List[Class] = List(child, parent)
+      val programThatExtendsAClass = Program(IntegerExp(1), extendedClassList)
+      Typechecker(programThatExtendsAClass)
+    }
+  }
+  test("extended Class throws duplicate constructor parameter"){
+    assertThrows[IllTypedException] {
+      val duplicateParameter = parameter
+      val child = DefExtClass("child",
+        "parent",
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(instanceVar),
+        List(duplicateParameter,duplicateParameter),
+        List(myMethod))
+      val parent = DefClass("parent",
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(InstanceDec(VarDeclaration(IntTypes, "myInt"))),
+        List(VarDeclaration(BoolTypes, "myBool")),
+        List(MethodDef(BoolTypes, "myMethod2", ExpStmt(IntegerExp(1)), List(VarDeclaration(StrTypes, "myString")), BooleanExp(false)))
+      )
+      val extendedClassList: List[Class] = List(child, parent)
+      val programThatExtendsAClass = Program(IntegerExp(1), extendedClassList)
+      Typechecker(programThatExtendsAClass)
+    }
+  }
+
+  test("extended Class throws duplicate class name"){
+    assertThrows[IllTypedException] {
+      val child = DefExtClass("child",
+        "parent",
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(instanceVar),
+        List(parameter),
+        List(myMethod))
+      val duplicateClass = DefClass("parent",
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(instanceVar),
+        List(parameter),
+        List(myMethod))
+      val parent = DefClass("parent",
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(InstanceDec(VarDeclaration(IntTypes, "myInt"))),
+        List(VarDeclaration(BoolTypes, "myBool")),
+        List(MethodDef(BoolTypes, "myMethod2", ExpStmt(IntegerExp(1)), List(VarDeclaration(StrTypes, "myString")), BooleanExp(false)))
+      )
+      val extendedClassList: List[Class] = List(child,duplicateClass, parent)
+      val programThatExtendsAClass = Program(IntegerExp(1), extendedClassList)
+      Typechecker(programThatExtendsAClass)
+    }
+  }
+
 }

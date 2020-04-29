@@ -6,12 +6,12 @@ object Typechecker {
   type SymbolTableClass = Map[String, DefExtClass]
 
   def makeSymbolTables(myClasses: List[Class], stClass: SymbolTableClass): SymbolTableClass= {
-    myClasses.foldLeft(stClass) ((res, cur) =>{
+    myClasses.foldLeft(stClass) ((res: SymbolTableClass, cur:Class) =>{
       cur match{
         case head: DefClass =>
-          res ++ makeSymbolTableDefClassHelper(head, stClass)
+          makeSymbolTableDefClassHelper(head,res)
         case head: DefExtClass =>
-          res ++  makeSymbolTableClassExtHelper(head, stClass)
+          makeSymbolTableClassExtHelper(head,res)
       }
     })
   }
@@ -266,19 +266,21 @@ class Typechecker(val stc: SymbolTableClass){
     }
   }
 
-  def typecheckClasses(myClasses: List[Class]): Unit ={
-    myClasses.foldLeft(List(): List[String])((res,cur)=>{
-      cur match {
-      case myClass: DefClass =>
-        checkForCycles(myClass.className, res) // pass an empty list because you havent seen anything
-        typecheckClass(myClass.className)
-        res
-      case myClass: DefExtClass =>
-        checkForCycles(myClass.classname,res)
-        typecheckClass(myClass.classname)
-        res
-      }}
-    )
+  def typecheckClasses(myClasses: List[Class]) : Unit ={
+    if( myClasses.nonEmpty){
+      myClasses.foldLeft(List(): List[String])((res,cur)=>{
+        cur match {
+        case myClass: DefClass =>
+          checkForCycles(myClass.className, res) // pass an empty list because you havent seen anything
+          typecheckClass(myClass.className)
+          res
+        case myClass: DefExtClass =>
+          checkForCycles(myClass.classname,res)
+          typecheckClass(myClass.classname)
+          res
+        }}
+      )
+    }
   }
 
   def checkForCycles(className: String, seen: List[String]): Unit ={
@@ -351,22 +353,13 @@ class Typechecker(val stc: SymbolTableClass){
         gamma
       }
       case BreakStmt => {
-        if(forLoopBool == true){
+        if(forLoopBool){
           gamma
         }
         else{
           throw IllTypedException("Break")
         }
       }
-        // we got rid of this
-//      case ReturnStmt(e1: Exp)=>{
-//        if(typeof(e1, gamma) == Types){
-//          gamma
-//        }
-//        else{
-//          throw IllTypedException("Return")
-//        }
-//      }
       case AssignmentStmt(vd1:VarDeclaration, e1:Exp) =>{
         val tau = vd1.types
         if(typeof(e1, gamma) == tau){
