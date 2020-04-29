@@ -162,20 +162,27 @@ class Typechecker(val stc: SymbolTableClass){
         }
       }
       case CastExp(t1, e1) => { // assumes the user knows how to cast exp ?
-        t1 match{
-          case x:Types => {
-            x
+          t1 match{
+            case IntTypes =>{
+              typeof(e1, gamma) match{
+                case StrTypes | BoolTypes => t1
+              }
+            }
+            case StrTypes =>{
+              typeof(e1, gamma) match{
+                case IntTypes | BoolTypes => t1
+              }
+            }
+            case BoolTypes =>{
+              typeof(e1, gamma) match{
+                case StrTypes | IntTypes => t1
+              }
+            }
+            case _ => throw IllTypedException("not a valid cast type")
           }
-          case _ => throw IllTypedException("cast exp")
-        }
       }
       case GroupedExp(e1) => { // assumes the user knows how to cast exp ?
-        typeof(e1,gamma) match {
-          case x:Types => {
-            x
-          }
-          case _ => throw IllTypedException("Grouped Exp")
-        }
+        typeof(e1,gamma)
       }
       // method call will need to check
       case MethodExp(e1, methodName, params) => {
