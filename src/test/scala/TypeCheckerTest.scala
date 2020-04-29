@@ -1,4 +1,3 @@
-import com.sun.jdi.IntegerType
 import org.scalatest.funsuite.AnyFunSuite
 
 class TypeCheckerTest extends AnyFunSuite {
@@ -85,7 +84,7 @@ class TypeCheckerTest extends AnyFunSuite {
     val received = mynonEmptyTypechecker.typeof(LTEExp(IntegerExp(2), IntegerExp(1)), Map())
     assert(expected == received)
   }
-  def testVariableExp(): Unit ={
+  test ("testTypeofVariableExp()"){
     //type TypeEnv = Map[String, Types]
     val gamma = Map("x" -> StrTypes)
     val expected = StrTypes
@@ -93,37 +92,37 @@ class TypeCheckerTest extends AnyFunSuite {
     assert(expected == received)
   }
 
-  def testSubtractExp(): Unit ={
+  test("TypeofSubtractExp()"){
     val expected = IntTypes
     val received = mynonEmptyTypechecker.typeof(SubtractExp(IntegerExp(2), IntegerExp(1)), Map())
     assert(expected == received)
   }
 
-  def testMultiplyExp(): Unit ={
+  test("TypeofMultiplyExp()"){
     val expected = IntTypes
     val received = mynonEmptyTypechecker.typeof(MultiplyExp(IntegerExp(2), IntegerExp(1)), Map())
     assert(expected == received)
   }
 
-  def testDivideExp(): Unit ={
+  test("TypeofDivideExp()"){
     val expected = IntTypes
     val received = mynonEmptyTypechecker.typeof(DivideExp(IntegerExp(2), IntegerExp(1)), Map())
     assert(expected == received)
   }
 
-  def testPowerExp(): Unit ={
+  test("TypeofPowerExp()"){
     val expected = IntTypes
     val received = mynonEmptyTypechecker.typeof(PowerExp(IntegerExp(2), IntegerExp(1)), Map())
     assert(expected == received)
   }
 
-  def testStrEqualsExp(): Unit ={
+  test("TypeofStrEqualsExp()"){
     val expected = BoolTypes
     val received = mynonEmptyTypechecker.typeof(EqualsExp(StringExp("x"), StringExp("x")), Map())
     assert(expected == received)
   }
 
-  def testIntEqualsExp(): Unit ={
+  test("TypeofIntEqualsExp()"){
     val expected = BoolTypes
     val received = mynonEmptyTypechecker.typeof(EqualsExp(IntegerExp(2), IntegerExp(2)), Map())
     assert(expected == received)
