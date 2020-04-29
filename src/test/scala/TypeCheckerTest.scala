@@ -346,5 +346,44 @@ class TypeCheckerTest extends AnyFunSuite {
       Typechecker(programThatExtendsAClass)
     }
   }
+  test("testing MethodExp") {
+
+  }
+  test("MethodExp throws Class is not in string format"){
+    assertThrows[IllTypedException] {
+
+      Typechecker()
+    }
+  }
+  test("MethodExp throws Class name not found") {
+    assertThrows[IllTypedException] {
+
+      Typechecker()
+    }
+  }
+  test("MethodExp throws no Methods were defined") {
+    assertThrows[IllTypedException] {
+
+      Typechecker()
+    }
+  }
+  test("MethodExp throws Method Name not found") {
+    assertThrows[IllTypedException] {
+
+      Typechecker()
+    }
+  }
+  test("MethodExp throws parameter type mismatch") {
+    assertThrows[IllTypedException] {
+
+      Typechecker()
+    }
+  }
+  test("MethodExp throws wrong number of params") {
+    assertThrows[IllTypedException] {
+
+      Typechecker()
+    }
+  }
 
 }
