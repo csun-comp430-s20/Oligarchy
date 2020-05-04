@@ -596,6 +596,17 @@ class TypeCheckerTest extends AnyFunSuite {
       mynonEmptyTypechecker.typeof(CallHighOrderExp(IntegerExp(1), List(StringExp("i"))), Map())
     }
   }
+
+  test("testing MethodExp") {
+
+  }
+  test("MethodExp throws Class is not in string format"){
+    assertThrows[IllTypedException] {
+      mynonEmptyTypechecker.typeof(MethodExp(IntegerExp(0), "foo", List(IntegerExp(1))), Map())
+    }
+  }
+
+
   test("MethodExp throws trying to call a method on a non variable") {
     val e= intercept[IllTypedException] {
       mynonEmptyTypechecker.typeof(MethodExp(IntegerExp(2),"irrelavent", List(StringExp("i"))), Map())
@@ -701,6 +712,7 @@ class TypeCheckerTest extends AnyFunSuite {
     val result = Typechecker(programThatExtendsAClass).typeof(entryPoint,Map())
     assert(expected == result)
   }
+
 }
 
 
