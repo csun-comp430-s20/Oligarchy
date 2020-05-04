@@ -270,9 +270,6 @@ class Parser(private var input: List[Token]) {
               case _ => throw ParserException("Not Statement")
             }
           }
-          case e => {
-            throw e
-          }
         }
       }
     }
