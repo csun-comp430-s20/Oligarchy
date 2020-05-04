@@ -17,6 +17,9 @@ class CodeGeneratorTest extends AnyFunSuite {
   test("try addition") // try every math operation
   // its ok if we need to remove some
   test("try a math operation on variables")
+  test("try setting a method to a variable")
+  test("try instantiating a class to a variable")
+  test("try calling a method on an instantiated class")
 
 
 }
