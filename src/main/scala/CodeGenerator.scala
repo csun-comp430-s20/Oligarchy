@@ -6,22 +6,3 @@ class CodeGeneratorException(val message: String) extends Exception(message)
 class CodeGenerator {
 
 }
-
-class VariableEntry(val variable: VariableExp, val types: Types, val index: Int) {
-  assert(index >= 0)
-
-  def load(visitor: MethodVisitor): Unit = { // both are treated as integers at the bytecode level
-    types match {
-      case IntTypes | BoolTypes =>
-        visitor.visitVarInsn(ILOAD, index)
-    }
-  }
-
-  def store(visitor: MethodVisitor): Unit = {
-    types match {
-      case IntTypes | BoolTypes =>
-        visitor.visitVarInsn(ILOAD, index)
-    }
-  }
-    // VariableEntr
-}
