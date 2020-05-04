@@ -186,39 +186,42 @@ class Typechecker(val stc: SymbolTableClass){
       }
       // method call will need to check
       case MethodExp(e1, methodName, params) => {
-        if (typeof(e1,gamma)== StrTypes) {
-          val className = e1.asInstanceOf[StringExp]
-          stc(className.value) match{
-            case myClass:DefExtClass =>{
-              myClass.methods.foreach {
-                case myMethod: MethodDef  if myMethod.methodName == methodName => {
-                  val (returnTypes, paramVardecs) = (myMethod.types, myMethod.parameters)
-                  if (params.size != paramVardecs.size) {
-                    throw IllTypedException("wrong number of params")
-                  } else {
-                    val expectedTypes = paramVardecs.foldLeft(List(): List[Types])((res, cur) => {
-                      res :+ cur.types
-                    })
-                    val actualTypes = params.foldLeft(List(): List[Types])((res, cur) => {
-                      res :+ typeof(cur, gamma)
-                    })
-                    if (expectedTypes != actualTypes) {
-                      throw IllTypedException("parameter type mismatch")
-                    } else {
-                      returnTypes
+        e1 match {
+          case e1: VariableExp => {
+            try {stc(e1.value)}catch{
+              case e:NoSuchElementException=> throw IllTypedException("Class name not found")
+            }
+            stc(e1.value) match{
+              case myClass:DefExtClass =>{
+                if(myClass.methods.nonEmpty){
+                  val method = myClass.methods.find(p =  _.methodName == methodName).getOrElse(throw IllTypedException("Method Name not found"))
+                  method match {
+                    case myMethod: MethodDef  => {
+                      val (returnTypes, paramVardecs) = (myMethod.types, myMethod.parameters)
+                      if (params.size != paramVardecs.size) {
+                        throw IllTypedException("wrong number of params")
+                      } else {
+                        val expectedTypes = paramVardecs.foldLeft(List(): List[Types])((res, cur) => {
+                          res :+ cur.types
+                        })
+                        val actualTypes = params.foldLeft(List(): List[Types])((res, cur) => {
+                          res :+ typeof(cur, gamma)
+                        })
+                        if (expectedTypes != actualTypes) {
+                          throw IllTypedException("parameter type mismatch")
+                        } else {
+                          returnTypes
+                        }
+                      }
                     }
                   }
-                }case _ =>
-                  throw IllTypedException("Method Name not found")
+                }else{
+                  throw IllTypedException("no Methods were defined")
+                }
               }
-              throw IllTypedException("no Methods were defined")
             }
-            case _ =>
-              throw IllTypedException("Class name not found")
           }
-        }
-        else{
-          throw IllTypedException("Class is not in string format")
+          case _=> throw IllTypedException("trying to call a method on a non variable")
         }
       }
       case NewClassExp(className: String , e1:List[Exp])=>{
