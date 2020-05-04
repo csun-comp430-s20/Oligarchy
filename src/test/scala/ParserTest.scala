@@ -15,8 +15,8 @@ class ParserTest extends AnyFunSuite {
 //  test("testClass()"){
 //    val input = "Class testing { int myInt;" +
 //      "constructor(bool myBool){1;}" +
-//      "int myMethod(str myString){1;}" +
-//      "return;}"
+//      "bool testMethod() return true;" +
+//      "}"
 //    val tokenizer = Lexer(input)
 //    val receivedTokens = tokenizer.tokenize()
 //    val program = Program(IntegerExp(1),
@@ -25,7 +25,7 @@ class ParserTest extends AnyFunSuite {
 //          BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
 //          List(InstanceDec(VarDeclaration(IntTypes,"myInt"))),
 //          List(VarDeclaration(BoolTypes,"myBool")),
-//          List(MethodDef(StrTypes,"myMethod",ExpStmt(IntegerExp(1) ),List(VarDeclaration(StrTypes,"myString")), BooleanExp(false)))
+//          List(MethodDef(BoolTypes, "testMethod",null, List[VarDeclaration](), BooleanExp(true)))
 //        )
 //      )
 //    )
@@ -72,6 +72,15 @@ class ParserTest extends AnyFunSuite {
     val parser = Parser(receivedTokens)
     val expected = GroupedExp(IntegerExp(14))
     testParses(receivedTokens,expected, parser.parseExp)
+  }
+  test("testing SimpleGroupedExp throws missing  grouped expression"){
+    assertThrows[ParserException] {
+      val lexerInput = "(14"
+      val tokenizer = Lexer(lexerInput)
+      val receivedTokens = tokenizer.tokenize()
+      val parser = Parser(receivedTokens)
+      parser.parseExp(receivedTokens)
+    }
   }
   test("testPowerExp()"){
     val lexerInput = "2^3"
@@ -171,6 +180,16 @@ class ParserTest extends AnyFunSuite {
     testParses(receivedTokens, expectedProgram, parser.parseVarDec)
   }
 
+  test("testing not var declaration"){
+    assertThrows[ParserException] {
+      val input = "int void "
+      val tokenizer = Lexer(input)
+      val receivedTokens = tokenizer.tokenize()
+      val parser = new Parser(receivedTokens)
+      parser.parseVarDec(receivedTokens)
+    }
+  }
+
   test("testMethodDefWithNoParameter()"){
     val input = "bool testMethod() return true;"
     val expectedProgram = MethodDef(BoolTypes, "testMethod",null, List[VarDeclaration](), BooleanExp(true))
@@ -190,10 +209,30 @@ class ParserTest extends AnyFunSuite {
     testParses(receivedTokens, expectedProgram, parser.parseMethodDef)
   }
 
+  test("testMethodDefWith1Parameter witth no return"){
+    val input = "bool testMethod(int foo) int i =10; return;"
+    val expectedProgram = MethodDef(BoolTypes, "testMethod", AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(10)),
+      List[VarDeclaration](VarDeclaration(IntTypes, "foo")), null)
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = new Parser(receivedTokens)
+    testParses(receivedTokens, expectedProgram, parser.parseMethodDef)
+  }
+
   test("testMethodDefWith2Parameter()"){
     val input = "bool testMethod(int foo, bool bar) return true;"
     val expectedProgram = MethodDef(BoolTypes, "testMethod", null,
       List[VarDeclaration](VarDeclaration(IntTypes, "foo"), VarDeclaration(BoolTypes, "bar")), BooleanExp(true))
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = new Parser(receivedTokens)
+    testParses(receivedTokens, expectedProgram, parser.parseMethodDef)
+  }
+
+  test("testMethodDefWith2Parameter no return"){
+    val input = "bool testMethod(int foo, bool bar) return;"
+    val expectedProgram = MethodDef(BoolTypes, "testMethod", null,
+      List[VarDeclaration](VarDeclaration(IntTypes, "foo"), VarDeclaration(BoolTypes, "bar")), BooleanExp(false))
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val parser = new Parser(receivedTokens)
@@ -209,6 +248,16 @@ class ParserTest extends AnyFunSuite {
     testParses(receivedTokens, expectedProgram, parser.parseInstanceDec)
   }
 
+  test("testing InstanceDec throws exception for missing semicolon "){
+    assertThrows[ParserException] {
+      val input = "bool foobar"
+      val tokenizer = Lexer(input)
+      val receivedTokens = tokenizer.tokenize()
+      val parser = new Parser(receivedTokens)
+      parser.parseInstanceDec(receivedTokens)
+    }
+  }
+
   test("testMethodNameExp()"){
     val input = "foobar(5)"
     val expectedProgram = MethodExp(IntegerExp(5), "foobar", List[Exp]())
@@ -217,7 +266,6 @@ class ParserTest extends AnyFunSuite {
     val parser = new Parser(receivedTokens)
     testParses(receivedTokens, expectedProgram, parser.parseExp)
   }
-
 
   test("testMethodNameExp2()"){
     val input = "foobar(5, 6, 7)"
@@ -310,6 +358,36 @@ class ParserTest extends AnyFunSuite {
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
+  test("test HighOrderFunctionCallExp throws a parser exception when missing a comma"){
+    assertThrows[ParserException] {
+      val lexerInput = "hofc( myHighOrderFunction \"mySecondExp\")"
+      val tokenizer = Lexer(lexerInput)
+      val receivedTokens = tokenizer.tokenize()
+      val parser = Parser(receivedTokens)
+      parser.parseExp(receivedTokens)
+    }
+  }
+
+  test("test HighOrderFunctionCallExp throws a parser exception when missing a right paren"){
+    assertThrows[ParserException] {
+      val lexerInput = "hofc( myHighOrderFunction , \"mySecondExp\""
+      val tokenizer = Lexer(lexerInput)
+      val receivedTokens = tokenizer.tokenize()
+      val parser = Parser(receivedTokens)
+      parser.parseExp(receivedTokens)
+    }
+  }
+
+  test("testing call high order expression throws parser exception when missing right paren "){
+    assertThrows[ParserException] {
+      val lexerInput = "(int myVariable  => myVariable + 2"
+      val tokenizer = Lexer(lexerInput)
+      val receivedTokens = tokenizer.tokenize()
+      val parser = Parser(receivedTokens)
+      parser.parseExp(receivedTokens)
+    }
+  }
+
   test("testCreateHighOrderFunctionExp()"){
     val lexerInput = "(int myVariable ) => myVariable + 2"
     val tokenizer = Lexer(lexerInput)
@@ -346,7 +424,24 @@ class ParserTest extends AnyFunSuite {
     val parser = Parser(tokens)
     testParses(tokens, expectedProgram, parser.parseStmt)
   }
-
+  test("testing StmtFor throw parser exception when missing a right paren token"){
+    assertThrows[ParserException] {
+      val input = "for(i = 0; i < 10; i = i + 10; 1;"
+      val tokenizer = Lexer(input)
+      val tokens = tokenizer.tokenize()
+      val parser = Parser(tokens)
+      parser.parseStmt(tokens)
+    }
+  }
+  test("testing StmtFor throw parser exception when missing a semicolon at the end of the expression "){
+    assertThrows[ParserException]{
+      val input = "for(i = 0; i < 10 i = i + 10;) 1"
+      val tokenizer = Lexer(input)
+      val tokens = tokenizer.tokenize()
+      val parser = Parser(tokens)
+      parser.parseStmt(tokens)
+    }
+  }
   test("testStmtBreak()"){
     val input = "break;"
     val expectedProgram = BreakStmt
@@ -372,6 +467,63 @@ class ParserTest extends AnyFunSuite {
     val tokens = tokenizer.tokenize()
     val parser = Parser(tokens)
     testParses(tokens, expectedProgram, parser.parseStmt)
+  }
+  test("testing IfStmt throws parser exception when missing an else"){
+    assertThrows[ParserException] {
+      val input = "if (x == 10) int w = 10;"
+      val tokenizer = Lexer(input)
+      val tokens = tokenizer.tokenize()
+      val parser = Parser(tokens)
+      parser.parseStmt(tokens)
+    }
+  }
+  test("testing IfStmt throws parser exception when missing a right paren token"){
+    assertThrows[ParserException] {
+      val input = "if (x == 10 int w = 10;"
+      val tokenizer = Lexer(input)
+      val tokens = tokenizer.tokenize()
+      val parser = Parser(tokens)
+      parser.parseStmt(tokens)
+    }
+  }
+  test("testing ExpStmt throws parser exception when missing a semicolon"){
+    assertThrows[ParserException] {
+      val input = "1"
+      val tokenizer = Lexer(input)
+      val tokens = tokenizer.tokenize()
+      val parser = Parser(tokens)
+      parser.parseStmt(tokens)
+    }
+  }
+
+  test("testing AssignmentStmt throws parser exception when missing a semicolon"){
+    assertThrows[ParserException] {
+      val input = "int i = 0"
+      val tokenizer = Lexer(input)
+      val tokens = tokenizer.tokenize()
+      val parser = Parser(tokens)
+      parser.parseStmt(tokens)
+    }
+  }
+
+  test("testing AssignmentStmt throws parser exception when missing a equals"){
+    assertThrows[ParserException] {
+      val input = "int i "
+      val tokenizer = Lexer(input)
+      val tokens = tokenizer.tokenize()
+      val parser = Parser(tokens)
+      parser.parseStmt(tokens)
+    }
+  }
+
+  test("testing not a valid stmt "){
+    assertThrows[ParserException] {
+      val input = "void"
+      val tokenizer = Lexer(input)
+      val tokens = tokenizer.tokenize()
+      val parser = Parser(tokens)
+      parser.parseStmt(tokens)
+    }
   }
 
 //  test("testStmtReturnVoid()"){
@@ -403,6 +555,14 @@ class ParserTest extends AnyFunSuite {
     testParses(tokens, expectedProgram, parser.parseExp)
   }
 
+  test("testing NewClassExp throws parser exception "){
+    val input = "myClass(print(1), 1 - 2)"
+    val tokenizer = Lexer(input)
+    val tokens = tokenizer.tokenize()
+    val parser = Parser(tokens)
+    parser.parseExp(tokens)
+  }
+
   test("testCastExp()"){
     val input = "(int) true"
     val tokenizer = Lexer(input)
@@ -422,7 +582,81 @@ class ParserTest extends AnyFunSuite {
     testParses(receivedTokens, expectedProgram, parser.parseExp)
   }
 
-//  def main(args: Array[String]) {
+  test("testing PrintExp throws parser exception for missing right paren"){
+    assertThrows[ParserException] {
+      val input = "print(45 "
+      val tokenizer = Lexer(input)
+      val receivedTokens = tokenizer.tokenize()
+      val parser = new Parser(receivedTokens)
+      parser.parseExp(receivedTokens)
+    }
+  }
+
+  test("testing void types"){
+    val input = "void"
+    val expectedProgram = VoidTypes
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = new Parser(receivedTokens)
+    testParses(receivedTokens, expectedProgram, parser.parseTypes)
+  }
+
+  test("testing groupedExp"){
+    val input = "(0)"
+    val expectedProgram = GroupedExp(IntegerExp(0))
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = new Parser(receivedTokens)
+    testParses(receivedTokens, expectedProgram, parser.parseGroupedExpression)
+  }
+
+  test("testing groupedExp throws a parser exception for missing exp"){
+    assertThrows[ParserException] {
+      val input = "10"
+      val tokenizer = Lexer(input)
+      val receivedTokens = tokenizer.tokenize()
+      val parser = new Parser(receivedTokens)
+      parser.parseGroupedExpression(receivedTokens)
+    }
+  }
+
+  test("testing groupedExp throws a parser exception for missing right paren"){
+    assertThrows[ParserException] {
+      val input = "( 10"
+      val tokenizer = Lexer(input)
+      val receivedTokens = tokenizer.tokenize()
+      val parser = new Parser(receivedTokens)
+      parser.parseGroupedExpression(receivedTokens)
+    }
+  }
+
+  test("testing class extends"){
+    val input = "Class testing extends otherClass{" +
+      "int i;" +
+      "constructor(int w) 1; " +
+      "bool testMethod(int foo) return true; }"
+    val expectedProgram = DefExtClass("testing", "otherClass", ExpStmt(IntegerExp(1)), List(InstanceDec(VarDeclaration(IntTypes, "i"))), List(VarDeclaration(IntTypes, "w")), List(MethodDef(BoolTypes, "testMethod", null,
+      List[VarDeclaration](VarDeclaration(IntTypes, "foo")), BooleanExp(true))))
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = new Parser(receivedTokens)
+    testParses(receivedTokens, expectedProgram, parser.parseClass)
+  }
+
+  test("testing class def"){
+    val input = "Class testing{" +
+      "int i;" +
+      "constructor(int w) 1; " +
+      "bool testMethod(int foo) return true; }"
+    val expectedProgram = DefClass("testing", ExpStmt(IntegerExp(1)), List(InstanceDec(VarDeclaration(IntTypes, "i"))), List(VarDeclaration(IntTypes, "w")), List(MethodDef(BoolTypes, "testMethod", null,
+      List[VarDeclaration](VarDeclaration(IntTypes, "foo")), BooleanExp(true))))
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = new Parser(receivedTokens)
+    testParses(receivedTokens, expectedProgram, parser.parseClass)
+  }
+
+  //  def main(args: Array[String]) {
 //    //    testPrecendenceLeftToRightExp()
 //    testStmtFor()
 //    testStmtVarDec()
