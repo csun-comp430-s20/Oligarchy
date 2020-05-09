@@ -79,7 +79,6 @@ class Typechecker(val stc: SymbolTableClass){
     e match {
       case VariableExp(x) if gamma.contains(x) => gamma(x)
       case IntegerExp(_) => IntTypes
-      case StringExp(_) => StrTypes
       case BooleanExp(true) | BooleanExp(false) => BoolTypes
       case AndExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
@@ -114,14 +113,14 @@ class Typechecker(val stc: SymbolTableClass){
       case EqualsExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => BoolTypes
-          case (StrTypes, StrTypes) => BoolTypes
           case (BoolTypes, BoolTypes) => BoolTypes
           case _ => throw IllTypedException("equals expression")
         }
       }
       case PrintExp(e1) => {
         typeof(e1, gamma) match {
-          case StrTypes => StrTypes
+          case IntTypes => IntTypes
+          case BoolTypes => IntTypes
           case _ => throw IllTypedException("print expression")
         }
       }
@@ -165,17 +164,12 @@ class Typechecker(val stc: SymbolTableClass){
           t1 match{
             case IntTypes =>{
               typeof(e1, gamma) match{
-                case StrTypes | BoolTypes => t1
-              }
-            }
-            case StrTypes =>{
-              typeof(e1, gamma) match{
-                case IntTypes | BoolTypes => t1
+                case  BoolTypes => t1
               }
             }
             case BoolTypes =>{
               typeof(e1, gamma) match{
-                case StrTypes | IntTypes => t1
+                case IntTypes => t1
               }
             }
             case _ => throw IllTypedException("not a valid cast type")
