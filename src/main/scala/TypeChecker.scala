@@ -17,7 +17,7 @@ object Typechecker {
   }
 
   def makeSymbolTableClassExtHelper(myClass: DefExtClass, symbolTableClass: SymbolTableClass): SymbolTableClass ={
-    val DefExtClass(classname, extendedClass, statements, instances,parameters,methods) = myClass
+    val DefExtClass(className, extendedClass, statements, instances,parameters,methods) = myClass
     val methodNames = methods.map(_.methodName).toSet
     if (methodNames.size != methods.size) {
       throw IllTypedException("duplicate methods ")
@@ -30,14 +30,14 @@ object Typechecker {
     if (paramNames.size != parameters.size) {
       throw IllTypedException("duplicate constructor parameters")
     }
-    if (symbolTableClass.contains(classname)) {
-      throw IllTypedException("duplicate Class name: " + classname)
+    if (symbolTableClass.contains(className)) {
+      throw IllTypedException("duplicate Class name: " + className)
     }
-    symbolTableClass + (classname -> myClass)
+    symbolTableClass + (className -> myClass)
   }
 
   def makeSymbolTableDefClassHelper(myClass: DefClass, symbolTableClass: SymbolTableClass): SymbolTableClass={
-    val DefClass(classname, statements, instances, parameters, methods) = myClass
+    val DefClass(className, extendedClass,statements, instances, parameters, methods) = myClass
     val methodNames = methods.map(_.methodName).toSet
     if (methodNames.size != methods.size) {
       throw IllTypedException("duplicate methods ")
@@ -50,11 +50,11 @@ object Typechecker {
     if (paramNames.size != parameters.size) {
       throw IllTypedException("duplicate constructor parameters")
     }
-    if (symbolTableClass.contains(classname)) {
-      throw IllTypedException("duplicate Class name: " + classname)
+    if (symbolTableClass.contains(className)) {
+      throw IllTypedException("duplicate Class name: " + className)
     }
 
-    symbolTableClass + (classname -> DefExtClass(classname,"",statements,instances,parameters,methods))
+    symbolTableClass + (className -> DefExtClass(className,"",statements,instances,parameters,methods))
   }
 
   def allDistinct[A](items: Seq[A]): Boolean = {
@@ -285,8 +285,8 @@ class Typechecker(val stc: SymbolTableClass){
           typecheckClass(myClass.className)
           res
         case myClass: DefExtClass =>
-          checkForCycles(myClass.classname,res)
-          typecheckClass(myClass.classname)
+          checkForCycles(myClass.className,res)
+          typecheckClass(myClass.className)
           res
         }}
       )

@@ -53,13 +53,21 @@ case class MethodDef(types:Types, methodName: String,  stmt: Stmt, parameters: L
 
 case class InstanceDec(v1: VarDeclaration)
 
-sealed trait Class
+sealed trait Class{
+  val className: String
+  val extendedClass: String
+  val statements: Stmt
+  val instances: List[InstanceDec]
+  val parameters: List[VarDeclaration]
+  val methods: List[MethodDef]
+}
 case class DefClass(className: String,
+                    extendedClass: String = "",
                     statements: Stmt,
-                    instance: List[InstanceDec],
+                    instances: List[InstanceDec],
                     parameters: List[VarDeclaration],
                     methods: List[MethodDef]) extends Class
-case class DefExtClass(classname: String,
+case class DefExtClass(className: String,
                        extendedClass: String,
                        statements: Stmt,
                        instances: List[InstanceDec],

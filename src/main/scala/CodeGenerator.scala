@@ -13,7 +13,7 @@ class CodeGenerator(
                      nextIndex: Int,
                      methodVisitor: MethodVisitor
                    ) {
-//  val thisVariable = "this"
+  //  val thisVariable = "this"
   val objectName = "java/lang"
   allClasses: Map[String,Class]
   lambdaMaker: LambdaMaker
