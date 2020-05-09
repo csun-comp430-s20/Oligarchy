@@ -2,7 +2,6 @@
 sealed trait Types
 case object IntTypes extends Types
 case object BoolTypes extends Types
-case object StrTypes extends Types
 case object VoidTypes extends Types // should be removed
 case class ClassTypes(className: String) extends Types
 case class MethodTypes(paramTypes: List[Types] , returnTypes: Types) extends Types
