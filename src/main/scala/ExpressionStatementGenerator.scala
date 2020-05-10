@@ -226,4 +226,3 @@ class ExpressionStatementGenerator(Map[String,Class], lambdaMaker:LambdaMaker, v
       case _=> throw CodeGeneratorException("Not a statement")
   }
 
-}
