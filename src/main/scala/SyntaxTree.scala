@@ -31,7 +31,6 @@ case class IntegerExp(value:Int) extends Exp
 case class StringExp(value:String) extends Exp
 case class BooleanExp(value: Boolean) extends Exp
 case class VariableExp(value: String) extends Exp
-case class PrintExp(e1:Exp) extends Exp
 //case class MethodExp(e1:Exp , methodName: String, e2: List[Exp]) extends Exp
 case class MethodExp(callVariable:Exp, className:String , methodName: String, params: List[Exp]) extends Exp
 case class NewClassExp(className: String, params:List[Exp] ) extends Exp
@@ -66,7 +65,7 @@ case class ConditionalStmt(condition: Exp, ifTrue: Stmt, ifFalse: Stmt) extends 
 case class ReturnStmt(returnExp: Exp) extends Stmt
 case object VoidStmt extends Stmt
 case class VarStmt(variableName:String, newValue:Exp) extends Stmt
-
+case class PrintExp(e1:Exp) extends Stmt
 
 case class MethodDef(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDeclaration], returnExpression: Exp){
   def toDescriptorString(): String = ???

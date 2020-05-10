@@ -255,8 +255,8 @@ class ClassGenerator(program: Program) {
           case PrintExp(e1) =>
           case methodExp: MethodExp => writeMethodCall(methodExp)
           case newExp: NewClassExp => writeNew(newExp)
-          case CastExp(newTypes, e2) => ???
-          case GroupedExp(e) => ???
+//          case CastExp(newTypes, e2) => ???
+          case GroupedExp(e) => writeExpression(e)
           case HighOrderExp(params, body) => ???
           case CallHighOrderExp(function, params) => ???
           case bop: BOP => bopHandler(bop)

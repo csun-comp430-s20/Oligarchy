@@ -17,7 +17,7 @@ import org.objectweb.asm.Opcodes.PUTFIELD
 class LambdaDef(className: String, varDeclaration: List[VarDeclaration], param: String, paramType: ClassTypes, returnType: ClassTypes, body: Exp) {
 
   def toSignatureString(): Unit = {
-    (VarDeclaration(ClassType(ClassGenerator.objectName)).toSignatureString() + LambdaType(paramType, returnType).toSignatureString())
+    (VarDeclaration(ClassTypes(ClassGenerator.objectName)).toSignatureString() + LambdaType(paramType, returnType).toSignatureString())
   }
 
   def constructorDescriptorString(): Unit = {
