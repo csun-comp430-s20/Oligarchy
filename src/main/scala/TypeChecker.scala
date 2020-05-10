@@ -117,13 +117,6 @@ class Typechecker(val stc: SymbolTableClass){
           case _ => throw IllTypedException("equals expression")
         }
       }
-      case PrintExp(e1) => {
-        typeof(e1, gamma) match {
-          case IntTypes => IntTypes
-          case BoolTypes => IntTypes
-          case _ => throw IllTypedException("print expression")
-        }
-      }
       case PlusExp(e1, e2) => {
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => IntTypes
@@ -352,6 +345,10 @@ class Typechecker(val stc: SymbolTableClass){
 
   def typecheckStatement(s: Stmt, gamma: TypeEnv, forLoopBool: Boolean): TypeEnv = {
     s match {
+      case PrintExp(e1) => {
+        typeof(e1, gamma)
+        gamma
+      }
       case ExpStmt(e1: Exp) =>{
         typeof(e1,gamma)
         gamma
