@@ -11,10 +11,14 @@ class CodeGenerator(
                      nextIndex: Int,
                      methodVisitor: MethodVisitor
                    ) {
-
+  //  val thisVariable = "this"
+  val objectName = "java/lang"
+  allClasses: Map[String,Class]
+  lambdaMaker: LambdaMaker
 
   // should be similar to the constructor method in java here we will set up how we will generate code
   def apply(outputClassName: String, outputMethodName: String): CodeGenerator = {
+
   }//apply
 
   private def getEntryFor(variable: String): VariableEntry = {
