@@ -15,11 +15,17 @@ import org.objectweb.asm.Opcodes.IFEQ
 import org.objectweb.asm.Opcodes.NEW
 import org.objectweb.asm.Opcodes.DUP
 import org.objectweb.asm.Opcodes.INVOKESPECIAL
+import org.objectweb.asm.Opcodes.IF_ICMPLT
+import org.objectweb.asm.Opcodes.IF_ICMPEQ
+import org.objectweb.asm.Opcodes.IADD
+import org.objectweb.asm.Opcodes.ISUB
+import org.objectweb.asm.Opcodes.IDIV
+import org.objectweb.asm.Opcodes.IMUL
 
 class ExpressionStatementGenerator(Map[String,Class], lambdaMaker:LambdaMaker, variables:VariableTable, methodVisitor:MethodVisitor) {
 
   def printlnDescriptor(forType: Types): String = {
-    val inner = ClassTypes((ClassGemerator.objectName)).className
+    val inner = ClassTypes((ClassGenerator.objectName)).className
     ("(" + inner + ")V")
   }
 
@@ -130,7 +136,7 @@ class ExpressionStatementGenerator(Map[String,Class], lambdaMaker:LambdaMaker, v
   def writeMethodCall(methodExp: MethodExp): Unit={
       writeExpression(methodExp.e1)
       writeExpressions(methodExp.e2)
-      methodVisitor.vistitMethodInsn(INVKOEVIRTUAL, className, methodExp.methodName, methodDescriptorFor(className, methodExp.methodName), false)
+      methodVisitor.vistitMethodInsn(INVOKEVIRTUAL, className, methodExp.methodName, methodDescriptorFor(className, methodExp.methodName), false)
   }
 
   def writeNew(newExp:NewClassExp): Unit={
@@ -150,29 +156,25 @@ class ExpressionStatementGenerator(Map[String,Class], lambdaMaker:LambdaMaker, v
 
   def writeExpression(exp: Exp): Unit={
     exp match{
-      case VariableExp(value) => loadVariable(exp.asInstanceOf[VariableExp].value)
-      case IntegerExp(value) => writeIntLiteral(exp.asInstanceOf[IntegerExp].value)
-      case BooleanExp(value) => if (exp.asInstanceOf[BooleanExp].value) writeIntLiteral( 1) else writeIntLiteral(0)
-      case PlusExp(leftExp, rightExp)  => {
-        val plusExp = exp.asInstanceOf[PlusExp]
+      case VariableExp(value) => loadVariable(value)
+      case IntegerExp(value) => writeIntLiteral(value)
+      case BooleanExp(value) =>  writeIntLiteral( if (value) 1 else 0)
+      case plusExp:PlusExp  => {
         writeExpression(plusExp.leftExp)
         writeExpression(plusExp.rightExp)
         writeOp(plusExp)
       }
-      case SubtractExp(leftExp, rightExp)  => {
-        val subExp = exp.asInstanceOf[SubtractExp]
+      case subExp:SubtractExp  => {
         writeExpression(subExp.leftExp)
         writeExpression(subExp.rightExp)
         writeOp(subExp)
       }
-      case DivideExp(leftExp, rightExp)  => {
-        val divExp = exp.asInstanceOf[DivideExp]
+      case divExp:DivideExp => {
         writeExpression(divExp.leftExp)
         writeExpression(divExp.rightExp)
         writeOp(divExp)
       }
-      case MultiplyExp(leftExp, rightExp)  => {
-        val multExp = exp.asInstanceOf[MultiplyExp]
+      case multExp:MultiplyExp  => {
         writeExpression(multExp.leftExp)
         writeExpression(multExp.rightExp)
         writeOp(multExp)
