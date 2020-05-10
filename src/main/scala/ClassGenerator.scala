@@ -87,9 +87,26 @@ class ClassGenerator(program: Program) {
 
   case class SingleClassGenerator(classDef: Class) {
 
-    private var forClass:DefExtClass =_
-    private var referenceType:ClassTypes = _
+    private var forClass:Class =_
+    private var thisType:ClassTypes = _
     private var classWriter:ClassWriter = _
+
+
+    def apply(forClass: Class) {
+      this.forClass = forClass
+      this.thisType = ClassTypes(forClass.className)
+      this.classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES)
+      classWriter.visit(V1_7, // Java 1.7
+        ACC_PUBLIC, // public
+        forClass.className, // class name
+        null, // signature (null means not generic)
+        forClass.extendedClass, // superclass if null is passed it checks for it and corrects it
+        new Array[String](0)) // interfaces (none)
+
+      for (field <- forClass.instances) {
+        classWriter.visitField(ACC_PUBLIC, field.v1.varName, field.v1.types.toDescriptorString, null, null).visitEnd()
+      }
+    } // SingleClassGenerator
 
     private def getEntryFor(variable: String) = {
 

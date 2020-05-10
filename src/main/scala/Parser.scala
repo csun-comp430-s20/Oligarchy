@@ -149,7 +149,7 @@ class Parser(private var input: List[Token]) {
                 val (stmt, restTokens3) = parseStmt(tail)
                 var (methods: List[MethodDef], restTokens4: List[Token]) = parseRepeat(restTokens3, parseMethodDef)
                 restTokens4 match {
-                  case RightCurlyToken ::afterClassTokens => (DefClass(classname,"", stmt, instances, declarations, methods), afterClassTokens)
+                  case RightCurlyToken ::afterClassTokens => (DefClass(classname,null, stmt, instances, declarations, methods), afterClassTokens)
                 }
 
               }

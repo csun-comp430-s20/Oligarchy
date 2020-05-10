@@ -1,13 +1,15 @@
 
-sealed trait Types
+sealed trait Types{
+  def toDescriptorString:String
+}
 case object IntTypes extends Types(){
-  def toDescriptiorString(): String ={
-    ("I")
+  def toDescriptorString: String = {
+    "I"
   }
 }
 case object BoolTypes extends Types(){
-  def toDescriptorString(): String ={
-    ("Z")
+  def toDescriptorString: String ={
+    "Z"
   }
 }
 case object StrTypes extends Types
@@ -74,7 +76,7 @@ sealed trait Class{
   val methods: List[MethodDef]
 }
 case class DefClass(className: String,
-                    extendedClass: String = "",
+                    extendedClass: String = null,
                     statements: Stmt,
                     instances: List[InstanceDec],
                     parameters: List[VarDeclaration],
