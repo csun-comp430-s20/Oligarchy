@@ -172,13 +172,14 @@ class Typechecker(val stc: SymbolTableClass){
         typeof(e1,gamma)
       }
       // method call will need to check
-      case MethodExp(e1, methodName, params) => {
+      case MethodExp(e1,className, methodName, params) => {
         e1 match {
           case e1: VariableExp => {
-            try {stc(e1.value)}catch{
+            typeof(e1,gamma)
+            try {stc(className)}catch{
               case e:NoSuchElementException=> throw IllTypedException("Class name not found")
             }
-            stc(e1.value) match{
+            stc(className) match{
               case myClass:DefExtClass =>{
                 if(myClass.methods.nonEmpty){
                   val method = myClass.methods.find(p =  _.methodName == methodName).getOrElse(throw IllTypedException("Method Name not found"))
