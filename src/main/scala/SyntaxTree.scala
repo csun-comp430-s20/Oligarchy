@@ -36,9 +36,11 @@ case class MethodExp(callVariable:Exp, className:String , methodName: String, pa
 case class NewClassExp(className: String, params:List[Exp] ) extends Exp
 case class CastExp(newTypes: Types , e2: Exp) extends Exp
 case class GroupedExp(e: Exp) extends Exp
-case class HighOrderExp(params: List[VarDeclaration], body: Exp) extends Exp
-case class CallHighOrderExp(function: Exp, params: List[Exp]) extends Exp
-abstract case class BOP() extends Exp{
+//case class HighOrderExp(params: List[VarDeclaration], body: Exp) extends Exp
+case class HighOrderExp(param: VarDeclaration, classTypes: ClassTypes, returnType: ClassTypes, body: Exp) extends Exp
+//case class CallHighOrderExp(function: Exp, params: List[Exp]) extends Exp
+case class CallHighOrderExp(lambda: Exp, classTypes: ClassTypes, param: Exp) extends Exp
+sealed trait  BOP extends Exp{
   val leftExp: Exp
   val rightExp: Exp
 }

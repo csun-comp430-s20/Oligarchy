@@ -1,3 +1,26 @@
+object VariableTable {
+  @throws[CodeGeneratorException]
+  def withFormalParam(thisType: ClassTypes, paramType: ClassTypes, param: String): VariableTable = {
+    val formalParams = List(VarDeclaration(paramType, param))
+    withFormalParams(thisType, formalParams)
+  } // withFormalParam
+
+  @throws[CodeGeneratorException]
+  def withFormalParams(thisType: ClassTypes, formalParams: List[VarDeclaration]): VariableTable = {
+    val table = new VariableTable
+    table.addEntry("this", thisType)
+    formalParams.foreach(formalParam => {
+      table.addEntry(formalParam)
+    })
+    table
+  } // withFormalParams
+
+  @throws[CodeGeneratorException]
+  def withFormalParamsFrom(thisType: ClassTypes, callable: MethodDef) = {
+    withFormalParams(thisType, callable.parameters)
+  } // withFormalParamsFrom
+}
+
 class VariableTable {
 
   private var variables: Map[String, VariableEntry] = _
@@ -30,27 +53,7 @@ class VariableTable {
 
   def hasEntryFor(variable: String): Boolean = {
     variables.contains(variable)
-  }// hasEntryFor
+  } // hasEntryFor
 
-  @throws[CodeGeneratorException]
-  def withFormalParam(thisType: ClassTypes, paramType: ClassTypes, param: String): VariableTable = {
-    val formalParams = List(VarDeclaration(paramType,param))
-    withFormalParams(thisType, formalParams)
-  }// withFormalParam
-
-  @throws[CodeGeneratorException]
-  def withFormalParams(thisType: ClassTypes, formalParams: List[VarDeclaration]): VariableTable = {
-    val table = new VariableTable
-    table.addEntry("this", thisType)
-    formalParams.foreach(formalParam =>{
-      table.addEntry(formalParam)
-    })
-    table
-  }// withFormalParams
-
-  @throws[CodeGeneratorException]
-  def withFormalParamsFrom(thisType: ClassTypes, callable: MethodDef) = {
-    withFormalParams(thisType, callable.parameters)
-  }// withFormalParamsFrom
 
 }
