@@ -346,14 +346,13 @@ class Parser(private var input: List[Token]) {
         case HOFCToken :: LeftParenToken :: tail => {
           val (function, restTokens) = parseExp(tail)
           restTokens match {
-            case CommaToken :: afterComma => {
-              val (returnType, afterReturnType) = parseTypes(afterComma)
+            case CommaToken :: VarToken(name) ::afterReturnType => {
               afterReturnType match {
                 case CommaToken :: tail => {
                   val (parameters, restTokens2) = parseExp(tail)
                   restTokens2 match {
                     case RightParenToken :: tail => {
-                      (CallHighOrderExp(function, returnType,parameters), tail)
+                      (CallHighOrderExp(function, ClassTypes(name),parameters), tail)
                     }
                     case _ => throw ParserException("not a high order function call")
                   }
