@@ -333,7 +333,7 @@ class Parser(private var input: List[Token]) {
                   afterType match {
                     case RightParenToken :: EqualsToken :: GreaterThanToken :: tail => {
                       val (body, restTokens2) = parseExp(tail)
-                      (HighOrderExp(highOrderVardec,highOrderReturnType, body), restTokens2)
+                      (HighOrderExp(highOrderVardec, highOrderReturnType, body), restTokens2)
                     }
                     case _ => throw ParserException("is not a high order function instantiation")
                   }
@@ -346,21 +346,28 @@ class Parser(private var input: List[Token]) {
         case HOFCToken :: LeftParenToken :: tail => {
           val (function, restTokens) = parseExp(tail)
           restTokens match {
-            case CommaToken :: tail => {
-              val (parameters, restTokens2) = parseRep1(tail, parseExp, skipCommas)
-              restTokens2 match {
-                case RightParenToken :: tail => {
-                  (CallHighOrderExp(function, parameters), tail)
+            case CommaToken :: afterComma => {
+              val (returnType, afterReturnType) = parseTypes(afterComma)
+              afterReturnType match {
+                case CommaToken :: tail => {
+                  val (parameters, restTokens2) = parseExp(tail)
+                  restTokens2 match {
+                    case RightParenToken :: tail => {
+                      (CallHighOrderExp(function, returnType,parameters), tail)
+                    }
+                    case _ => throw ParserException("not a high order function call")
+                  }
                 }
                 case _ => throw ParserException("not a high order function call")
               }
             }
-            case _ => throw ParserException("not a high order function call")
+            case _ => throw ParserException("no comma")
           }
         }
         case _ => throw ParserException("Probably Not an Expression")
       }
-    } catch {
+    }
+    catch {
       case _: ParserException => {
         val (finalExp, restTokens) = parseBinaryOperator(tokens)
         (finalExp, restTokens)
@@ -476,7 +483,9 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  private def skipCommas(tokens: List[Token]): (Any, List[Token]) = {
+  private def skipCommas(tokens: List[Token]): (Any, List[Token])
+
+  = {
     tokens match {
       case CommaToken :: restTokens => ("Skipped", restTokens)
       case _ => throw ParserException("No commas to skip")
@@ -486,7 +495,9 @@ class Parser(private var input: List[Token]) {
   private def parseRep1[A, B](tokens: List[Token],
                               parseWanted: List[Token] => (A, List[Token]),
                               parseSkip: List[Token] => (B, List[Token])):
-  (List[A], List[Token]) = {
+  (List[A], List[Token])
+
+  = {
     try {
       val (a, restTokens) = parseWanted(tokens)
       val (_, restTokens2) = parseRepeat(restTokens, parseSkip)
@@ -501,7 +512,9 @@ class Parser(private var input: List[Token]) {
     }
   }
 
-  private def parseRepeat[A](tokens: List[Token], parseOne: List[Token] => (A, List[Token])): (List[A], List[Token]) = {
+  private def parseRepeat[A](tokens: List[Token], parseOne: List[Token] => (A, List[Token])): (List[A], List[Token])
+
+  = {
     try {
       val (a, restTokens) = parseOne(tokens)
       val (restAs, finalRestTokens) = parseRepeat(restTokens, parseOne)
