@@ -34,7 +34,7 @@ class LambdaDef(className: String, varDeclaration: List[VarDeclaration], param: 
   }
 
   def bridgeApplyDescriptorString(): Unit = {
-    val objectType = VarDeclaration(ClassTypes(ClassGereator.objectName))
+    val objectType = VarDeclaration(ClassTypes(ClassGenerator.objectName))
 
   }
 
@@ -59,7 +59,7 @@ class LambdaDef(className: String, varDeclaration: List[VarDeclaration], param: 
 
     }
     catch {
-      case _ => throw CodeGeneratorException("Failed to write constructor")
+      case _ => throw new CodeGeneratorException("Failed to write constructor")
     }
   }
 
@@ -73,7 +73,7 @@ class LambdaDef(className: String, varDeclaration: List[VarDeclaration], param: 
       methodVisitor.visitMaxs(0, 0)
     }
     catch {
-      case _ => throw CodeGeneratorException("Failed to write typed apply")
+      case _ => throw new CodeGeneratorException("Failed to write typed apply")
     }
   }
 
@@ -89,7 +89,7 @@ class LambdaDef(className: String, varDeclaration: List[VarDeclaration], param: 
       methodVisitor.visitMaxs(0, 0)
     }
     catch {
-      case _ => throw CodeGeneratorException("Failed to write bridge apply")
+      case _ => throw new CodeGeneratorException("Failed to write bridge apply")
     }
   }
 

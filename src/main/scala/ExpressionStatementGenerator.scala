@@ -2,26 +2,21 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes._
 
-class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: LambdaMaker, variables: VariableTable, methodVisitor: MethodVisitor) {
 
+case object ExpressionStatementGenerator{
   def printlnDescriptor(forType: Types): String = {
     val inner = ClassTypes((ClassGenerator.objectName)).className
     ("(" + inner + ")V")
   }
+}
+
+class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: LambdaMaker, variables: VariableTable, methodVisitor: MethodVisitor) {
 
   def classDefFor(name: String): Class = {
     if (allClasses contains name) {
       allClasses(name)
     } else {
       throw new CodeGeneratorException("No Class named " + name)
-    }
-  }
-
-  def constructorDescriptorFor(name: String): String = {
-    name match {
-      case ClassGenerator.objectName => ("()V")
-      case name.startsWith(LambdaMaker.LAMBDA_PREFIX) => lambdaMaker.constructorDescriptorFor(name)
-      case _ => classDefFor(name).constructor.toDescriptorString()
     }
   }
 
@@ -42,7 +37,7 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
   def fieldDescriptorFor(className: String, fieldName: String): String = {
     className match {
       case ClassGenerator.objectName => throw new CodeGeneratorException("Nonexistant field " + fieldName)
-      case className.startsWith(LambdaMaker.LAMBDA_PREFIX) => lambdaMaker.fieldDescriptorFor(className, fieldName)
+      case className => if(className.startsWith(LambdaMaker.LAMBDA_PREFIX)) lambdaMaker.fieldDescriptorFor(className, fieldName)
       case _ => {
         val classDef: Class = classDefFor(className)
         val varDecs: List[InstanceDec] = classDef.instances
@@ -65,9 +60,21 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
   def doReturn(returnType: Types): Unit = {
     returnType match {
       case IntTypes | BoolTypes => methodVisitor.visitInsn(IRETURN)
-      //@ToDo add refence type return
-      case _ => throw new new CodeGeneratorException ("Unkonwn Type: " + returnType)
+      case classTypes:ClassTypes => methodVisitor.visitInsn(ARETURN)
+      case _ => throw new CodeGeneratorException ("Unkonwn Type: " + returnType)
     }
+  }
+  //@Todo writeGet not sure what get is in our language
+
+  def writeLambdaExp(highOrderExp: HighOrderExp): Unit={
+    writeExpression(lambdaMaker.translateLambda(highOrderExp, variables))
+  }
+
+  def writeLambdaCallExp(callhighOrderExp: CallHighOrderExp): Unit={
+    writeExpression(callhighOrderExp.lambda)
+    writeExpression(callhighOrderExp.param)
+    methodVisitor.visitMethodInsn(INVOKEINTERFACE, LambdaMaker.EXTENDS_NAME.name, LambdaMaker.APPLY_NAME.name, LambdaDef.bridgeApplyDescriptorString(), true)
+    methodVisitor.visitTypeInsn(CHECKCAST, callhighOrderExp.classTypes.className) // we need to change how our higher order functions are called
   }
 
   def writeIntLiteral(value: Int): Unit = {
@@ -92,7 +99,7 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
       case GTEExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPGE, conditionTrue)
       case GTExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPGT, conditionTrue)
       case EqualsExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ACMPEQ, conditionTrue)
-      case _ => throw new new CodeGeneratorException ("Unrecognized operation: " + exp)
+      case _ => throw new CodeGeneratorException ("Unrecognized operation: " + exp)
     }
     writeIntLiteral(0)
     methodVisitor.visitJumpInsn(GOTO, afterCondition)
@@ -124,9 +131,6 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
     writeExpressions(newExp.params)
     methodVisitor.visitMethodInsn(INVOKESPECIAL, newExp.className, "<init>", constructorDescriptorFor(newExp.className), false)
   }
-
-  //@TODO dont know what this section is for we also dont have a lambdaExp
-  //def writeGet( ) def lambdaEXP or lambdaCallExp
 
   def writeExpressions(exp: List[Exp]): Unit = {
     exp.foreach {
@@ -161,7 +165,10 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
       }
       case methodExp: MethodExp => writeMethodCall(methodExp)
       case NewClassExp(className, e1) => writeNew(exp.asInstanceOf[NewClassExp])
-      //@ToDo add the lambda things
+      case newExp: NewClassExp => writeNew(newExp)
+      case GroupedExp(e) => writeExpression(e)
+      case highOrderExp:HighOrderExp => writeLambdaExp(highOrderExp)
+      case callHighOrderExp: CallHighOrderExp => writeLambdaCallExp(callHighOrderExp)
       case _ => throw new CodeGeneratorException("Unrecognized expression: " + exp)
     }
   }
@@ -184,21 +191,34 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
     methodVisitor.visitLabel(afterFalseLabel)
   }
 
+  def writeForStatement(forStmt: ForStmt): Unit ={
+    val head = Label
+    val afterFor = Label
+    methodVisitor.visitLabel(head)
+    writeStatements(forStmt.assign)
+    writeExpression(forStmt.e1)
+    methodVisitor.visitJumpInsn(IFEQ, afterFor)
+    writeStatements(forStmt.forBody)
+    writeStatements(forStmt.inc)
+    methodVisitor.visitJumpInsn(GOTO, head)
+    methodVisitor.visitLabel(afterFor)
+  }
   def writeStatements(stmt: Stmt): Unit = {
     stmt match {
-      case ExpStmt(e1) =>
+      case expStmt:ExpStmt => writeExpression(expStmt.e1)
       case AssignmentStmt(varDec, exp) => {
         val stmtEntry = stmt.asInstanceOf[AssignmentStmt]
         variables.addEntry(stmtEntry.varDec.varName, stmtEntry.varDec.types)
         writeExpression(stmtEntry.exp)
         storeVariable(stmtEntry.varDec.varName)
       }
-      case ForStmt(assign, e1, inc, forBody) =>
-      case BreakStmt =>
-      case BlockStmt(statements) =>
-      case ConditionalStmt(condition, ifTrue, ifFalse) =>
-      case ReturnStmt(returnExp) =>
-      case VoidStmt =>
+      case forStmt:ForStmt => writeForStatement(forStmt)
+      case BreakStmt => ???
+      case BlockStmt(statements) => for (statement: Stmt <- statements) {
+        writeStatements(statement)
+      }
+      case stmt:ConditionalStmt => writeIfStatement(stmt)
+      case returnStmt:ReturnStmt => writeExpression(returnStmt.returnExp)
       case VarStmt(variableName, newValue) => {
         writeExpression(stmt.asInstanceOf[VarStmt].newValue)
         storeVariable(stmt.asInstanceOf[VarStmt].variableName)

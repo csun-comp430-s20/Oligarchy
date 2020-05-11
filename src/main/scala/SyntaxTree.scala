@@ -13,15 +13,26 @@ case object BoolTypes extends Types(){
   }
 }
 
-case object VoidTypes extends Types // should be removed
-case class ClassTypes(className: String) extends Types
-case class MethodTypes(paramTypes: List[Types] , returnTypes: Types) extends Types
+case object VoidTypes extends Types (){
+  def toDescriptorString: String ={
+    "V"
+  }
+}
 
+case class ClassTypes(className: String) extends Types(){
+  def toDescriptorString: String ={
+    ("L" + className + ";")
+  }
+}
+case class MethodTypes(paramTypes: List[Types] , returnTypes: Types) extends Types(){
+  def toDescriptorString(): String ={
 
+  }
+}
 
 case class VarDeclaration(types: Types, varName: String)(){
-  def toDescriptorString(): Unit ={
-
+  def toDescriptorString(): String ={
+    (varName)
   }
 }
 
