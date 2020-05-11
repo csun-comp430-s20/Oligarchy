@@ -40,7 +40,7 @@ class LambdaDef(className: String, varDeclaration: List[VarDeclaration], param: 
 
   def writeConstructor(classWriter: ClassWriter): Unit = {
     try {
-      val methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "<init>", varDeclaration.className, null, null)
+      val methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "<init>", className, null, null)
       methodVisitor.visitCode()
       methodVisitor.visitVarInsn(ALOAD, 0)
       methodVisitor.visitMethodInsn(INVOKEVIRTUAL, ClassGenerator.objectName, "<init>", "()V", false)

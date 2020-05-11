@@ -12,8 +12,6 @@ class Parser(private var input: List[Token]) {
     tokens match {
       case IntTypeToken :: tail =>
         (IntTypes, tail)
-      case StringTypeToken :: tail =>
-        (StrTypes, tail)
       case BooleanTypeToken :: tail =>
         (BoolTypes, tail)
       case (className: VarToken) :: tail =>
@@ -291,20 +289,20 @@ class Parser(private var input: List[Token]) {
       tokens match {
         case (method: VarToken) :: LeftParenToken :: tail => {
           val (baseExp, restTokens) = parseExp(tail)
-          restTokens match{
-            case VariableExp(className) :: restTokens2 =>{
-              restTokens2 match{
+          restTokens match {
+            case VariableExp(className) :: restTokens2 => {
+              restTokens2 match {
                 case CommaToken :: afterCommaTail => {
-                val (parameters, restTokens3) = parseRep1 (afterCommaTail, parseExp, skipCommas)
-                restTokens3 match {
-                  case RightParenToken :: tail => (MethodExp (baseExp, className, method.name, parameters), tail)
-                  case _ => throw ParserException ("not a method expression")
-                 }
+                  val (parameters, restTokens3) = parseRep1(afterCommaTail, parseExp, skipCommas)
+                  restTokens3 match {
+                    case RightParenToken :: tail => (MethodExp(baseExp, className, method.name, parameters), tail)
+                    case _ => throw ParserException("not a method expression")
+                  }
                 }
-               case RightParenToken :: tail => (MethodExp (baseExp, className, method.name, List()), tail)
-               case _ => throw ParserException ("not a method expression")
-                }
-             }
+                case RightParenToken :: tail => (MethodExp(baseExp, className, method.name, List()), tail)
+                case _ => throw ParserException("not a method expression")
+              }
+            }
           }
         }
         case NewToken :: (className: VarToken) :: LeftParenToken :: tail => {
@@ -328,13 +326,19 @@ class Parser(private var input: List[Token]) {
             }
           } catch {
             case _: Exception => {
-              val (highOrderVardecs, afterVardecs) = parseRep1(tail, parseVarDec, skipCommas)
+              val (highOrderVardec, afterVardecs) = parseVarDec(tail)
               afterVardecs match {
-                case RightParenToken :: EqualsToken :: GreaterThanToken :: tail => {
-                  val (body, restTokens2) = parseExp(tail)
-                  (HighOrderExp(highOrderVardecs, body), restTokens2)
+                case RightParenToken :: LeftParenToken :: afterLeftParen => {
+                  val (highOrderReturnType, afterType) = parseTypes(afterLeftParen)
+                  afterType match {
+                    case RightParenToken :: EqualsToken :: GreaterThanToken :: tail => {
+                      val (body, restTokens2) = parseExp(tail)
+                      (HighOrderExp(highOrderVardec,highOrderReturnType, body), restTokens2)
+                    }
+                    case _ => throw ParserException("is not a high order function instantiation")
+                  }
                 }
-                case _ => throw ParserException("is not a high order function instantiation")
+                case _ => throw ParserException("no right paren left paren")
               }
             }
           }
