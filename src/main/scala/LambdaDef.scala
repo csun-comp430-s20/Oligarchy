@@ -65,9 +65,9 @@ class LambdaDef(className: String, varDeclaration: List[VarDeclaration], param: 
 
   def writeTypedApply(classWriter: ClassWriter, allClasses: Map[String, Class], lambdaMaker: LambdaMaker) = {
     try {
-      val methodVisitor = classWriter.visitMethod(ACC_PUBLIC, LambdaMakemr.APPLY_NAME.name, typedApplyDescriptorString())
+      val methodVisitor = classWriter.visitMethod(ACC_PUBLIC, LambdaMaker.APPLY_NAME.name, typedApplyDescriptorString())
       methodVisitor.visitCode()
-      val gen = ExpressionStamtmentGenerator(allClasses, lambdaMaker, VariableTable.withFormalParams(ClassTypes(className), varDeclaration), methodVisitor)
+      val gen = ExpressionStatementGenerator(allClasses, lambdaMaker, VariableTable.withFormalParams(ClassTypes(className), varDeclaration), methodVisitor)
       gen.writeExpression(body)
       gen.doReturn(returnType)
       methodVisitor.visitMaxs(0, 0)
