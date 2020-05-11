@@ -37,13 +37,14 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
   def fieldDescriptorFor(className: String, fieldName: String): String = {
     className match {
       case ClassGenerator.objectName => throw new CodeGeneratorException("Nonexistant field " + fieldName)
-      case className => if(className.startsWith(LambdaMaker.LAMBDA_PREFIX)) lambdaMaker.fieldDescriptorFor(className, fieldName)
+      case className => if(className.startsWith(LambdaMaker.LAMBDA_PREFIX)) lambdaMaker.fieldDescriptorFor(className, fieldName) else
+        throw new CodeGeneratorException("doesnt start with lambda prefix")
       case _ => {
         val classDef: Class = classDefFor(className)
         val varDecs: List[InstanceDec] = classDef.instances
-        varDecs.foreach {
-          case varDec: VarDeclaration => if (varDec.varName equals fieldName) (varDec.types.toDescriptorString())
-        }
+        varDecs.foreach(instanceDec =>{
+          if (instanceDec.v1.varName equals fieldName) (instanceDec.v1.types.toDescriptorString())
+        })
         (fieldDescriptorFor(classDef.extendedClass, fieldName))
       }
     }
@@ -73,7 +74,7 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
   def writeLambdaCallExp(callhighOrderExp: CallHighOrderExp): Unit={
     writeExpression(callhighOrderExp.lambda)
     writeExpression(callhighOrderExp.param)
-    methodVisitor.visitMethodInsn(INVOKEINTERFACE, LambdaMaker.EXTENDS_NAME.name, LambdaMaker.APPLY_NAME.name, LambdaDef.bridgeApplyDescriptorString(), true)
+    methodVisitor.visitMethodInsn(INVOKEINTERFACE, LambdaMaker.EXTENDS_NAME, LambdaMaker.APPLY_NAME, LambdaDef.bridgeApplyDescriptorString(), true)
     methodVisitor.visitTypeInsn(CHECKCAST, callhighOrderExp.classTypes.className) // we need to change how our higher order functions are called
   }
 
@@ -129,7 +130,7 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
     methodVisitor.visitTypeInsn(NEW, newExp.className)
     methodVisitor.visitInsn(DUP)
     writeExpressions(newExp.params)
-    methodVisitor.visitMethodInsn(INVOKESPECIAL, newExp.className, "<init>", constructorDescriptorFor(newExp.className), false)
+    methodVisitor.visitMethodInsn(INVOKESPECIAL, newExp.className, "<init>", null, false)
   }
 
   def writeExpressions(exp: List[Exp]): Unit = {
@@ -175,7 +176,7 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
 
   def writePrint(variable: String): Unit = {
     val entry = variables.getEntryFor(variable)
-    val descriptor = printlnDescriptor(entry.types)
+    val descriptor = ExpressionStatementGenerator.printlnDescriptor(entry.types)
     methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", descriptor, false)
   }
 
