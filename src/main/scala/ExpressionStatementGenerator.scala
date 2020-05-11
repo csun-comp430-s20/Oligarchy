@@ -1,20 +1,19 @@
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Label
-
 import org.objectweb.asm.Opcodes._
 
-class ExpressionStatementGenerator(test: Map[String,Class], lambdaMaker:LambdaMaker, variables:VariableTable, methodVisitor:MethodVisitor) {
+class ExpressionStatementGenerator(allClasses:Map[String,Class], lambdaMaker:LambdaMaker, variables:VariableTable, methodVisitor:MethodVisitor) {
 
   def printlnDescriptor(forType: Types): String = {
     val inner = ClassTypes((ClassGenerator.objectName)).className
     ("(" + inner + ")V")
   }
 
-  def classDefFor(name: String): Unit = {
-    val classDef = allClasses.get(name)
+  def classDefFor(name: String): Class ={
+    val classDef:Class = allClasses.get(name)
     classDef match {
       case null => throw CodeGeneratorException("No class named " + name)
-      case _ => classDef
+      case _ =>(classDef)
     }
   }
 
@@ -30,28 +29,25 @@ class ExpressionStatementGenerator(test: Map[String,Class], lambdaMaker:LambdaMa
     className match {
       case ClassGenerator.objectName => throw CodeGeneratorException("Nonexistant Method: " + methodName)
       case _ => {
-        val classDef = classDefFor(className)
-        val methodDef = classDef.methods
-        methodDef.foreach {
-          methodDef.methodName match {
-            case methodName => (methodDef.methodName) //might need to change this to a toDescriptorString but I think this is what it wants
-          }
+        val classDef:Class= classDefFor(className)
+        val methodDef:List[MethodDef] = classDef.methods
+        methodDef.foreach{
+          case methodDefName:VarDeclaration => if (methodDefName.varName equals methodName) (methodDef.toDescriptorString())
         }
+        (methodDescriptorFor(classDef.extendedClass, methodName ))
       }
     }
   }
 
   def fieldDescriptorFor(className: String, fieldName: String): String = {
     className match {
-      case ClassGenerator.objectName => throw CodeGeneratorException("Nonexistant field " = fieldName.name)
-      case className.startsWith(LambdaMaker.LAMBDA_PREFIX) => lambdaMaker.feildDesriptorFor(className, fieldName)
+      case ClassGenerator.objectName => throw CodeGeneratorException("Nonexistant field " + fieldName)
+      case className.startsWith(LambdaMaker.LAMBDA_PREFIX) => lambdaMaker.fieldDescriptorFor(className, fieldName)
       case _ => {
-        val classDef = classDefFor(className)
-        val varDecs = classDef.parameters
-        varDecs.foreach {
-          varDecs.varName match {
-            case fieldName => (varDecs.type.toDescriptorString())
-          }
+        val classDef:Class = classDefFor(className)
+        val varDecs:List[InstanceDec] = classDef.instances
+        varDecs.foreach{
+            case varDec:VarDeclaration => if (varDec.varName equals fieldName) (varDec.types.toDescriptorString())
         }
         (fieldDescriptorFor(classDef.extendedClass, fieldName))
       }
@@ -62,12 +58,12 @@ class ExpressionStatementGenerator(test: Map[String,Class], lambdaMaker:LambdaMa
   }
 
   def storeVariable(variable:String): Unit={
-    variable.getEntryFor(variable).store(methodVisitor)
+    variables.getEntryFor(variable).store(methodVisitor)
   }
 
   def doReturn(returnType: Types):Unit ={
     returnType match{
-      case IntTypes | BoolTypes => methodVisitor.visitInt(IRETURN)
+      case IntTypes | BoolTypes => methodVisitor.visitInsn(IRETURN)
         //@ToDo add refence type return
       case _ => throw new CodeGeneratorException("Unkonwn Type: " + returnType)
     }
@@ -89,18 +85,19 @@ class ExpressionStatementGenerator(test: Map[String,Class], lambdaMaker:LambdaMa
   def writeArithmeticComparisonOp(exp: Exp): Unit={
     val conditionTrue = Label
     val afterCondition = Label
-    exp match{
-        //@ToDo add more cases for LTEEXP GTEEXP, GTEXP
-      case LTExp => methodVisitor.visitJumpInsn(IF_ICMPLT, conditionTrue)
-      case EqualsExp => methodVisitor.visitJumpInsn(IF_ICMPEQ, conditionTrue)
-        //@ToDo assert(false) is it needed
-      case _ => throw CodeGeneratorException("Unrecognized orperation:  " + exp)
+    exp match {
+      case LTEExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPLT, conditionTrue)
+      case LTExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPLE, conditionTrue)
+      case GTEExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPGE, conditionTrue)
+      case GTExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPGT, conditionTrue)
+      case EqualsExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ACMPEQ, conditionTrue)
+      case _ => throw new CodeGeneratorException("Unrecognized operation: " + exp)
     }
     writeIntLiteral(0)
     methodVisitor.visitJumpInsn(GOTO, afterCondition)
-    methodVisitor.visitLable(conditionTrue)
+    methodVisitor.visitLabel(conditionTrue)
     writeIntLiteral(1)
-    methodVisitor.visitLable(afterCondition)
+    methodVisitor.visitLabel(afterCondition)
   }
 
   def writeOp(exp: Exp): Unit ={
@@ -108,22 +105,22 @@ class ExpressionStatementGenerator(test: Map[String,Class], lambdaMaker:LambdaMa
       case PlusExp(leftExp, rightExp) => methodVisitor.visitInsn(IADD)
       case SubtractExp(leftExp, rightExp) => methodVisitor.visitInsn(ISUB)
       case DivideExp(leftExp, rightExp) => methodVisitor.visitInsn(IDIV)
-      case MultiplyExp(leftExp, rightExp) => methodVistor.visitInsn(IMUL)
-      case LTExp(leftExp, rightExp) | LTEExp(leftExp, rightExp) | GTExp(leftExp, rightExp) | GTEExp(leftExp, rightExp) | EqualsExp(leftExp, rightExp) => writeArithmeticComparisonOp(exp)
+      case MultiplyExp(leftExp, rightExp) => methodVisitor.visitInsn(IMUL)
+      case LTExp(_, _) | LTEExp(_, _) | GTExp(_, _) | GTEExp(_, _) | EqualsExp(_, _) => writeArithmeticComparisonOp(exp)
       case _ => CodeGeneratorException("unknown binary operator: " + exp)
     }
   }
 
   def writeMethodCall(methodExp: MethodExp): Unit={
-      writeExpression(methodExp.e1)
-      writeExpressions(methodExp.e2)
-      methodVisitor.vistitMethodInsn(INVOKEVIRTUAL, className, methodExp.methodName, methodDescriptorFor(className, methodExp.methodName), false)
+      writeExpression(methodExp.callVariable)
+      writeExpressions(methodExp.params)
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, methodExp.className, methodExp.methodName, methodDescriptorFor(methodExp.className, methodExp.methodName), false)
   }
 
   def writeNew(newExp:NewClassExp): Unit={
     methodVisitor.visitTypeInsn(NEW, newExp.className)
     methodVisitor.visitInsn(DUP)
-    writeExpressions(newExp.e1)
+    writeExpressions(newExp.params)
     methodVisitor.visitMethodInsn(INVOKESPECIAL, newExp.className, "<init>", constructorDescriptorFor(newExp.className), false)
   }
   //@TODO dont know what this section is for we also dont have a lambdaExp
@@ -139,7 +136,7 @@ class ExpressionStatementGenerator(test: Map[String,Class], lambdaMaker:LambdaMa
     exp match{
       case VariableExp(value) => loadVariable(value)
       case IntegerExp(value) => writeIntLiteral(value)
-      case BooleanExp(value) =>  writeIntLiteral( if (value) 1 else 0)
+      case BooleanExp(value) => writeIntLiteral(if (value) 1 else 0)
       case plusExp:PlusExp  => {
         writeExpression(plusExp.leftExp)
         writeExpression(plusExp.rightExp)
@@ -160,7 +157,7 @@ class ExpressionStatementGenerator(test: Map[String,Class], lambdaMaker:LambdaMa
         writeExpression(multExp.rightExp)
         writeOp(multExp)
       }
-      case MethodExp(e1, methodName, e2) => writeMethodCall(exp.asInstanceOf[MethodExp])
+      case methodExp:MethodExp => writeMethodCall(methodExp)
       case NewClassExp(className, e1) => writeNew(exp.asInstanceOf[NewClassExp])
         //@ToDo add the lambda things
       case _ => throw CodeGeneratorException("Unrecognized expression: " + exp)
