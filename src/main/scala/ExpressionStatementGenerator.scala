@@ -26,9 +26,9 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
       case _ => {
         val classDef: Class = classDefFor(className)
         val methodDef: List[MethodDef] = classDef.methods
-        methodDef.foreach {
-          case methodDefName: VarDeclaration => if (methodDefName.varName equals methodName) (methodDef.toDescriptorString())
-        }
+        methodDef.foreach( method=> {
+          if (method.methodName equals methodName) (method.toDescriptorString())
+        })
         (methodDescriptorFor(classDef.extendedClass, methodName))
       }
     }
