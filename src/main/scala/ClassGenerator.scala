@@ -8,14 +8,14 @@ import org.objectweb.asm.Opcodes._
 
 class CodeGeneratorException(val message: String) extends Exception(message)
 
-class ClassGenerator(program: Program) {
+object ClassGenerator {
   val thisVariable = "this"
   val objectName = "java/lang/Object"
   var allClasses: Map[String, Class] = _
   //  lambdaMaker: LambdaMaker
 
   // should be similar to the constructor method in java here we will set up how we will generate code
-  def apply(program: Program): ClassGenerator = {
+  def apply(program: Program){
     program.classes.foreach(myClass => {
       if (this.allClasses contains (myClass.className)) {
         throw new CodeGeneratorException("redefining a defined class " + myClass.className)

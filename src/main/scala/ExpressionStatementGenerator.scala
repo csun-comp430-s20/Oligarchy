@@ -1,28 +1,9 @@
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Label
 
-import org.objectweb.asm.Opcodes.IRETURN
-import org.objectweb.asm.Opcodes.ICONST_M1
-import org.objectweb.asm.Opcodes.ICONST_0
-import org.objectweb.asm.Opcodes.ICONST_1
-import org.objectweb.asm.Opcodes.ICONST_2
-import org.objectweb.asm.Opcodes.ICONST_3
-import org.objectweb.asm.Opcodes.ICONST_4
-import org.objectweb.asm.Opcodes.ICONST_5
-import org.objectweb.asm.Opcodes.INVOKEVIRTUAL
-import org.objectweb.asm.Opcodes.GOTO
-import org.objectweb.asm.Opcodes.IFEQ
-import org.objectweb.asm.Opcodes.NEW
-import org.objectweb.asm.Opcodes.DUP
-import org.objectweb.asm.Opcodes.INVOKESPECIAL
-import org.objectweb.asm.Opcodes.IF_ICMPLT
-import org.objectweb.asm.Opcodes.IF_ICMPEQ
-import org.objectweb.asm.Opcodes.IADD
-import org.objectweb.asm.Opcodes.ISUB
-import org.objectweb.asm.Opcodes.IDIV
-import org.objectweb.asm.Opcodes.IMUL
+import org.objectweb.asm.Opcodes._
 
-class ExpressionStatementGenerator(Map[String,Class], lambdaMaker:LambdaMaker, variables:VariableTable, methodVisitor:MethodVisitor) {
+class ExpressionStatementGenerator(test: Map[String,Class], lambdaMaker:LambdaMaker, variables:VariableTable, methodVisitor:MethodVisitor) {
 
   def printlnDescriptor(forType: Types): String = {
     val inner = ClassTypes((ClassGenerator.objectName)).className
