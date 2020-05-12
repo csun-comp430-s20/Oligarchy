@@ -12,7 +12,7 @@ object ClassGenerator {
   val thisVariable = "this"
   val objectName = "java/lang/Object"
   var allClasses: Map[String, Class] = _
-  //  lambdaMaker: LambdaMaker
+  val lambdaMaker: LambdaMaker
 
   // should be similar to the constructor method in java here we will set up how we will generate code
   def apply(program: Program){
@@ -135,7 +135,7 @@ object ClassGenerator {
       def apply(methodDef: MethodDef): SingleMethodGenerator = {
         this.method = methodDef
         val flags = ACC_PUBLIC
-        variables = variables.withFormalParamsFrom(thisType, method)
+        variables = VariableTable.withFormalParamsFrom(thisType, method)
         methodVisitor = classWriter.visitMethod(flags, method.methodName, method.toDescriptorString(), null, null)
         this
       }
@@ -255,10 +255,9 @@ object ClassGenerator {
           case PrintExp(e1) =>
           case methodExp: MethodExp => writeMethodCall(methodExp)
           case newExp: NewClassExp => writeNew(newExp)
-//          case CastExp(newTypes, e2) => ???
           case GroupedExp(e) => writeExpression(e)
-          case HighOrderExp(params, body) => ???
-          case CallHighOrderExp(function, params) => ???
+          case highOrderExp:HighOrderExp => writeLambdaExp(highOrderExp)
+          case callHighOrderExp:CallHighOrderExp => writeLambdaCallExp(callHighOrderExp)
           case bop: BOP => bopHandler(bop)
 
           case _ => throw new CodeGeneratorException("Unrecognized expression: " + exp)
@@ -295,20 +294,32 @@ object ClassGenerator {
         }
       } // writeStatements
 
+      def writeForStatement(forStmt: ForStmt): Unit ={
+        val head = Label
+        val afterFor = Label
+        methodVisitor.visitLabel(head)
+        writeStatement(forStmt.assign)
+        writeExpression(forStmt.e1)
+        methodVisitor.visitJumpInsn(IFEQ, afterFor)
+        writeStatement(forStmt.forBody)
+        writeStatement(forStmt.inc)
+        methodVisitor.visitJumpInsn(GOTO, head)
+        methodVisitor.visitLabel(afterFor)
+      }
+
       @throws[CodeGeneratorException]
       private def writeStatement(stmt: Stmt): Unit = {
         stmt match {
-          case ExpStmt(e1) =>
+          case ExpStmt(e1) => writeExpression(e1)
           case AssignmentStmt(varDec, exp) => variables.addEntry(varDec.varName, varDec.types)
             writeExpression(exp)
             storeVariable(varDec.varName)
-          case ForStmt(assign, e1, inc, forBody) => // writeWhileStatement(stmt.asInstanceOf[Nothing])
-          //          case BreakStmt => lets get rid of these
+          case forStmt:ForStmt => writeStatement(forStmt)
           case BlockStmt(statements) => for (statement: Statement <- statements) {
             writeStatement(statement)
           }
           case stmt: ConditionalStmt => writeIfStatement(stmt)
-          case VoidStmt =>
+          //case VoidStmt =>
           //          case PrintStmt(variable) => writePrint(variable)
           case VarStmt(variableName, newValue) => writeExpression(newValue)
             storeVariable(variableName)
@@ -330,7 +341,18 @@ object ClassGenerator {
         doReturn(method.types)
         methodVisitor.visitMaxs(0, 0)
       } // writeMethod
+
+
+      def writeLambdaExp(highOrderExp: HighOrderExp): Unit={
+        writeExpression(lambdaMaker.translateLambda(highOrderExp, variables))
+      }
+
+      def writeLambdaCallExp(callhighOrderExp: CallHighOrderExp): Unit={
+        writeExpression(callhighOrderExp.lambda)
+        writeExpression(callhighOrderExp.param)
+        methodVisitor.visitMethodInsn(INVOKEINTERFACE, LambdaMaker.EXTENDS_NAME, LambdaMaker.APPLY_NAME, LambdaDef.bridgeApplyDescriptorString(), true)
+        methodVisitor.visitTypeInsn(CHECKCAST, callhighOrderExp.returnType.toDescriptorString) // we need to change how our higher order functions are called
+      }
     } // singleMethodGenerator
   } // singleClassGenerator
-
 }

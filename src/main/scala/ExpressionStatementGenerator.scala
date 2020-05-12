@@ -75,7 +75,7 @@ class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: 
     writeExpression(callhighOrderExp.lambda)
     writeExpression(callhighOrderExp.param)
     methodVisitor.visitMethodInsn(INVOKEINTERFACE, LambdaMaker.EXTENDS_NAME, LambdaMaker.APPLY_NAME, LambdaDef.bridgeApplyDescriptorString(), true)
-    methodVisitor.visitTypeInsn(CHECKCAST, callhighOrderExp.classTypes.className) // we need to change how our higher order functions are called
+    methodVisitor.visitTypeInsn(CHECKCAST, callhighOrderExp.returnType.toDescriptorString) // we need to change how our higher order functions are called
   }
 
   def writeIntLiteral(value: Int): Unit = {
