@@ -29,6 +29,11 @@ case class MethodTypes(paramTypes: List[Types] , returnTypes: Types) extends Typ
     ???
   }
 }
+case class HighOrderFuncType(paramType:ClassTypes , returnTypes: ClassTypes) extends Types(){
+  def toDescriptorString(): String ={
+    ???
+  }
+}
 
 case class VarDeclaration(types: Types, varName: String)(){
 
