@@ -13,77 +13,71 @@ import org.objectweb.asm.Opcodes.ARETURN
 import org.objectweb.asm.Opcodes.RETURN
 import org.objectweb.asm.Opcodes.PUTFIELD
 
-case object LambdaDef{
+case object LambdaDef {
   def bridgeApplyDescriptorString(): String = {
-
+    var objectFormalParams: List[VarDeclaration] = List()
+    val objectType = ClassTypes(ClassGenerator.objectName)
+    objectFormalParams = objectFormalParams.:+(VarDeclaration(objectType, ""))
+    MethodDef.toDescriptorString(objectFormalParams, objectType)
   }
 }
-class LambdaDef(className: String, varDeclaration: List[VarDeclaration], param: String, paramType: Types, returnType: Types, body: Exp) {
 
-  def toSignatureString(): String = {
-    (ClassTypes(className).toDescriptorString() + LambdaType(returnType, returnType).toSignatureString())
+case class LambdaDef(className: String, varDeclarations: List[VarDeclaration], param: String, paramType: Types, returnType: Types, body: Exp) {
+
+  var formalParams: List[VarDeclaration] = List()
+
+  def apply(className: String, varDeclarations: List[VarDeclaration], param: String, paramType: Types, returnType: Types, body: Exp): LambdaDef = new LambdaDef(className, varDeclarations, param, paramType, returnType, body){
+    formalParams = formalParams :+ (VarDeclaration(paramType,param))
+    this
+  }
+  def toSignatureString: String = {
+    ClassTypes(className).toDescriptorString() + HighOrderFuncType(returnType, returnType).toDescriptorString()
   }
 
   def constructorDescriptorString(): String = {
-    var descriptor = "("
-    varDeclaration.foreach{
-      varDeclaration => {
-        descriptor = descriptor + varDeclaration.types
-      }
-    }
-    descriptor = descriptor + ")V"
-    (descriptor)
+    MethodDef.toDescriptorString(varDeclarations, VoidTypes)
   }
 
-  def toSignatureString(fieldName: String): String = {
-    varDeclaration.foreach {
-      varDeclaration => {
-        if (varDeclaration.varName == fieldName) {}
-        (varDeclaration.types.toDescriptorString())
-      }
+  @throws[CodeGeneratorException]
+  def fieldDescriptorString(fieldName: String): String = {
+    for (varDec <- varDeclarations) {
+      if (varDec.varName.equals(fieldName)) return varDec.types.toDescriptorString
     }
-  }
+    throw new CodeGeneratorException("Unknown field: " + fieldName)
 
- def typedApplyDescriptorString(): String = {
-    var descriptor = "("
-    varDeclaration.foreach{
-      varDeclaration => {
-        descriptor = descriptor + varDeclaration.types
-      }
-    }
-    descriptor = descriptor + ")" + returnType.toDescriptorString()
-    (descriptor)
-  }
+  } // fieldDescriptorString
+
+  def typedApplyDescriptorString: String = {
+    MethodDef.toDescriptorString(formalParams, returnType)
+  }// typedApplyDescriptorString
 
   def writeConstructor(classWriter: ClassWriter): Unit = {
     try {
-
       val methodVisitor = classWriter.visitMethod(ACC_PUBLIC, "<init>", constructorDescriptorString(), null, null)
       methodVisitor.visitCode()
       methodVisitor.visitVarInsn(ALOAD, 0)
       methodVisitor.visitMethodInsn(INVOKEVIRTUAL, ClassGenerator.objectName, "<init>", "()V", false)
       var variableIndex = 1
-      varDeclaration.foreach {
-        varDeclaration: VarDeclaration => {
+      varDeclarations.foreach {
+        varDeclarations: VarDeclaration => {
           methodVisitor.visitVarInsn(ALOAD, 0)
-          methodVisitor.visitVarInsn(VariableEntry.loadInstructionForType(varDeclaration.types), variableIndex = variableIndex + 1)
-          methodVisitor.visitFieldInsn(PUTFIELD, className, varDeclaration.varName, varDeclaration.types.toString)
+          methodVisitor.visitVarInsn(VariableEntry.loadInstructionForType(varDeclarations.types), variableIndex = variableIndex + 1)
+          methodVisitor.visitFieldInsn(PUTFIELD, className, varDeclarations.varName, varDeclarations.types.toString)
         }
       }
       methodVisitor.visitInsn(RETURN)
       methodVisitor.visitMaxs(0, 0)
-
     }
     catch {
-      case _ => throw new CodeGeneratorException("Failed to write constructor")
+      case _: Throwable => throw new CodeGeneratorException("Failed to write constructor")
     }
   }
 
-  def writeTypedApply(classWriter: ClassWriter, allClasses: Map[String, Class], lambdaMaker: LambdaMaker) = {
+  def writeTypedApply(classWriter: ClassWriter, allClasses: Map[String, Class], lambdaMaker: LambdaMaker): Unit = {
     try {
-      val methodVisitor = classWriter.visitMethod(ACC_PUBLIC, LambdaMaker.APPLY_NAME, typedApplyDescriptorString(), null, null)
+      val methodVisitor = classWriter.visitMethod(ACC_PUBLIC, LambdaMaker.APPLY_NAME, typedApplyDescriptorString, null, null)
       methodVisitor.visitCode()
-      val gen = ExpressionStatementGenerator(allClasses, lambdaMaker, VariableTable.withFormalParams(ClassTypes(className), varDeclaration), methodVisitor)
+      val gen = ExpressionStatementGenerator(allClasses, lambdaMaker, VariableTable.withFormalParams(ClassTypes(className), varDeclarations), methodVisitor)
       gen.writeExpression(body)
       gen.doReturn(returnType)
       methodVisitor.visitMaxs(0, 0)
@@ -95,12 +89,12 @@ class LambdaDef(className: String, varDeclaration: List[VarDeclaration], param: 
 
   def writeBridgeApply(classWriter: ClassWriter, allClasses: Map[String, Class]) = {
     try {
-      val methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_SYNTHETIC | ACC_BRIDGE, LambdaMaker.APPLY_NAME, bridgeApplyDescriptorString(), null, null)
+      val methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_SYNTHETIC | ACC_BRIDGE, LambdaMaker.APPLY_NAME, LambdaDef.bridgeApplyDescriptorString(), null, null)
       methodVisitor.visitCode()
       methodVisitor.visitVarInsn(ALOAD, 0)
       methodVisitor.visitVarInsn(ALOAD, 1)
       methodVisitor.visitTypeInsn(CHECKCAST, className)
-      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, className, LambdaMaker.APPLY_NAME, typedApplyDescriptorString(), false)
+      methodVisitor.visitMethodInsn(INVOKEVIRTUAL, className, LambdaMaker.APPLY_NAME, typedApplyDescriptorString, false)
       methodVisitor.visitInsn(ARETURN)
       methodVisitor.visitMaxs(0, 0)
     }

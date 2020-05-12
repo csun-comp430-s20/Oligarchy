@@ -41,8 +41,8 @@ case object LambdaMaker {
       case MethodExp(e1, className, methodName, e2) => freeVariables(params, e1) ++ freeVariables(params, e2)
       case CastExp(newTypes, e2) => freeVariables(params, e2)
       case GroupedExp(e) => freeVariables(params, e)
-      case HighOrderExp(param, body) => ???
-      case CallHighOrderExp(function, params) => ???
+      case HighOrderExp(param, paramType,returnType, body) => freeVariables(addSet(params, param), body)
+      case CallHighOrderExp(lambda, returnType, param) =>  freeVariables(params, lambda)++ freeVariables(params, param)
       case bop: BOP => freeVariables(params, bop.leftExp) ++ freeVariables(params, bop.rightExp)
     }
   }
@@ -82,7 +82,7 @@ case class LambdaMaker(var allClasses: Map[String, Class], var additionalClasses
   } // translateLambdaBodies
 
   @throws[CodeGeneratorException]
-  private def translateLambdaBody(body: Exp, lambdaParam: String, lambdaParamType: Types, lambdaClass: String): Exp = {
+  private def translateLambdaBody(body: Exp, lambdaParam: String, lambdaParamType: ClassTypes, lambdaClass: String): Exp = {
     body match {
       case body: VariableExp =>body
 //      case body: VariableExp =>if (body.value.equals(lambdaParam)) return body
@@ -105,7 +105,7 @@ case class LambdaMaker(var allClasses: Map[String, Class], var additionalClasses
         VariableTable.withFormalParam(ClassTypes(lambdaClass),
           lambdaParamType,
           lambdaParam));
-      case asCall: CallHighOrderExp => CallHighOrderExp(translateLambdaBody(asCall.lambda, lambdaParam, lambdaParamType, lambdaClass), asCall.classTypes, translateLambdaBody(asCall.param, lambdaParam, lambdaParamType, lambdaClass))
+      case asCall: CallHighOrderExp => CallHighOrderExp(translateLambdaBody(asCall.lambda, lambdaParam, lambdaParamType, lambdaClass), asCall.returnType, translateLambdaBody(asCall.param, lambdaParam, lambdaParamType, lambdaClass))
       case body: PlusExp =>   PlusExp(
         translateLambdaBody(body.leftExp, lambdaParam, lambdaParamType, lambdaClass),
         translateLambdaBody(body.rightExp, lambdaParam, lambdaParamType, lambdaClass)
@@ -149,11 +149,12 @@ case class LambdaMaker(var allClasses: Map[String, Class], var additionalClasses
   private def writeLambda(lambdaDef: LambdaDef, toDirectory: String): Unit = {
     val classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES)
     classWriter.visit(V1_7, ACC_PUBLIC,
-      lambdaDef.className, lambdaDef.toSignatureString(),
+      lambdaDef.className, lambdaDef.toSignatureString,
       ClassGenerator.objectName,
       Array[String](LambdaMaker.EXTENDS_NAME)
     )
-    ClassGenerator.writeInstanceVariables(classWriter, lambdaDef.instanceVariables)
+
+    ClassGenerator.writeInstanceVariables(classWriter, lambdaDef.varDeclarations)
     lambdaDef.writeConstructor(classWriter)
     lambdaDef.writeTypedApply(classWriter, allClasses, this)
     lambdaDef.writeBridgeApply(classWriter, allClasses)
@@ -176,7 +177,11 @@ case class LambdaMaker(var allClasses: Map[String, Class], var additionalClasses
       res :+ VarDeclaration(varType, varName)
     })
 
-    val lambdaDef = new LambdaDef(outputClassName, instanceVariables, lambdaExp.param.varName, lambdaExp.param.types, lambdaExp.returnType, translateLambdaBody(lambdaExp.body, lambdaExp.param.varName, lambdaExp.param.types, outputClassName))
+    val lambdaDef = new LambdaDef(outputClassName,
+      instanceVariables,
+      lambdaExp.param,
+      lambdaExp.paramType, lambdaExp.returnType,
+      translateLambdaBody(lambdaExp.body, lambdaExp.param, lambdaExp.paramType, outputClassName))
     additionalClasses = additionalClasses.:+(lambdaDef)
     var newParams = List()
     for (instanceVariable <- instanceVariables) {

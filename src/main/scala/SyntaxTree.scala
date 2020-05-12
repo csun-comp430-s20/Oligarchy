@@ -26,14 +26,17 @@ case class ClassTypes(className: String) extends Types(){
 }
 case class MethodTypes(paramTypes: List[Types] , returnTypes: Types) extends Types(){
   def toDescriptorString(): String ={
-
+    ???
+  }
+}
+case class HighOrderFuncType(paramType:Types , returnTypes: Types) extends Types(){
+  def toDescriptorString(): String ={
+    ???
   }
 }
 
 case class VarDeclaration(types: Types, varName: String)(){
-  def toDescriptorString(): String ={
-    (varName)
-  }
+
 }
 
 
@@ -48,7 +51,7 @@ case class NewClassExp(className: String, params:List[Exp] ) extends Exp
 case class CastExp(newTypes: Types , e2: Exp) extends Exp
 case class GroupedExp(e: Exp) extends Exp
 //case class HighOrderExp(params: List[VarDeclaration], body: Exp) extends Exp
-case class HighOrderExp(param: VarDeclaration, returnType: Types, body: Exp) extends Exp
+case class HighOrderExp(param: String, paramType:ClassTypes, returnType: Types, body: Exp) extends Exp
 //case class CallHighOrderExp(function: Exp, params: List[Exp]) extends Exp
 case class CallHighOrderExp(lambda: Exp, returnType: ClassTypes, param: Exp) extends Exp
 sealed trait  BOP extends Exp{
@@ -79,9 +82,22 @@ case class ReturnStmt(returnExp: Exp) extends Stmt
 case object VoidStmt extends Stmt
 case class VarStmt(variableName:String, newValue:Exp) extends Stmt
 case class PrintExp(e1:Exp) extends Stmt
-
+case object MethodDef{
+  def toDescriptorString(formalParams: List[VarDeclaration], returnType: Types): String = {
+    val result = new StringBuffer
+    result.append("(")
+    for (param <- formalParams) {
+      result.append(param.types.toDescriptorString)
+    }
+    result.append(")")
+    result.append(returnType.toDescriptorString)
+    result.toString
+  }// toDescriptorString
+}
 case class MethodDef(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDeclaration], returnExpression: Exp){
-  def toDescriptorString(): String = ???
+  def toDescriptorString: String = {
+    MethodDef.toDescriptorString(parameters, types)
+  }
 
 }
 
