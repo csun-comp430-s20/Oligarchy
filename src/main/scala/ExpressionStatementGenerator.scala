@@ -214,7 +214,7 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
         storeVariable(stmtEntry.varDec.varName)
       }
       case forStmt:ForStmt => writeForStatement(forStmt)
-      case BreakStmt => ???
+//      case BreakStmt => ???
       case BlockStmt(statements) => for (statement: Stmt <- statements) {
         writeStatements(statement)
       }
