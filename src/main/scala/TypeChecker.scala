@@ -409,6 +409,6 @@ class Typechecker(val stc: SymbolTableClass){
 
   def typecheckProgram(input: Program, gamma: TypeEnv) {
     typecheckClasses(input.classes)
-    typeof(input.entryPoint,gamma)
+    typecheckStatement(input.entryPoint, gamma, false)
   } // typecheckProgram
 } // Typechecker
