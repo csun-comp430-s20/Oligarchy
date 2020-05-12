@@ -113,8 +113,8 @@ class Parser(private var input: List[Token]) {
   //Daniel
   def parseProgram(tokens: List[Token]): (Program, List[Token]) = {
     val (classes: List[Class], restTokens: List[Token]) = parseRepeat(tokens, parseClass)
-    val (exp: Exp, restTokens2: List[Token]) = parseExp(restTokens)
-    (Program(exp, classes), restTokens2)
+    val (stmt: Stmt, restTokens2: List[Token]) = parseStmt(restTokens)
+    (Program(stmt, classes), restTokens2)
   } //ParseProgram
 
   //Daniel

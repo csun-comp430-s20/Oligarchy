@@ -110,4 +110,4 @@ case class DefExtClass(className: String,
 
 
 
-case class Program(entryPoint: Exp, classes: List[Class])
+case class Program(entryPoint: Stmt, classes: List[Class])
