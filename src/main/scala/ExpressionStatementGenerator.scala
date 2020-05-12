@@ -92,8 +92,8 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
   }
 
   def writeArithmeticComparisonOp(exp: Exp): Unit = {
-    val conditionTrue = Label
-    val afterCondition = Label
+    val conditionTrue = new Label()
+    val afterCondition = new Label()
     exp match {
       case LTEExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPLT, conditionTrue)
       case LTExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPLE, conditionTrue)
@@ -181,8 +181,8 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
   }
 
   def writeIfStatement(ifStmt: ConditionalStmt): Unit = {
-    val falseLabel: Label = Label
-    val afterFalseLabel: Label = Label
+    val falseLabel: Label = new Label()
+    val afterFalseLabel: Label = new Label()
     writeExpression(ifStmt.condition)
     methodVisitor.visitJumpInsn(IFEQ, falseLabel)
     writeStatements(ifStmt.ifTrue)
@@ -193,8 +193,8 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
   }
 
   def writeForStatement(forStmt: ForStmt): Unit ={
-    val head = Label
-    val afterFor = Label
+    val head = new Label()
+    val afterFor = new Label()
     methodVisitor.visitLabel(head)
     writeStatements(forStmt.assign)
     writeExpression(forStmt.e1)
