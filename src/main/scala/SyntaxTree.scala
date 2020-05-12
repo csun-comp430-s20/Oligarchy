@@ -29,7 +29,7 @@ case class MethodTypes(paramTypes: List[Types] , returnTypes: Types) extends Typ
     ???
   }
 }
-case class HighOrderFuncType(paramType:ClassTypes , returnTypes: ClassTypes) extends Types(){
+case class HighOrderFuncType(paramType:Types , returnTypes: Types) extends Types(){
   def toDescriptorString(): String ={
     ???
   }
@@ -51,7 +51,7 @@ case class NewClassExp(className: String, params:List[Exp] ) extends Exp
 case class CastExp(newTypes: Types , e2: Exp) extends Exp
 case class GroupedExp(e: Exp) extends Exp
 //case class HighOrderExp(params: List[VarDeclaration], body: Exp) extends Exp
-case class HighOrderExp(param: VarDeclaration, returnType: Types, body: Exp) extends Exp
+case class HighOrderExp(param: String, paramType:ClassTypes, returnType: Types, body: Exp) extends Exp
 //case class CallHighOrderExp(function: Exp, params: List[Exp]) extends Exp
 case class CallHighOrderExp(lambda: Exp, returnType: ClassTypes, param: Exp) extends Exp
 sealed trait  BOP extends Exp{

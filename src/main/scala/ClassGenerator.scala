@@ -9,7 +9,7 @@ import org.objectweb.asm.Opcodes._
 
 class CodeGeneratorException(val message: String) extends Exception(message)
 
-object ClassGenerator {
+case object ClassGenerator {
   val thisVariable = "this"
   val objectName = "java/lang/Object"
 

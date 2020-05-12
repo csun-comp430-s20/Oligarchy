@@ -22,12 +22,11 @@ case object LambdaDef {
   }
 }
 
-class LambdaDef(className: String, varDeclarations: List[VarDeclaration], param: String, paramType: ClassTypes, returnType: ClassTypes, body: Exp) {
-
+case class LambdaDef(className: String, varDeclarations: List[VarDeclaration], param: String, paramType: Types, returnType: Types, body: Exp) {
 
   var formalParams: List[VarDeclaration] = List()
 
-  def apply(className: String, varDeclarations: List[VarDeclaration], param: String, paramType: ClassTypes, returnType: ClassTypes, body: Exp): LambdaDef = new LambdaDef(className, varDeclarations, param, paramType, returnType, body){
+  def apply(className: String, varDeclarations: List[VarDeclaration], param: String, paramType: Types, returnType: Types, body: Exp): LambdaDef = new LambdaDef(className, varDeclarations, param, paramType, returnType, body){
     formalParams = formalParams :+ (VarDeclaration(paramType,param))
     this
   }
