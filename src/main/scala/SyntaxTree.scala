@@ -26,14 +26,12 @@ case class ClassTypes(className: String) extends Types(){
 }
 case class MethodTypes(paramTypes: List[Types] , returnTypes: Types) extends Types(){
   def toDescriptorString(): String ={
-
+    ???
   }
 }
 
 case class VarDeclaration(types: Types, varName: String)(){
-  def toDescriptorString(): String ={
-    (varName)
-  }
+
 }
 
 
@@ -79,9 +77,22 @@ case class ReturnStmt(returnExp: Exp) extends Stmt
 case object VoidStmt extends Stmt
 case class VarStmt(variableName:String, newValue:Exp) extends Stmt
 case class PrintExp(e1:Exp) extends Stmt
-
+case object MethodDef{
+  def toDescriptorString(formalParams: List[VarDeclaration], returnType: Types): String = {
+    val result = new StringBuffer
+    result.append("(")
+    for (param <- formalParams) {
+      result.append(param.types.toDescriptorString)
+    }
+    result.append(")")
+    result.append(returnType.toDescriptorString)
+    result.toString
+  }// toDescriptorString
+}
 case class MethodDef(types:Types, methodName: String,  stmt: Stmt, parameters: List[VarDeclaration], returnExpression: Exp){
-  def toDescriptorString(): String = ???
+  def toDescriptorString: String = {
+    MethodDef.toDescriptorString(parameters, types)
+  }
 
 }
 

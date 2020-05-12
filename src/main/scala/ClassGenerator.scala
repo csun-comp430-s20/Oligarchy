@@ -96,7 +96,7 @@ case class ClassGenerator(program: Program){
       def apply(method:MethodDef): SingleMethodGenerator = {
         val flags = ACC_PUBLIC
         variables = VariableTable.withFormalParamsFrom(thisType, method)
-        methodVisitor = classWriter.visitMethod(flags, method.methodName, method.toDescriptorString(), null, null)
+        methodVisitor = classWriter.visitMethod(flags, method.methodName, method.toDescriptorString, null, null)
         this
       }
 
