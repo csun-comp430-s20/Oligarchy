@@ -10,7 +10,7 @@ case object ExpressionStatementGenerator{
   }
 }
 
-class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: LambdaMaker, variables: VariableTable, methodVisitor: MethodVisitor) {
+case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMaker: LambdaMaker, variables: VariableTable, methodVisitor: MethodVisitor) {
 
   def classDefFor(name: String): Class = {
     if (allClasses contains name) {
