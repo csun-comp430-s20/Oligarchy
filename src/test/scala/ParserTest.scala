@@ -433,14 +433,6 @@ class ParserTest extends AnyFunSuite {
       parser.parseStmt(tokens)
     }
   }
-  test("testStmtBreak()"){
-    val input = "break;"
-    val expectedProgram = BreakStmt
-    val tokenizer = Lexer(input)
-    val tokens = tokenizer.tokenize()
-    val parser = Parser(tokens)
-    testParses(tokens, expectedProgram, parser.parseStmt)
-  }
 
   test("testBlockStmt()"){
     val input = "{int myInt = 10;}"

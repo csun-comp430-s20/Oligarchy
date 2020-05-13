@@ -148,21 +148,6 @@ class TypeCheckerTest extends AnyFunSuite {
       mynonEmptyTypechecker.typecheckStatement(VarStmt("x", IntegerExp(1)), Map("x" -> BoolTypes), false)
     }
   }
-  test("testing break statement outside of for loop") {
-    assertThrows[IllTypedException] {
-      mynonEmptyTypechecker.typecheckStatement(BreakStmt, Map(), false)
-    }
-  }
-  test("testing for loop statement with break statement") {
-    val expected = Map()
-    val recieved = mynonEmptyTypechecker.typecheckStatement(ForStmt(AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(1)), LTEExp(IntegerExp(10), IntegerExp(30)), VarStmt("i", IntegerExp(2)), BreakStmt), Map(), false)
-    assert(recieved == expected)
-  }
-  test("testing ill typed for loop statement with break statement") {
-    assertThrows[IllTypedException] {
-      mynonEmptyTypechecker.typecheckStatement(ForStmt(AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(1)), IntegerExp(0), VarStmt("i", IntegerExp(2)), BreakStmt), Map(), false)
-    }
-  }
   test("testing conditional statements") {
     val expected = Map()
     val recieved = mynonEmptyTypechecker.typecheckStatement(ConditionalStmt(GTEExp(IntegerExp(10), IntegerExp(0)), AssignmentStmt(VarDeclaration(BoolTypes, "bool"), BooleanExp(false)), AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(1))), Map(), false)
@@ -446,21 +431,6 @@ class TypeCheckerTest extends AnyFunSuite {
     assertThrows[IllTypedException] {
       mynonEmptyTypechecker.typeof(EqualsExp(IntegerExp(1), BooleanExp(false)), Map())
     }
-  }
-  test("testing cast expression returns IntTypes") {
-    val expected = IntTypes
-    val recieved = mynonEmptyTypechecker.typeof(CastExp(IntTypes, StringExp("1")), Map())
-    assert(recieved == expected)
-  }
-  test("testing cast expression returns Ill Typed Exception") {
-    assertThrows[IllTypedException] {
-      mynonEmptyTypechecker.typeof(CastExp(VoidTypes, IntegerExp(1)), Map())
-    }
-  }
-  test("testing cast expression returns BoolTypes") {
-    val expected = BoolTypes
-    val recieved = mynonEmptyTypechecker.typeof(CastExp(BoolTypes, StringExp("1")), Map())
-    assert(recieved == expected)
   }
 
   test("testing grouped expression returns IntTypes") {
