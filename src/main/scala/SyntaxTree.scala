@@ -48,7 +48,6 @@ case class VariableExp(value: String) extends Exp
 //case class MethodExp(e1:Exp , methodName: String, e2: List[Exp]) extends Exp
 case class MethodExp(callVariable:Exp, className:String , methodName: String, params: List[Exp]) extends Exp
 case class NewClassExp(className: String, params:List[Exp] ) extends Exp
-case class CastExp(newTypes: Types , e2: Exp) extends Exp
 case class GroupedExp(e: Exp) extends Exp
 //case class HighOrderExp(params: List[VarDeclaration], body: Exp) extends Exp
 case class HighOrderExp(param: String, paramType:ClassTypes, returnType: Types, body: Exp) extends Exp
@@ -75,7 +74,6 @@ sealed trait Stmt
 case class ExpStmt(e1: Exp) extends Stmt
 case class AssignmentStmt(varDec: VarDeclaration, exp: Exp) extends Stmt
 case class ForStmt(assign: Stmt, e1: Exp, inc: Stmt, forBody: Stmt) extends Stmt
-case object BreakStmt extends Stmt
 case class BlockStmt(statements: List[Stmt]) extends Stmt
 case class ConditionalStmt(condition: Exp, ifTrue: Stmt, ifFalse: Stmt) extends Stmt
 case class ReturnStmt(returnExp: Exp) extends Stmt

@@ -192,9 +192,9 @@ class Parser(private var input: List[Token]) {
         }
       }
 
-      case BreakToken :: SemicolonToken :: tail => {
-        (BreakStmt, tail)
-      }
+//      case BreakToken :: SemicolonToken :: tail => {
+//        (BreakStmt, tail)
+//      }
       case IfToken :: LeftParenToken :: tail => {
         val (exp: Exp, restTokens: List[Token]) = parseExp(tail)
         restTokens match {
@@ -316,15 +316,7 @@ class Parser(private var input: List[Token]) {
         }
         case LeftParenToken :: tail => {
           val (nextType, restTokens) = parseTypes(tail)
-          try {
-            restTokens match {
-              case RightParenToken :: tail => {
-                val (expToBeCasted, restTokens2) = parseExp(tail)
-                (CastExp(nextType, expToBeCasted), restTokens2)
-              }
-              case _ => throw ParserException("is not a cast")
-            }
-          } catch {
+          restTokens match{
             case _: Exception => {
               val (highOrderVardec, afterVardecs) = parseVarDec(tail)
               afterVardecs match {

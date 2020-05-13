@@ -151,23 +151,24 @@ class Typechecker(val stc: SymbolTableClass){
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => BoolTypes
           case _ => throw IllTypedException("less than equals")
+          case _ => throw IllTypedException("less than equals")
         }
       }
-      case CastExp(t1, e1) => { // assumes the user knows how to cast exp ?
-        t1 match {
-          case IntTypes => {
-            typeof(e1, gamma) match {
-              case BoolTypes => t1
-            }
-          }
-          case BoolTypes => {
-            typeof(e1, gamma) match {
-              case IntTypes => t1
-            }
-          }
-          case _ => throw IllTypedException("not a valid cast type")
-        }
-      }
+//      case CastExp(t1, e1) => { // assumes the user knows how to cast exp ?
+//        t1 match {
+//          case IntTypes => {
+//            typeof(e1, gamma) match {
+//              case BoolTypes => t1
+//            }
+//          }
+//          case BoolTypes => {
+//            typeof(e1, gamma) match {
+//              case IntTypes => t1
+//            }
+//          }
+//          case _ => throw IllTypedException("not a valid cast type")
+//        }
+//      }
       case GroupedExp(e1) => { // assumes the user knows how to cast exp ?
         typeof(e1, gamma)
       }
@@ -358,14 +359,14 @@ class Typechecker(val stc: SymbolTableClass){
         typeof(e1,gamma)
         gamma
       }
-      case BreakStmt => {
-        if(forLoopBool){
-          gamma
-        }
-        else{
-          throw IllTypedException("Break")
-        }
-      }
+//      case BreakStmt => {
+//        if(forLoopBool){
+//          gamma
+//        }
+//        else{
+//          throw IllTypedException("Break")
+//        }
+//      }
       case AssignmentStmt(vd1:VarDeclaration, e1:Exp) =>{
         val tau = vd1.types
         if(typeof(e1, gamma) == tau){
