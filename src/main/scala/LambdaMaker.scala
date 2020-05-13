@@ -39,7 +39,6 @@ case object LambdaMaker {
       //      case PrintExp(e1) =>
       case NewClassExp(className, e1) => freeVariables(params, e1)
       case MethodExp(e1, className, methodName, e2) => freeVariables(params, e1) ++ freeVariables(params, e2)
-      case CastExp(newTypes, e2) => freeVariables(params, e2)
       case GroupedExp(e) => freeVariables(params, e)
       case HighOrderExp(param, paramType,returnType, body) => freeVariables(addSet(params, param), body)
       case CallHighOrderExp(lambda, returnType, param) =>  freeVariables(params, lambda)++ freeVariables(params, param)
