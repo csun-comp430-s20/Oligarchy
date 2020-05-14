@@ -290,16 +290,16 @@ class Parser(private var input: List[Token]) {
         case (method: VarToken) :: LeftParenToken :: tail => {
           val (baseExp, restTokens) = parseExp(tail)
           restTokens match {
-            case VariableExp(className) :: restTokens2 => {
+            case (className:VariableExp) :: restTokens2 => {
               restTokens2 match {
                 case CommaToken :: afterCommaTail => {
                   val (parameters, restTokens3) = parseRep1(afterCommaTail, parseExp, skipCommas)
                   restTokens3 match {
-                    case RightParenToken :: tail => (MethodExp(baseExp, className, method.name, parameters), tail)
+                    case RightParenToken :: tail => (MethodExp(baseExp, className.value, method.name, parameters), tail)
                     case _ => throw ParserException("not a method expression")
                   }
                 }
-                case RightParenToken :: tail => (MethodExp(baseExp, className, method.name, List()), tail)
+                case RightParenToken :: tail => (MethodExp(baseExp, className.value, method.name, List()), tail)
                 case _ => throw ParserException("not a method expression")
               }
             }

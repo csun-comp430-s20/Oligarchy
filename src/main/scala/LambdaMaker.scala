@@ -159,10 +159,7 @@ case class LambdaMaker(var allClasses: Map[String, Class], var additionalClasses
 
   @throws[CodeGeneratorException]
   def translateLambda(lambdaExp: HighOrderExp, table: VariableTable): NewClassExp = {
-    val outputClassName = (LambdaMaker.LAMBDA_PREFIX + {
-      curLambda += 1;
-      curLambda - 1
-    })
+    val outputClassName = (LambdaMaker.LAMBDA_PREFIX + {curLambda += 1;})
     val needToCapture = LambdaMaker.freeVariables(lambdaExp)
     val instanceVariables = needToCapture.foldLeft(List())((res,cur)=>{
       val varType = table.getEntryFor(cur).types
@@ -177,11 +174,11 @@ case class LambdaMaker(var allClasses: Map[String, Class], var additionalClasses
       lambdaExp.paramType, lambdaExp.returnType,
       translateLambdaBody(lambdaExp.body, lambdaExp.param, lambdaExp.paramType, outputClassName))
     additionalClasses = additionalClasses.:+(lambdaDef)
-    var newParams = List()
+    var newParams:List[Exp] = List()
     for (instanceVariable <- instanceVariables) {
       val toPass = if (instanceVariable.equals(LambdaMaker.REWRITTEN_THIS)) ClassGenerator.thisVariable
       else instanceVariable
-      newParams = newParams.:+(VariableExp(toPass))
+      newParams = newParams :+ VariableExp(toPass)
     }
     NewClassExp(outputClassName, newParams)
   } // translateLambda
