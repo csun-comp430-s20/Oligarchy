@@ -2,12 +2,8 @@ import scala.io.Source
 
 object compiler {
   def main(args: Array[String]) {
-    var input = "class test{" +
-      "bool testMethod(int foo)" +
-      "}"
-
     val filename = "Oligarchy/src/main/scala/test.txt"
-    input = Source.fromFile(filename).getLines().mkString
+    var input = Source.fromFile(filename).getLines().mkString
 
     val tokenizer = Lexer(input)
     val tokenizerOutput:List[Token] = tokenizer.tokenize()

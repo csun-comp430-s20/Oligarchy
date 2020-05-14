@@ -30,7 +30,7 @@ case class ClassGenerator(program: Program){
   private var lambdaMaker:LambdaMaker = _
 
   @throws[CodeGeneratorException]
-  def apply(program: Program){
+  def apply(program: Program): ClassGenerator ={
     program.classes.foreach(myClass => {
       if (this.allClasses contains (myClass.className)) {
         throw new CodeGeneratorException("redefining a defined class " + myClass.className)
@@ -38,6 +38,7 @@ case class ClassGenerator(program: Program){
       this.allClasses += (myClass.className -> myClass)
     })
     this.lambdaMaker = LambdaMaker(this.allClasses)
+    this
   } //apply
 
   @throws[CodeGeneratorException]

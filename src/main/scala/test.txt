@@ -1,3 +1,4 @@
-class test{
-      bool testMethod(int foo) return true;
-      }
+Class testing { int myInt;
+      constructor(bool myBool){1;}
+      bool testMethod() return true;
+      } int i = 1;

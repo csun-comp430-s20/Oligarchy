@@ -151,7 +151,6 @@ class Typechecker(val stc: SymbolTableClass){
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => BoolTypes
           case _ => throw IllTypedException("less than equals")
-          case _ => throw IllTypedException("less than equals")
         }
       }
 //      case CastExp(t1, e1) => { // assumes the user knows how to cast exp ?
