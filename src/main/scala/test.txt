@@ -1,0 +1,3 @@
+class test{
+      bool testMethod(int foo) return true;
+      }

@@ -23,22 +23,27 @@ case object LambdaMaker {
     })
   }
 
-
   @throws[CodeGeneratorException]
-  def freeVariables(lambdaExp: HighOrderExp): Set[String] = {
-    freeVariables(addSet(Set(), lambdaExp.param), lambdaExp.body)
-  }// freeVariables
+  def freeVariables(highOrderExp: HighOrderExp): Set[String] = {
+    freeVariables(addSet(Set(), highOrderExp), highOrderExp.body)
+  } // freeVariables
 
-  def freeVariables(params: Set[String], exp: Exp):Set[String] = exp match {
-    case IntegerExp(_) | BooleanExp(_) => Set()
-    case VariableExp(value) => if (!params.contains(value)) Set().+(value) else Set()
-    //      case PrintExp(e1) =>
-    case NewClassExp(className, e1) => freeVariables(params, e1)
-    case MethodExp(e1, className, methodName, e2) => freeVariables(params, e1) ++ freeVariables(params, e2)
-    case GroupedExp(e) => freeVariables(params, e)
-    case HighOrderExp(param, paramType,returnType, body) => freeVariables(addSet(params, param), body)
-    case CallHighOrderExp(lambda, returnType, param) =>  freeVariables(params, lambda)++ freeVariables(params, param)
-    case bop: BOP => freeVariables(params, bop.leftExp) ++ freeVariables(params, bop.rightExp)
+  def freeVariables(params: Set[String], exp: Exp): Set[String] = {
+    exp match {
+      case IntegerExp(_) | BooleanExp(_) => Set()
+      case VariableExp(value) => if (!params.contains(value)) {
+        Set().+(value)
+      } else {
+        Set()
+      }
+      //      case PrintExp(e1) =>
+      case NewClassExp(className, e1) => freeVariables(params, e1)
+      case MethodExp(e1, className, methodName, e2) => freeVariables(params, e1) ++ freeVariables(params, e2)
+      case GroupedExp(e) => freeVariables(params, e)
+      case HighOrderExp(param, paramType,returnType, body) => freeVariables(addSet(params, param), body)
+      case CallHighOrderExp(lambda, returnType, param) =>  freeVariables(params, lambda)++ freeVariables(params, param)
+      case bop: BOP => freeVariables(params, bop.leftExp) ++ freeVariables(params, bop.rightExp)
+    }
   }
 
 
@@ -164,11 +169,11 @@ case class LambdaMaker(var allClasses: Map[String, Class], var additionalClasses
       curLambda - 1
     })
     val needToCapture = LambdaMaker.freeVariables(lambdaExp)
-    val instanceVariables = needToCapture.foldLeft(List():List[VarDeclaration])((res,cur)=>{
+    val instanceVariables = needToCapture.foldLeft(List())((res,cur)=>{
       val varType = table.getEntryFor(cur).types
       val varName = if (cur.equals(ClassGenerator.thisVariable)) LambdaMaker.REWRITTEN_THIS
       else cur
-      res.:+(VarDeclaration(varType, varName))
+      res :+ VarDeclaration(varType, varName)
     })
 
     val lambdaDef = new LambdaDef(outputClassName,
@@ -177,10 +182,10 @@ case class LambdaMaker(var allClasses: Map[String, Class], var additionalClasses
       lambdaExp.paramType, lambdaExp.returnType,
       translateLambdaBody(lambdaExp.body, lambdaExp.param, lambdaExp.paramType, outputClassName))
     additionalClasses = additionalClasses.:+(lambdaDef)
-    var newParams:List[VariableExp] = List()
+    var newParams = List()
     for (instanceVariable <- instanceVariables) {
-      val toPass = if (instanceVariable.varName.equals(LambdaMaker.REWRITTEN_THIS)) ClassGenerator.thisVariable
-      else instanceVariable.varName
+      val toPass = if (instanceVariable.equals(LambdaMaker.REWRITTEN_THIS)) ClassGenerator.thisVariable
+      else instanceVariable
       newParams = newParams.:+(VariableExp(toPass))
     }
     NewClassExp(outputClassName, newParams)

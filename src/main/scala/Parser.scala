@@ -192,9 +192,9 @@ class Parser(private var input: List[Token]) {
         }
       }
 
-      //      case BreakToken :: SemicolonToken :: tail => {
-      //        (BreakStmt, tail)
-      //      }
+//      case BreakToken :: SemicolonToken :: tail => {
+//        (BreakStmt, tail)
+//      }
       case IfToken :: LeftParenToken :: tail => {
         val (exp: Exp, restTokens: List[Token]) = parseExp(tail)
         restTokens match {
@@ -290,7 +290,7 @@ class Parser(private var input: List[Token]) {
         case (method: VarToken) :: LeftParenToken :: tail => {
           val (baseExp, restTokens) = parseExp(tail)
           restTokens match {
-            case VarToken(className) :: restTokens2 => {
+            case VariableExp(className) :: restTokens2 => {
               restTokens2 match {
                 case CommaToken :: afterCommaTail => {
                   val (parameters, restTokens3) = parseRep1(afterCommaTail, parseExp, skipCommas)
@@ -314,16 +314,23 @@ class Parser(private var input: List[Token]) {
             case _ => throw ParserException("miss NewToken ")
           }
         }
-        case LeftParenToken :: VarToken(hofcName) :: VarToken(hofcType) :: tail => {
-          tail match {
-            case RightParenToken :: LeftParenToken :: afterLeftParen => {
-              val (highOrderReturnType, afterType) = parseTypes(afterLeftParen)
-              afterType match {
-                case RightParenToken :: EqualsToken :: GreaterThanToken :: tail => {
-                  val (body, restTokens2) = parseExp(tail)
-                  (HighOrderExp(hofcName,ClassTypes(hofcType), highOrderReturnType, body), restTokens2)
+        case LeftParenToken :: tail => {
+          val (nextType, restTokens) = parseTypes(tail)
+          restTokens match{
+            case _: Exception => {
+              val (highOrderVardec, afterVardecs) = parseVarDec(tail)
+              afterVardecs match {
+                case RightParenToken :: LeftParenToken :: afterLeftParen => {
+                  val (highOrderReturnType, afterType) = parseTypes(afterLeftParen)
+                  afterType match {
+                    case RightParenToken :: EqualsToken :: GreaterThanToken :: tail => {
+                      val (body, restTokens2) = parseExp(tail)
+                      (HighOrderExp(highOrderVardec, highOrderReturnType, body), restTokens2)
+                    }
+                    case _ => throw ParserException("is not a high order function instantiation")
+                  }
                 }
-                case _ => throw ParserException("is not a high order function instantiation")
+                case _ => throw ParserException("no right paren left paren")
               }
             }
           }
@@ -331,13 +338,13 @@ class Parser(private var input: List[Token]) {
         case HOFCToken :: LeftParenToken :: tail => {
           val (function, restTokens) = parseExp(tail)
           restTokens match {
-            case CommaToken :: VarToken(name) :: afterReturnType => {
+            case CommaToken :: VarToken(name) ::afterReturnType => {
               afterReturnType match {
                 case CommaToken :: tail => {
                   val (parameters, restTokens2) = parseExp(tail)
                   restTokens2 match {
                     case RightParenToken :: tail => {
-                      (CallHighOrderExp(function, ClassTypes(name), parameters), tail)
+                      (CallHighOrderExp(function, ClassTypes(name),parameters), tail)
                     }
                     case _ => throw ParserException("not a high order function call")
                   }
