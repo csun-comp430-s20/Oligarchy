@@ -27,7 +27,7 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
         val classDef: Class = classDefFor(className)
         val methodDef: List[MethodDef] = classDef.methods
         methodDef.foreach( method=> {
-          if (method.methodName equals methodName) (method.toDescriptorString())
+          if (method.methodName equals methodName) (method.toDescriptorString)
         })
         (methodDescriptorFor(classDef.extendedClass, methodName))
       }
@@ -43,7 +43,7 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
         val classDef: Class = classDefFor(className)
         val varDecs: List[InstanceDec] = classDef.instances
         varDecs.foreach(instanceDec =>{
-          if (instanceDec.v1.varName equals fieldName) (instanceDec.v1.types.toDescriptorString())
+          if (instanceDec.v1.varName equals fieldName) (instanceDec.v1.types.toDescriptorString)
         })
         (fieldDescriptorFor(classDef.extendedClass, fieldName))
       }
