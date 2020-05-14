@@ -31,7 +31,7 @@ case class LambdaDef(className: String, varDeclarations: List[VarDeclaration], p
     this
   }
   def toSignatureString: String = {
-    ClassTypes(className).toDescriptorString() + HighOrderFuncType(returnType, returnType).toDescriptorString()
+    ClassTypes(className).toDescriptorString + HighOrderFuncType(returnType, returnType).toDescriptorString
   }
 
   def constructorDescriptorString(): String = {
@@ -61,8 +61,9 @@ case class LambdaDef(className: String, varDeclarations: List[VarDeclaration], p
       varDeclarations.foreach {
         varDeclarations: VarDeclaration => {
           methodVisitor.visitVarInsn(ALOAD, 0)
-          methodVisitor.visitVarInsn(VariableEntry.loadInstructionForType(varDeclarations.types), variableIndex = variableIndex + 1)
+          methodVisitor.visitVarInsn(VariableEntry.loadInstructionForType(varDeclarations.types), variableIndex)
           methodVisitor.visitFieldInsn(PUTFIELD, className, varDeclarations.varName, varDeclarations.types.toString)
+          variableIndex = variableIndex + 1
         }
       }
       methodVisitor.visitInsn(RETURN)

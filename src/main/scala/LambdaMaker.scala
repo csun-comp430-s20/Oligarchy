@@ -23,27 +23,22 @@ case object LambdaMaker {
     })
   }
 
-  @throws[CodeGeneratorException]
-  def freeVariables(highOrderExp: HighOrderExp): Set[String] = {
-    freeVariables(addSet(Set(), highOrderExp), highOrderExp.body)
-  } // freeVariables
 
-  def freeVariables(params: Set[String], exp: Exp): Set[String] = {
-    exp match {
-      case IntegerExp(_) | BooleanExp(_) => Set()
-      case VariableExp(value) => if (!params.contains(value)) {
-        Set().+(value)
-      } else {
-        Set()
-      }
-      //      case PrintExp(e1) =>
-      case NewClassExp(className, e1) => freeVariables(params, e1)
-      case MethodExp(e1, className, methodName, e2) => freeVariables(params, e1) ++ freeVariables(params, e2)
-      case GroupedExp(e) => freeVariables(params, e)
-      case HighOrderExp(param, paramType,returnType, body) => freeVariables(addSet(params, param), body)
-      case CallHighOrderExp(lambda, returnType, param) =>  freeVariables(params, lambda)++ freeVariables(params, param)
-      case bop: BOP => freeVariables(params, bop.leftExp) ++ freeVariables(params, bop.rightExp)
-    }
+  @throws[CodeGeneratorException]
+  def freeVariables(lambdaExp: HighOrderExp): Set[String] = {
+    freeVariables(addSet(Set(), lambdaExp.param), lambdaExp.body)
+  }// freeVariables
+
+  def freeVariables(params: Set[String], exp: Exp):Set[String] = exp match {
+    case IntegerExp(_) | BooleanExp(_) => Set()
+    case VariableExp(value) => if (!params.contains(value)) Set().+(value) else Set()
+    //      case PrintExp(e1) =>
+    case NewClassExp(className, e1) => freeVariables(params, e1)
+    case MethodExp(e1, className, methodName, e2) => freeVariables(params, e1) ++ freeVariables(params, e2)
+    case GroupedExp(e) => freeVariables(params, e)
+    case HighOrderExp(param, paramType,returnType, body) => freeVariables(addSet(params, param), body)
+    case CallHighOrderExp(lambda, returnType, param) =>  freeVariables(params, lambda)++ freeVariables(params, param)
+    case bop: BOP => freeVariables(params, bop.leftExp) ++ freeVariables(params, bop.rightExp)
   }
 
 
