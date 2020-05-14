@@ -241,14 +241,35 @@ class Typechecker(val stc: SymbolTableClass){
       }
       case HighOrderExp(params, paramType, returnType, body)  if Typechecker.allDistinct(params) =>{
         val gamma2 = gamma ++ Map(params -> paramType)
-        val tau2 = typeof(body, gamma2)
-        MethodTypes(List[Types](paramType), tau2)
+        if( typeof(body, gamma2) == returnType) {
+          MethodTypes(List[Types](paramType), returnType)
+        }
+        else{
+          throw IllTypedException("Not a higher order expression")
+        }
       }
       case CallHighOrderExp(lambda, returnType, params) => {
         typeof(lambda, gamma) match {
-          case MethodTypes(tau1, tau2) =>{
-            if (returnType == tau2) {
-              (tau2)
+          case MethodTypes(tau1: List[Types], tau2) =>{
+            if (tau1.size == 1) {
+              tau1 match{
+                case (tau:Types)::tail=>{
+                  if(typeof(params, gamma) == tau){
+                    if(tau2 == returnType){
+                      (tau2)
+                    }
+                    else{
+                      throw IllTypedException("tau2 not of ClassTypes in call high order expression")
+                    }
+                  }
+                  else{
+                    throw IllTypedException("params not of the same type as tau in call high order expression ")
+                  }
+                }
+              }
+            }
+            else{
+              throw IllTypedException("tau1 is not of size one in call high order expression")
             }
           }
           case _ => throw IllTypedException("not a higher-order function")
