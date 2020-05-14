@@ -159,13 +159,16 @@ case class LambdaMaker(var allClasses: Map[String, Class], var additionalClasses
 
   @throws[CodeGeneratorException]
   def translateLambda(lambdaExp: HighOrderExp, table: VariableTable): NewClassExp = {
-    val outputClassName = (LambdaMaker.LAMBDA_PREFIX + {curLambda += 1;})
+    val outputClassName = (LambdaMaker.LAMBDA_PREFIX + {
+      curLambda += 1;
+      curLambda - 1
+    })
     val needToCapture = LambdaMaker.freeVariables(lambdaExp)
-    val instanceVariables = needToCapture.foldLeft(List())((res,cur)=>{
+    val instanceVariables = needToCapture.foldLeft(List():List[VarDeclaration])((res,cur)=>{
       val varType = table.getEntryFor(cur).types
       val varName = if (cur.equals(ClassGenerator.thisVariable)) LambdaMaker.REWRITTEN_THIS
       else cur
-      res :+ VarDeclaration(varType, varName)
+      res.:+(VarDeclaration(varType, varName))
     })
 
     val lambdaDef = new LambdaDef(outputClassName,
@@ -174,11 +177,11 @@ case class LambdaMaker(var allClasses: Map[String, Class], var additionalClasses
       lambdaExp.paramType, lambdaExp.returnType,
       translateLambdaBody(lambdaExp.body, lambdaExp.param, lambdaExp.paramType, outputClassName))
     additionalClasses = additionalClasses.:+(lambdaDef)
-    var newParams:List[Exp] = List()
+    var newParams:List[VariableExp] = List()
     for (instanceVariable <- instanceVariables) {
-      val toPass = if (instanceVariable.equals(LambdaMaker.REWRITTEN_THIS)) ClassGenerator.thisVariable
-      else instanceVariable
-      newParams = newParams :+ VariableExp(toPass)
+      val toPass = if (instanceVariable.varName.equals(LambdaMaker.REWRITTEN_THIS)) ClassGenerator.thisVariable
+      else instanceVariable.varName
+      newParams = newParams.:+(VariableExp(toPass))
     }
     NewClassExp(outputClassName, newParams)
   } // translateLambda
