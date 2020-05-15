@@ -23,7 +23,7 @@ object VariableTable {
 
 class VariableTable {
 
-  private var variables: Map[String, VariableEntry] = _
+  private var variables: Map[String, VariableEntry] = Map()
   private var nextIndex = 0
 
   @throws[CodeGeneratorException]

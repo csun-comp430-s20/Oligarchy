@@ -26,7 +26,7 @@ case object ClassGenerator {
   } // instance Variables
 }
 case class ClassGenerator(program: Program){
-  private var allClasses:Map[String,Class] = _
+  private var allClasses:Map[String,Class] = Map()
   private var lambdaMaker:LambdaMaker = _
 
   @throws[CodeGeneratorException]
@@ -35,7 +35,9 @@ case class ClassGenerator(program: Program){
       if (this.allClasses contains (myClass.className)) {
         throw new CodeGeneratorException("redefining a defined class " + myClass.className)
       }
-      this.allClasses += (myClass.className -> myClass)
+      else {
+        this.allClasses += (myClass.className -> myClass)
+      }
     })
     this.lambdaMaker = LambdaMaker(this.allClasses)
     this
@@ -45,6 +47,7 @@ case class ClassGenerator(program: Program){
   def writeClasses(toDirectory:String): Unit = {
     for (classDef <- allClasses.values) {
       val genClass = SingleClassGenerator(classDef)
+      genClass.apply(classDef)
       genClass.writeClass(toDirectory)
     }
     lambdaMaker.writeLambdas(toDirectory)
@@ -84,6 +87,7 @@ case class ClassGenerator(program: Program){
       // we dont have constructors or main
       for (method <- forClass.methods) {
         val methodGen = SingleMethodGenerator(method)
+        methodGen.apply(method)
         methodGen.writeMethod()
       }
       classWriter.visitEnd()
@@ -93,7 +97,6 @@ case class ClassGenerator(program: Program){
     case class SingleMethodGenerator(method: MethodDef) {
       private var variables: VariableTable = _
       private var methodVisitor: MethodVisitor = _
-
       def apply(method:MethodDef): SingleMethodGenerator = {
         val flags = ACC_PUBLIC
         variables = VariableTable.withFormalParamsFrom(thisType, method)
