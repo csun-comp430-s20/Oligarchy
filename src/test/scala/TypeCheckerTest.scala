@@ -670,10 +670,6 @@ class TypeCheckerTest extends AnyFunSuite {
 //    val extendedClassList: List[Class] = List(parent)
 //    val programThatExtendsAClass = Program(myStmt, extendedClassList)
 //    Typechecker(programThatExtendsAClass)
-//
-//    val expected = IntTypes
-//    val result = mynonEmptyTypechecker.typeof(start,Map())
-//    assert(expected == result)
 //  }
 
 }

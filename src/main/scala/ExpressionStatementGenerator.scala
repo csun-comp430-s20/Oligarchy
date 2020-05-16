@@ -51,7 +51,7 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
   }
 
   def loadVariable(variable: String): Unit = {
-    variables.getEntryFor(variable).store(methodVisitor)
+    variables.getEntryFor(variable).load(methodVisitor)
   }
 
   def storeVariable(variable: String): Unit = {
