@@ -151,7 +151,6 @@ class Typechecker(val stc: SymbolTableClass){
         (typeof(e1, gamma), typeof(e2, gamma)) match {
           case (IntTypes, IntTypes) => BoolTypes
           case _ => throw IllTypedException("less than equals")
-          case _ => throw IllTypedException("less than equals")
         }
       }
 //      case CastExp(t1, e1) => { // assumes the user knows how to cast exp ?
@@ -284,7 +283,7 @@ class Typechecker(val stc: SymbolTableClass){
   def typecheckMethodDef(className:String, methodDef: MethodDef): Unit ={
     checkForDuplicatesParameters(methodDef.parameters)
     val gamma1 = methodDef.parameters.map(pair => (pair.varName -> pair.types)).toMap
-    val gamma2 = typecheckStatement(methodDef.stmt, gamma1,false)
+    val gamma2 = typecheckStatement(methodDef.stmt, gamma1)
     if (typeof(methodDef.returnExpression, gamma2) != methodDef.types) {
       throw IllTypedException("return type mismatch")
     }
@@ -370,7 +369,7 @@ class Typechecker(val stc: SymbolTableClass){
 
 
 
-  def typecheckStatement(s: Stmt, gamma: TypeEnv, forLoopBool: Boolean): TypeEnv = {
+  def typecheckStatement(s: Stmt, gamma: TypeEnv): TypeEnv = {
     s match {
       case PrintExp(e1) => {
         typeof(e1, gamma)
@@ -407,11 +406,10 @@ class Typechecker(val stc: SymbolTableClass){
         }
       }
       case ForStmt(s1: Stmt, e1:Exp, s2: Stmt, forBody: Stmt)=>{
-        val breakBool = true
-        val gamma2 = typecheckStatement(s1, gamma, false)
+        val gamma2 = typecheckStatement(s1, gamma )
         if(typeof(e1,gamma2) == BoolTypes) {
-          val gamma3 = typecheckStatement(s2, gamma2, false)
-          typecheckStatement(forBody, gamma3, breakBool)
+          val gamma3 = typecheckStatement(s2, gamma2)
+          typecheckStatement(forBody, gamma3)
           gamma
         }
         else{
@@ -420,21 +418,21 @@ class Typechecker(val stc: SymbolTableClass){
       }
       case ConditionalStmt(e1: Exp, stmtTrue: Stmt, stmtFalse: Stmt)=>{
         if(typeof(e1, gamma) == BoolTypes) {
-          typecheckStatement(stmtTrue, gamma, false)
-          typecheckStatement(stmtFalse, gamma, false)
+          typecheckStatement(stmtTrue, gamma)
+          typecheckStatement(stmtFalse, gamma)
           gamma
         }else{
           throw IllTypedException("conditional statement")
         }
       }
       case BlockStmt(st: List[Stmt])=>{
-        st.foldLeft(gamma)((currentGamma, currentStatement) => typecheckStatement(currentStatement, currentGamma,false))
+        st.foldLeft(gamma)((currentGamma, currentStatement) => typecheckStatement(currentStatement, currentGamma))
       }
     }
   } // typecheckStatement
 
   def typecheckProgram(input: Program, gamma: TypeEnv) {
     typecheckClasses(input.classes)
-    typecheckStatement(input.entryPoint, gamma, false)
+    typecheckStatement(input.entryPoint, gamma)
   } // typecheckProgram
 } // Typechecker

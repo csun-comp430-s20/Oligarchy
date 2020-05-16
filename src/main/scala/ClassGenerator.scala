@@ -26,19 +26,31 @@ case object ClassGenerator {
   } // instance Variables
 }
 case class ClassGenerator(program: Program){
-  private var allClasses:Map[String,Class] = _
+  private var allClasses:Map[String,Class] = Map()
   private var lambdaMaker:LambdaMaker = _
-
-  @throws[CodeGeneratorException]
-  def apply(program: Program){
-    program.classes.foreach(myClass => {
-      if (this.allClasses contains (myClass.className)) {
-        throw new CodeGeneratorException("redefining a defined class " + myClass.className)
-      }
+  program.classes.foreach(myClass => {
+    if (this.allClasses contains (myClass.className)) {
+      throw new CodeGeneratorException("redefining a defined class " + myClass.className)
+    }
+    else {
       this.allClasses += (myClass.className -> myClass)
-    })
-    this.lambdaMaker = LambdaMaker(this.allClasses)
-  } //apply
+    }
+  })
+  this.lambdaMaker = LambdaMaker(this.allClasses)
+  this
+//  @throws[CodeGeneratorException]
+//  def apply(program: Program): ClassGenerator ={
+//    program.classes.foreach(myClass => {
+//      if (this.allClasses contains (myClass.className)) {
+//        throw new CodeGeneratorException("redefining a defined class " + myClass.className)
+//      }
+//      else {
+//        this.allClasses += (myClass.className -> myClass)
+//      }
+//    })
+//    this.lambdaMaker = LambdaMaker(this.allClasses)
+//    this
+//  } //apply
 
   @throws[CodeGeneratorException]
   def writeClasses(toDirectory:String): Unit = {
@@ -58,29 +70,45 @@ case class ClassGenerator(program: Program){
 
 
   case class SingleClassGenerator(forClass: Class) {
+
     // ---BEGIN INSTANCE VARIABLES---
     private var thisType:ClassTypes = _
     private var classWriter:ClassWriter = _
     // ---END INSTANCE VARIABLES---
 
-    def apply(forClass: Class) {
-      this.thisType = ClassTypes(forClass.className)
-      this.classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES)
-      classWriter.visit(V1_7, // Java 1.7
-        ACC_PUBLIC, // public
-        forClass.className, // class name
-        null, // signature (null means not generic)
-        forClass.extendedClass, // superclass if null is passed it checks for it and corrects it
-        new Array[String](0)) // interfaces (none)
-      for (field <- forClass.instances) {
-        classWriter.visitField(ACC_PUBLIC, field.v1.varName, field.v1.types.toDescriptorString, null, null).visitEnd()
-      }
-    } // SingleClassGenerator
+    this.thisType = ClassTypes(forClass.className)
+    this.classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES)
+    classWriter.visit(V1_7, // Java 1.7
+      ACC_PUBLIC, // public
+      forClass.className, // class name
+      null, // signature (null means not generic)
+      forClass.extendedClass, // superclass if null is passed it checks for it and corrects it
+      new Array[String](0)) // interfaces (none)
+    for (field <- forClass.instances) {
+      classWriter.visitField(ACC_PUBLIC, field.v1.varName, field.v1.types.toDescriptorString, null, null).visitEnd()
+    }
+
+//    def SingleClassGenerator(forClass: Class) {
+//      this.thisType = ClassTypes(forClass.className)
+//      this.classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES)
+//      classWriter.visit(V1_7, // Java 1.7
+//        ACC_PUBLIC, // public
+//        forClass.className, // class name
+//        null, // signature (null means not generic)
+//        forClass.extendedClass, // superclass if null is passed it checks for it and corrects it
+//        new Array[String](0)) // interfaces (none)
+//      for (field <- forClass.instances) {
+//        classWriter.visitField(ACC_PUBLIC, field.v1.varName, field.v1.types.toDescriptorString, null, null).visitEnd()
+//      }
+//    } // SingleClassGenerator
 
 
     @throws[CodeGeneratorException]
     def writeClass(toDiectory: String): Unit = {
       // we dont have constructors or main
+//      val methodGen: SingleMethodGenerator = new SingleMethodGenerator(MethodDef(VoidTypes,"<init>",forClass.statements,forClass.parameters,IntegerExp(1)))
+//      methodGen.writeMethod()
+      classWriter.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null)
       for (method <- forClass.methods) {
         val methodGen = SingleMethodGenerator(method)
         methodGen.writeMethod()
@@ -92,13 +120,16 @@ case class ClassGenerator(program: Program){
     case class SingleMethodGenerator(method: MethodDef) {
       private var variables: VariableTable = _
       private var methodVisitor: MethodVisitor = _
-
-      def apply(method:MethodDef): SingleMethodGenerator = {
-        val flags = ACC_PUBLIC
-        variables = VariableTable.withFormalParamsFrom(thisType, method)
-        methodVisitor = classWriter.visitMethod(flags, method.methodName, method.toDescriptorString, null, null)
-        this
-      }
+      val flags = ACC_PUBLIC
+      variables = VariableTable.withFormalParamsFrom(thisType, method)
+      methodVisitor = classWriter.visitMethod(flags, method.methodName, method.toDescriptorString, null, null)
+      this
+//      def apply(method:MethodDef): SingleMethodGenerator = {
+//        val flags = ACC_PUBLIC
+//        variables = VariableTable.withFormalParamsFrom(thisType, method)
+//        methodVisitor = classWriter.visitMethod(flags, method.methodName, method.toDescriptorString, null, null)
+//        this
+//      }
 
 
       @throws[CodeGeneratorException]
@@ -114,7 +145,6 @@ case class ClassGenerator(program: Program){
         gen.doReturn(method.types)
         methodVisitor.visitMaxs(0,0)
       } // writeMethod
-
     } // singleMethodGenerator
   } // singleClassGenerator
 }
