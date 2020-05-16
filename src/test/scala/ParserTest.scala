@@ -12,25 +12,27 @@ class ParserTest extends AnyFunSuite {
   }
 
 //@todo this errors out please fix
-//  test("testClass()"){
-//    val input = "Class testing { int myInt;" +
-//      "constructor(bool myBool){1;}" +
-//      "bool testMethod() return true;" +
-//      "}"
-//    val tokenizer = Lexer(input)
-//    val receivedTokens = tokenizer.tokenize()
-//    val program = Program(IntegerExp(1),
-//      List(
-//        DefClass("testing",
-//          BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
-//          List(InstanceDec(VarDeclaration(IntTypes,"myInt"))),
-//          List(VarDeclaration(BoolTypes,"myBool")),
-//          List(MethodDef(BoolTypes, "testMethod",null, List[VarDeclaration](), BooleanExp(true)))
-//        )
-//      )
-//    )
-//    testParses(receivedTokens,program)
-//  }
+  test("testClass()"){
+    val input = " Class testing { int myInt;" +
+      "constructor(bool myBool){1;}" +
+      "bool testMethod() int i = 0; return true;" +
+      "} int i = 1;"
+
+    val tokenizer = Lexer(input)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val expected = Program(AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(1)),
+      List(
+        DefClass("testing", null,
+          BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+          List(InstanceDec(VarDeclaration(IntTypes,"myInt"))),
+          List(VarDeclaration(BoolTypes,"myBool")),
+          List(MethodDef(BoolTypes, "testMethod", AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(0)), List[VarDeclaration](), BooleanExp(true)))
+        )
+      )
+    )
+    testParses(receivedTokens,expected)
+  }
 
   test("testIntegerExp()"){
     val lexerInput = "35"
@@ -144,15 +146,6 @@ class ParserTest extends AnyFunSuite {
     testParses(receivedTokens, expectedProgram, parser.parseTypes)
   }
 
-  test("testStrType()"){
-    val input = "str "
-    val expectedProgram = StrTypes
-    val tokenizer = Lexer(input)
-    val receivedTokens = tokenizer.tokenize()
-    val parser = new Parser(receivedTokens)
-    testParses(receivedTokens, expectedProgram, parser.parseTypes)
-  }
-
   test("testBooleanType()"){
     val input = "bool "
     val expectedProgram = BoolTypes
@@ -259,8 +252,8 @@ class ParserTest extends AnyFunSuite {
   }
 
   test("testMethodNameExp()"){
-    val input = "foobar(5)"
-    val expectedProgram = MethodExp(IntegerExp(5), "foobar", List[Exp]())
+    val input = "foobar(5 className)"
+    val expectedProgram = MethodExp(IntegerExp(5), "className", "foobar", List[Exp]())
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val parser = new Parser(receivedTokens)
@@ -268,8 +261,8 @@ class ParserTest extends AnyFunSuite {
   }
 
   test("testMethodNameExp2()"){
-    val input = "foobar(5, 6, 7)"
-    val expectedProgram = MethodExp(IntegerExp(5), "foobar", List[Exp](IntegerExp(6), IntegerExp(7)))
+    val input = "foobar(5 varClassName, 6, 7)"
+    val expectedProgram = MethodExp(IntegerExp(5), "varClassName", "foobar", List[Exp](IntegerExp(6), IntegerExp(7)))
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val parser = new Parser(receivedTokens)
@@ -331,30 +324,30 @@ class ParserTest extends AnyFunSuite {
   }
 
 
-//  test("testPrecendenceExp()"){
-//    val lexerInput = "1+2*5^6"
-//    val tokenizer = Lexer(lexerInput)
-//    val receivedTokens = tokenizer.tokenize()
-//    val parser = Parser(receivedTokens)
-//    val expected = PlusExp(IntegerExp(1),MultiplyExp(IntegerExp(2),PowerExp(IntegerExp(5),IntegerExp(6))))
-//    testParses(receivedTokens,expected, parser.parseExp)
-//  }
-
-//  test("testPrecendenceLeftToRightExp()"){
-//    val lexerInput = "1^2*5+6"
-//    val tokenizer = Lexer(lexerInput)
-//    val receivedTokens = tokenizer.tokenize()
-//    val parser = Parser(receivedTokens)
-//    val expected = PlusExp(MultiplyExp(PowerExp(IntegerExp(1),IntegerExp(2)),IntegerExp(5)),IntegerExp(6))
-//    testParses(receivedTokens,expected, parser.parseExp)
-//  }
-
-  test("testHighOrderFunctionCallExp()"){
-    val lexerInput = "hofc( myHighOrderFunction, \"mySecondExp\")"
+  test("testPrecendenceExp()"){
+    val lexerInput = "1+2*5^6"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
     val parser = Parser(receivedTokens)
-    val expected = CallHighOrderExp(VariableExp("myHighOrderFunction"),List(StringExp("mySecondExp")))
+    val expected = PlusExp(IntegerExp(1),MultiplyExp(IntegerExp(2),PowerExp(IntegerExp(5),IntegerExp(6))))
+    testParses(receivedTokens,expected, parser.parseExp)
+  }
+
+  test("testPrecendenceLeftToRightExp()"){
+    val lexerInput = "1^2*5+6"
+    val tokenizer = Lexer(lexerInput)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val expected =  PowerExp(IntegerExp(1),MultiplyExp(IntegerExp(2),PlusExp(IntegerExp(5),IntegerExp(6))))
+    testParses(receivedTokens,expected, parser.parseExp)
+  }
+
+  test("testHighOrderFunctionCallExp()"){
+    val lexerInput = "hofc( myHighOrderFunction, className, \"mySecondExp\")"
+    val tokenizer = Lexer(lexerInput)
+    val receivedTokens = tokenizer.tokenize()
+    val parser = Parser(receivedTokens)
+    val expected = CallHighOrderExp(VariableExp("myHighOrderFunction"),ClassTypes("className"), StringExp("mySecondExp"))
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
@@ -388,18 +381,18 @@ class ParserTest extends AnyFunSuite {
     }
   }
 
-  test("testCreateHighOrderFunctionExp()"){
-    val lexerInput = "(int myVariable ) => myVariable + 2"
+  test("testCreateHighOrderFunctionExp()") {
+    val lexerInput = "(foo foo2) ( int ) => 1;"
     val tokenizer = Lexer(lexerInput)
     val receivedTokens = tokenizer.tokenize()
     val parser = Parser(receivedTokens)
-    val expected = HighOrderExp(List(VarDeclaration(IntTypes,"myVariable")) ,PlusExp(VariableExp("myVariable"),IntegerExp(2)))
+    val expected = HighOrderExp("foo", ClassTypes("foo2"), IntTypes, IntegerExp(1))
     testParses(receivedTokens,expected, parser.parseExp)
   }
 
   test("testMethodNameExp1()"){
-    val input = "foobar(5, 6)"
-    val expectedProgram = MethodExp(IntegerExp(5), "foobar", List[Exp](IntegerExp(6)))
+    val input = "foobar(5 className , 6)"
+    val expectedProgram = MethodExp(IntegerExp(5), "className", "foobar", List[Exp](IntegerExp(6)))
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val parser = new Parser(receivedTokens)
@@ -441,14 +434,6 @@ class ParserTest extends AnyFunSuite {
       val parser = Parser(tokens)
       parser.parseStmt(tokens)
     }
-  }
-  test("testStmtBreak()"){
-    val input = "break;"
-    val expectedProgram = BreakStmt
-    val tokenizer = Lexer(input)
-    val tokens = tokenizer.tokenize()
-    val parser = Parser(tokens)
-    testParses(tokens, expectedProgram, parser.parseStmt)
   }
 
   test("testBlockStmt()"){
@@ -547,9 +532,9 @@ class ParserTest extends AnyFunSuite {
 //  }
 
   test("testNewClassExp()"){
-    val input = "new myClass(print(1), 1 - 2)"
+    val input = "new myClass(1 - 2)"
     val tokenizer = Lexer(input)
-    val expectedProgram = NewClassExp("myClass", List[Exp](PrintExp(IntegerExp(1)), SubtractExp(IntegerExp(1), IntegerExp(2))))
+    val expectedProgram = NewClassExp("myClass", List(SubtractExp(IntegerExp(1), IntegerExp(2))))
     val tokens = tokenizer.tokenize()
     val parser = Parser(tokens)
     testParses(tokens, expectedProgram, parser.parseExp)
@@ -563,23 +548,13 @@ class ParserTest extends AnyFunSuite {
     parser.parseExp(tokens)
   }
 
-  test("testCastExp()"){
-    val input = "(int) true"
-    val tokenizer = Lexer(input)
-    val expectedProgram = CastExp(IntTypes, BooleanExp(true))
-    val tokens = tokenizer.tokenize()
-    val parser = Parser(tokens)
-    testParses(tokens, expectedProgram, parser.parseExp)
-  }
-
-
   test("testPrintExp()"){
-    val input = "print(45) "
+    val input = "print(45)"
     val expectedProgram = PrintExp(IntegerExp(45))
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val parser = new Parser(receivedTokens)
-    testParses(receivedTokens, expectedProgram, parser.parseExp)
+    testParses(receivedTokens, expectedProgram, parser.parseStmt)
   }
 
   test("testing PrintExp throws parser exception for missing right paren"){
@@ -588,7 +563,7 @@ class ParserTest extends AnyFunSuite {
       val tokenizer = Lexer(input)
       val receivedTokens = tokenizer.tokenize()
       val parser = new Parser(receivedTokens)
-      parser.parseExp(receivedTokens)
+      parser.parseStmt(receivedTokens)
     }
   }
 
@@ -644,12 +619,12 @@ class ParserTest extends AnyFunSuite {
   }
 
   test("testing class def"){
-    val input = "Class testing{" +
+    val input = "Class testing extends testing2{" +
       "int i;" +
       "constructor(int w) 1; " +
-      "bool testMethod(int foo) return true; }"
-    val expectedProgram = DefClass("testing", ExpStmt(IntegerExp(1)), List(InstanceDec(VarDeclaration(IntTypes, "i"))), List(VarDeclaration(IntTypes, "w")), List(MethodDef(BoolTypes, "testMethod", null,
-      List[VarDeclaration](VarDeclaration(IntTypes, "foo")), BooleanExp(true))))
+      "bool testMethod(int foo) return 1;}"
+    val expectedProgram =  DefExtClass("testing", "testing2", ExpStmt(IntegerExp(1)), List(InstanceDec(VarDeclaration(IntTypes, "i"))), List(VarDeclaration(IntTypes, "w")), List(MethodDef(BoolTypes, "testMethod", null,
+      List[VarDeclaration](VarDeclaration(IntTypes, "foo")), IntegerExp(1))))
     val tokenizer = Lexer(input)
     val receivedTokens = tokenizer.tokenize()
     val parser = new Parser(receivedTokens)
