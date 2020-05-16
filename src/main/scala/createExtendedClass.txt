@@ -1,0 +1,17 @@
+int i = 1;
+Class Child extends Parent{
+    int myInt;
+    constructor(bool myBool){
+        int i = 1;
+    }
+    int childMethod(int i) i =2; return i;
+
+}
+Class Parent {
+    int myInt;
+    constructor(){
+        int i = 1;
+    }
+    int parentMethod(int i) i =0; return i;
+}
+
