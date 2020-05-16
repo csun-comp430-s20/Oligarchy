@@ -15,7 +15,7 @@ class ParserTest extends AnyFunSuite {
   test("testClass()"){
     val input = " Class testing { int myInt;" +
       "constructor(bool myBool){1;}" +
-      "bool testMethod() return true;" +
+      "bool testMethod() int i = 0; return true;" +
       "} int i = 1;"
 
     val tokenizer = Lexer(input)
@@ -27,7 +27,7 @@ class ParserTest extends AnyFunSuite {
           BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
           List(InstanceDec(VarDeclaration(IntTypes,"myInt"))),
           List(VarDeclaration(BoolTypes,"myBool")),
-          List(MethodDef(BoolTypes, "testMethod",null, List[VarDeclaration](), BooleanExp(true)))
+          List(MethodDef(BoolTypes, "testMethod", AssignmentStmt(VarDeclaration(IntTypes, "i"), IntegerExp(0)), List[VarDeclaration](), BooleanExp(true)))
         )
       )
     )

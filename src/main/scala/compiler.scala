@@ -11,7 +11,6 @@ object compiler {
     val parserOutput = parser.parseProgram(tokenizerOutput)
     val typechecker = Typechecker(parserOutput._1)
     val codeGen = ClassGenerator(parserOutput._1)
-    codeGen.apply(parserOutput._1)
     codeGen.writeClasses("/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/")
   }
 }
