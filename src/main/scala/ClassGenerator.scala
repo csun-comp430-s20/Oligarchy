@@ -82,8 +82,13 @@ case class ClassGenerator(program: Program){
       ACC_PUBLIC, // public
       forClass.className, // class name
       null, // signature (null means not generic)
-      forClass.extendedClass, // superclass if null is passed it checks for it and corrects it
-      new Array[String](0)) // interfaces (none)
+      if(forClass.extendedClass == null){
+        ClassGenerator.objectName
+      }
+      else{
+        forClass.extendedClass
+      },
+    new Array[String](0)) // interfaces (none)
     for (field <- forClass.instances) {
       classWriter.visitField(ACC_PUBLIC, field.v1.varName, field.v1.types.toDescriptorString, null, null).visitEnd()
     }
@@ -108,7 +113,19 @@ case class ClassGenerator(program: Program){
       // we dont have constructors or main
 //      val methodGen: SingleMethodGenerator = new SingleMethodGenerator(MethodDef(VoidTypes,"<init>",forClass.statements,forClass.parameters,IntegerExp(1)))
 //      methodGen.writeMethod()
-      classWriter.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null)
+val constructor: MethodVisitor = classWriter.visitMethod(ACC_PUBLIC, // access modifier
+  "<init>", // method name (constructor)
+  "()V", // descriptor
+  null, // signature (null means not generic)
+  null) // exceptions
+      constructor.visitCode
+      constructor.visitVarInsn(ALOAD, 0) // load "this"
+
+      constructor.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false) // super()
+
+      constructor.visitInsn(RETURN)
+      constructor.visitMaxs(0, 0)
+//      classWriter.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null)
       for (method <- forClass.methods) {
         val methodGen = SingleMethodGenerator(method)
         methodGen.writeMethod()
