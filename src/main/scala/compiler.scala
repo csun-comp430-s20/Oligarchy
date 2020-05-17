@@ -5,7 +5,11 @@ object compiler {
 //    val filenameS = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\createExtendedClass.txt"
 //    val filenameS = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/ForLoopStatement.txt"
     val filenameS = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\createAndCallHighOrderFunction.txt"
-    val source = Source.fromFile(filenameS)
+//    val source = Source.fromFile(filenameS)
+    val filename = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/createExtendedClass.txt"
+//    val filename = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\createAndCallHighOrderFunction.txt"
+
+    val source = Source.fromFile(filename)
     val input = source.getLines().mkString
     val tokenizer = Lexer(input)
     val tokenizerOutput:List[Token] = tokenizer.tokenize()
@@ -13,9 +17,8 @@ object compiler {
     val parserOutput = parser.parseProgram(tokenizerOutput)
     val typechecker = Typechecker(parserOutput._1)
     val codeGen = ClassGenerator(parserOutput._1)
-    val pathE = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\"
-//    val pathS = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/"
-//    codeGen.writeClasses(pathS)
-    codeGen.writeClasses(pathE)
+//    val path = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\"
+    val path = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/"
+    codeGen.writeClasses(path)
   }
 }
