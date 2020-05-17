@@ -2,9 +2,9 @@ import scala.io.Source
 
 object compiler {
   def main(args: Array[String]) {
-    val filenameS = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\createExtendedClass.txt"
+//    val filenameS = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\createExtendedClass.txt"
 //    val filenameS = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/ForLoopStatement.txt"
-//    val filenameS = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\createAndCallHighOrderFunction.txt"
+    val filenameS = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\createAndCallHighOrderFunction.txt"
     val source = Source.fromFile(filenameS)
     val input = source.getLines().mkString
     val tokenizer = Lexer(input)
