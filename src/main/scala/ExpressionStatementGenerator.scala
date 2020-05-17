@@ -95,11 +95,11 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
     val conditionTrue = new Label()
     val afterCondition = new Label()
     exp match {
-      case LTEExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPLT, conditionTrue)
-      case LTExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPLE, conditionTrue)
+      case LTEExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPLE, conditionTrue)
+      case LTExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPLT, conditionTrue)
       case GTEExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPGE, conditionTrue)
       case GTExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPGT, conditionTrue)
-      case EqualsExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ACMPEQ, conditionTrue)
+      case EqualsExp(leftExp, rightExp) => methodVisitor.visitJumpInsn(IF_ICMPEQ, conditionTrue)
       case _ => throw new CodeGeneratorException ("Unrecognized operation: " + exp)
     }
     writeIntLiteral(0)
@@ -170,6 +170,7 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
       case GroupedExp(e) => writeExpression(e)
       case highOrderExp:HighOrderExp => writeLambdaExp(highOrderExp)
       case callHighOrderExp: CallHighOrderExp => writeLambdaCallExp(callHighOrderExp)
+      case bop:BOP => writeOp(bop)
       case _ => throw new CodeGeneratorException("Unrecognized expression: " + exp)
     }
   }
@@ -190,6 +191,7 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
     methodVisitor.visitLabel(falseLabel)
     writeStatements(ifStmt.ifFalse)
     methodVisitor.visitLabel(afterFalseLabel)
+
   }
 
   def writeForStatement(forStmt: ForStmt): Unit ={

@@ -1,0 +1,13 @@
+Class Arithmetic{
+int myInt;
+      constructor(bool myBool){
+       int i = 1;
+       print(i)
+      }
+    int multiplication(int i, int w) i = i * w; return i;
+    int addition(int i , int w) i = i + w; return i;
+    int division (int i, int w) i = i/w; return i;
+    int subtraction(int i, int w) i = i - w; return i;
+    int randomSequence(int i)  i = (10 * 5) + 2 - i; return i;
+}
+int i = 1;
