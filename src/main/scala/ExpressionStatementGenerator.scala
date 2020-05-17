@@ -170,7 +170,11 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
       case GroupedExp(e) => writeExpression(e)
       case highOrderExp:HighOrderExp => writeLambdaExp(highOrderExp)
       case callHighOrderExp: CallHighOrderExp => writeLambdaCallExp(callHighOrderExp)
-      case bop:BOP => writeOp(bop)
+      case bop:BOP => {
+        writeExpression(bop.leftExp)
+        writeExpression(bop.rightExp)
+        writeOp(bop)
+      }
       case _ => throw new CodeGeneratorException("Unrecognized expression: " + exp)
     }
   }
@@ -195,14 +199,14 @@ case class ExpressionStatementGenerator(allClasses: Map[String, Class], lambdaMa
   }
 
   def writeForStatement(forStmt: ForStmt): Unit ={
-    val head = new Label()
-    val afterFor = new Label()
-    methodVisitor.visitLabel(head)
+    val head:Label = new Label()
+    val afterFor:Label = new Label()
     writeStatements(forStmt.assign)
+    methodVisitor.visitLabel(head)
     writeExpression(forStmt.e1)
     methodVisitor.visitJumpInsn(IFEQ, afterFor)
-    writeStatements(forStmt.forBody)
     writeStatements(forStmt.inc)
+    writeStatements(forStmt.forBody)
     methodVisitor.visitJumpInsn(GOTO, head)
     methodVisitor.visitLabel(afterFor)
   }

@@ -3,11 +3,11 @@ import scala.io.Source
 object compiler {
   def main(args: Array[String]) {
 //    val filename = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\createExtendedClass.txt"
-    val filenameS = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/ConditionalStatement.txt"
+    val filenameS = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/ForLoopStatement.txt"
     val filename = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\createAndCallHighOrderFunction.txt"
-    val source = Source.fromFile(filename)
+    val source = Source.fromFile(filenameS)
+
     val input = source.getLines().mkString
-    source.close()
     val tokenizer = Lexer(input)
     val tokenizerOutput:List[Token] = tokenizer.tokenize()
     val parser = Parser(tokenizerOutput)
@@ -16,6 +16,6 @@ object compiler {
     val codeGen = ClassGenerator(parserOutput._1)
     val pathE = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\"
     val pathS = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/"
-    codeGen.writeClasses(pathE)
+    codeGen.writeClasses(pathS)
   }
 }
