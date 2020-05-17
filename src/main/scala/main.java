@@ -1,6 +1,7 @@
 
 public class main {
     public static void main(String args[]){
+        // testing extended class
 //        Child x = new Child();
 //        int a = x.childMethod(1);
 //        Parent y = new Parent();
@@ -8,7 +9,7 @@ public class main {
 //        System.out.println(a);
 //        System.out.println(b);
   
-      
+        // arithmatic
 //        Arithmetic x = new Arithmetic();
 //        int multiplication = x.multiplication(5,6);
 //        int addition = x.addition(1, 2);
@@ -22,12 +23,12 @@ public class main {
 //        System.out.println("Subtraction: " + subtraction);
 //        System.out.println("Random Sequence: " + randomSequence);
       
-//
+//        conditional
 //        ConditionalStatement c = new ConditionalStatement();
 //        boolean value = c.testMethod(false);
 //        System.out.println(value);
 
-
+        // for loop
 //          ForLoopStatement f = new ForLoopStatement();
 //          int forLoop = f.testMethod(0);
 //          System.out.println(forLoop);

@@ -111,17 +111,21 @@ case class ClassGenerator(program: Program){
     @throws[CodeGeneratorException]
     def writeClass(toDiectory: String): Unit = {
       // we dont have constructors or main
-//      val methodGen: SingleMethodGenerator = new SingleMethodGenerator(MethodDef(VoidTypes,"<init>",forClass.statements,forClass.parameters,IntegerExp(1)))
-//      methodGen.writeMethod()
-val constructor: MethodVisitor = classWriter.visitMethod(ACC_PUBLIC, // access modifier
-  "<init>", // method name (constructor)
-  "()V", // descriptor
-  null, // signature (null means not generic)
-  null) // exceptions
+      //      val methodGen: SingleMethodGenerator = new SingleMethodGenerator(MethodDef(VoidTypes,"<init>",forClass.statements,forClass.parameters,IntegerExp(1)))
+      //      methodGen.writeMethod()
+      var owner = ClassGenerator.objectName
+      if (forClass.extendedClass != null){
+         owner =  forClass.extendedClass
+      }
+      val constructor: MethodVisitor = classWriter.visitMethod(ACC_PUBLIC, // access modifier
+        "<init>", // method name (constructor)
+        "()V", // descriptor
+        null, // signature (null means not generic)
+        null) // exceptions
       constructor.visitCode
       constructor.visitVarInsn(ALOAD, 0) // load "this"
 
-      constructor.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false) // super()
+      constructor.visitMethodInsn(INVOKESPECIAL, owner, "<init>", "()V", false) // super()
 
       constructor.visitInsn(RETURN)
       constructor.visitMaxs(0, 0)
