@@ -106,7 +106,7 @@ Some limitations were expected.  We didn't plan to have optimizations.  There wa
 
 **Boolean** is true or false
 
-**type** ::= Int | Boolean |
+**type** ::= Int | Boolean | // void is only used as a java bytecode neccesecity 
 
 classname // class type; includes Object and String
 
@@ -114,7 +114,7 @@ classname // class type; includes Object and String
 
 **logic** ::=  &amp;&amp; | || |   ==  // something that needs logic on each side to evaluate
 
-**exp** ::= var | str | i | Variables, strings, and integers are expressions
+**exp** ::= var | i | Variables, strings, and integers are expressions
 
  Boolean| //
 
@@ -122,15 +122,13 @@ classname // class type; includes Object and String
 
   exp\_1 math exp\_2 | Arithmetic operations // adds planned restriction
 
-  exp\_1.methodname(exp\_2\*) | Calls a method
+  methodname(exp_1, Classname,methodname,exp\_2\*) | Calls a method
 
   new classname(exp\*) | Creates a new instance of a class
 
-  (type)exp Casts an expression as a type // bad casts are in planned restrictions
+ (type var )(Classname ) =\&gt; exp // variable is in scope and will probably be used in the exp class name is the return type
 
- (type var ) =\&gt; exp // variable is in scope and will probably be used in the exp
-
- exp\_1(exp\_2)// how to call a high order function
+ hofc( exp\_1 , Classname, Types ,  (exp\_2) )// how to call a high order function
 
 **vardec** ::= var  Variable declaration  // add back changes
 
@@ -138,7 +136,7 @@ classname // class type; includes Object and String
 
   var = exp; | vardec = exp; | Assignment
 
-  for(vardec^; exp;  stmt^) stmt | //^ optional omit them to be treated as a while loop
+  for(vardec; exp;  stmt) stmt | 
 
   { stmt\* } | block
 
