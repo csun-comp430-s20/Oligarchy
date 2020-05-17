@@ -445,42 +445,42 @@ class TypeCheckerTest extends AnyFunSuite {
     assert(recieved == expected)
   }
 
-//  test("Check Type of new class Exp missing parameters") {
-//    val e = intercept[IllTypedException] {
-//      val entryPoint = NewClassExp("parent", List(
-//        IntegerExp(1),
-//        IntegerExp(2),
-//        // missing the string
-//      ))
-//      val myInt = VarDeclaration(IntTypes, "myInt")
-//      val mySecondInt = VarDeclaration(IntTypes, "mySecondInt")
-//      val myString = VarDeclaration(IntTypes, "myString")
-//      val testingClassParams = List(myInt, mySecondInt, myString)
-//      val child = DefExtClass("child",
-//        "parent",
-//        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
-//        List(instanceVar),
-//        List(parameter),
-//        List(myMethod))
-//      val parent = DefClass("parent", null,
-//        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
-//        List(instanceVar),
-//        testingClassParams,
-//        List(myMethod)
-//      )
-//      val extendedClassList: List[Class] = List(child, parent)
-//      val programThatExtendsAClass = Program(myStmt, extendedClassList)
-//      Typechecker(programThatExtendsAClass)
-//    }
-//    assert(e.msg == "Missing Parameters")
-//  }
+  test("Check Type of new class Exp missing parameters") {
+    val e = intercept[IllTypedException] {
+      val entryPoint = AssignmentStmt(VarDeclaration(ClassTypes("parent"), "x"), NewClassExp("parent", List(
+        IntegerExp(1),
+        IntegerExp(2),
+        // missing the string
+      )))
+      val myInt = VarDeclaration(IntTypes, "myInt")
+      val mySecondInt = VarDeclaration(IntTypes, "mySecondInt")
+      val myString = VarDeclaration(IntTypes, "myString")
+      val testingClassParams = List(myInt, mySecondInt, myString)
+      val child = DefExtClass("child",
+        "parent",
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(instanceVar),
+        List(parameter),
+        List(myMethod))
+      val parent = DefClass("parent", null,
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(instanceVar),
+        testingClassParams,
+        List(myMethod)
+      )
+      val extendedClassList: List[Class] = List(child, parent)
+      val programThatExtendsAClass = Program(entryPoint, extendedClassList)
+      Typechecker(programThatExtendsAClass)
+    }
+    assert(e.msg == "Missing Parameters")
+  }
 //  test("Check Type of new class Exp parameters dont match") {
 //    val e2 = intercept[IllTypedException] {
-//      val entryPoint = NewClassExp("parent", List(
+//      val entryPoint = AssignmentStmt(VarDeclaration(ClassTypes("parent"), "x"), NewClassExp("parent", List(
 //        IntegerExp(1),
 //        IntegerExp(2),
 //        StringExp("hello") // 3 ints when want 2 ints and a string
-//      ))
+//      )))
 //      val myInt = VarDeclaration(IntTypes, "myInt")
 //      val mySecondInt = VarDeclaration(IntTypes, "mySecondInt")
 //      val myString = VarDeclaration(IntTypes, "myString")
@@ -498,50 +498,53 @@ class TypeCheckerTest extends AnyFunSuite {
 //        List(myMethod)
 //      )
 //      val extendedClassList: List[Class] = List(child, parent)
-//      val programThatExtendsAClass = Program(myStmt, extendedClassList)
+//      val programThatExtendsAClass = Program(entryPoint, extendedClassList)
 //      Typechecker(programThatExtendsAClass)
 //    }
 //    assert("parameters for new class don't match" == e2.msg)
 //  }
-//  test("Check Type of new class Exp class not defined") {
-//    val e3 = intercept[IllTypedException] {
-//      val entryPoint = NewClassExp("notDefined", List(
-//        IntegerExp(1),
-//        IntegerExp(2),
-//        IntegerExp(3) // 3 ints when want 2 ints and a string
-//      ))
-//      val myInt = VarDeclaration(IntTypes, "myInt")
-//      val mySecondInt = VarDeclaration(IntTypes, "mySecondInt")
-//      val myString = VarDeclaration(IntTypes, "myString")
-//      val testingClassParams = List(myInt, mySecondInt, myString)
-//      val child = DefExtClass("child",
-//        "parent",
-//        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
-//        List(instanceVar),
-//        List(parameter),
-//        List(myMethod))
-//      val parent = DefClass("parent", null,
-//        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
-//        List(instanceVar),
-//        testingClassParams,
-//        List(myMethod)
-//      )
-//      val extendedClassList: List[Class] = List(child, parent)
-//      val programThatExtendsAClass = Program(myStmt, extendedClassList)
-//      Typechecker(programThatExtendsAClass)
-//    }
-//    assert(e3.msg == "class not defined")
-//  }
+  test("Check Type of new class Exp class not defined") {
+    val e3 = intercept[IllTypedException] {
+      val entryPoint = AssignmentStmt(VarDeclaration(ClassTypes("parent"), "x"), NewClassExp("notDefined", List(
+        IntegerExp(1),
+        IntegerExp(2),
+        IntegerExp(3) // 3 ints when want 2 ints and a string
+      )))
+      val myInt = VarDeclaration(IntTypes, "myInt")
+      val mySecondInt = VarDeclaration(IntTypes, "mySecondInt")
+      val myString = VarDeclaration(IntTypes, "myString")
+      val testingClassParams = List(myInt, mySecondInt, myString)
+      val child = DefExtClass("child",
+        "parent",
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(instanceVar),
+        List(parameter),
+        List(myMethod))
+      val parent = DefClass("parent", null,
+        BlockStmt(List(ExpStmt(IntegerExp(1)))), //stmt after the method
+        List(instanceVar),
+        testingClassParams,
+        List(myMethod)
+      )
+      val extendedClassList: List[Class] = List(child, parent)
+      val programThatExtendsAClass = Program(entryPoint, extendedClassList)
+      Typechecker(programThatExtendsAClass)
+    }
+    assert(e3.msg == "class not defined")
+  }
   //@ToDo add test for high order expression and call high order expression
 //  test("testing higher order expression reeturns method types") {
 //    val expected = MethodTypes(List( IntTypes), IntTypes)
-////    val list: List[VarDeclaration] = List(VarDeclaration(BoolTypes, "bool"), VarDeclaration(IntTypes, "intType"))
-//    val recieved = mynonEmptyTypechecker.typeof(HighOrderExp( "test1", ClassTypes("test2"), IntTypes, IntegerExp(10)), Map())
-//    assert(recieved == expected)
+//    val list: List[VarDeclaration] = List(VarDeclaration(BoolTypes, "bool"), VarDeclaration(IntTypes, "intType"))
+//    val mystmt = BlockStmt(List(
+//      AssignmentStmt(VarDeclaration(IntTypes,"x"),HighOrderExp( "test1", ClassTypes("test2"), IntTypes, IntegerExp(10))),
+//      ExpStmt(CallHighOrderExp(VariableExp("x"), ClassTypes("test2"), IntegerExp(2))),
+//    ))
+//    mynonEmptyTypechecker.typecheckStatement(mystmt,Map())
 //  }
 //  test("testing call high order expression returns a type") {
 //    val expected = IntTypes
-//    val recieved = mynonEmptyTypechecker.typeof(CallHighOrderExp(VariableExp("foo"), ClassTypes("className"), VariableExp("i")), Map())
+//    val recieved = mynonEmptyTypechecker.typeof(CallHighOrderExp(VariableExp("foo"), ClassTypes("className"), VariableExp("i")), Map("foo" ->MethodTypes(List(ClassTypes("className")),ClassTypes("className"))))
 //    assert(recieved == expected)
 //  }
 //  test("testing call high order expression returns an ill typed for other exp") {
