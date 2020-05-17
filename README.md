@@ -1,3 +1,4 @@
+# pls look at our documentation.md for requested info
 # Language Design Proposal
 
 **Student Name(s):** Eduardo Preciado, Imon Daneshmand, Daniel Cardenas, Jiamin Zhu, Stephanie Contreras
