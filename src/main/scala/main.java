@@ -22,10 +22,15 @@ public class main {
 //        System.out.println("Subtraction: " + subtraction);
 //        System.out.println("Random Sequence: " + randomSequence);
       
- 
+//
 //        ConditionalStatement c = new ConditionalStatement();
 //        boolean value = c.testMethod(false);
 //        System.out.println(value);
+
+
+//          ForLoopStatement f = new ForLoopStatement();
+//          int forLoop = f.testMethod(0);
+//          System.out.println(forLoop);
 
     }
 }

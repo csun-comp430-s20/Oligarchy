@@ -4,7 +4,7 @@ int myInt;
        int i = 1;
        print(i)
       }
-    bool testMethod(bool w) if (1 == 5)  w = true; else  w = false; return w;
+    bool testMethod(bool w) if (w == false)  w = true; else  w = false; return w;
 
 }
 int i = 1;

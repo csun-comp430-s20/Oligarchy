@@ -166,7 +166,7 @@ class Parser(private var input: List[Token]) {
       case PrintToken :: LeftParenToken :: tail => {
         val (printedExp, restTokens) = parseExp(tail)
         restTokens match {
-          case RightParenToken :: finalTokens => {
+          case RightParenToken :: SemicolonToken :: finalTokens => {
             (PrintExp(printedExp), finalTokens)
           }
           case _ => {
