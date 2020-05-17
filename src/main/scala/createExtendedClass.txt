@@ -13,4 +13,3 @@ Class Child extends Parent{
     int childMethod(int i) i =2; return i;
 }
 int i = 1;
-

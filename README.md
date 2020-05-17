@@ -20,19 +20,15 @@
 
 **func** is the name of a method
 
-**str** is a string
-
 **int** is an integer
 
 **Boolean** is true or false
 
 **type** ::= Int | Boolean |
 
- Void | // will only be used as a return type
-
 classname // class type; includes Object and String
 
-**math** ::= + | - | \* | / | ^ | \&lt; | \&gt; |  \&lt;= | \&gt;= Arithmetic operations // something that requires numbers to evaluate
+**math** ::= + | - | \* | / | \&lt; | \&gt; |  \&lt;= | \&gt;= Arithmetic operations // something that requires numbers to evaluate
 
 **logic** ::=  &amp;&amp; | || |   ==  // something that needs logic on each side to evaluate
 
@@ -41,8 +37,6 @@ classname // class type; includes Object and String
  Boolean| //
 
  exp\_1 logic exp\_2|
-
-  print(exp) | Prints something to the terminal
 
   exp\_1 math exp\_2 | Arithmetic operations // adds planned restriction
 
@@ -62,9 +56,7 @@ classname // class type; includes Object and String
 
   var = exp; | vardec = exp; | Assignment
 
-    for(vardec^; exp;  stmt^) stmt | //^ optional omit them to be treated as a while loop
-
-    break; | break
+  for(vardec^; exp;  stmt^) stmt | //^ optional omit them to be treated as a while loop
 
   { stmt\* } | block
 
@@ -72,7 +64,9 @@ classname // class type; includes Object and String
 
   return exp; | return an expression
 
-  return; return Void
+  return; | return Void
+  print(exp) | Prints something to the terminal
+
 
 **methoddef** ::= type methodname(vardec\*) stmt //vardecs are comma-separated
 
@@ -80,13 +74,13 @@ classname // class type; includes Object and String
 
 **classdef** ::= class classname extends^ classname^ {
 
-    instancedec\*
+   instancedec\*
 
- constructor(vardec\*) stmt  // vardecs are comma-sep
+   constructor(vardec\*) stmt  // vardecs are comma-sep
 
- methoddef\*
+   methoddef\*
 
-          }   // ^ indicates optional
+  }   // ^ indicates optional
 
 **program** ::= classdef\* exp //exp is entry point
 
