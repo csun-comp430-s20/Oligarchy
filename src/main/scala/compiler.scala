@@ -2,7 +2,7 @@ import scala.io.Source
 
 object compiler {
   def main(args: Array[String]) {
-    val filename = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/test.txt"
+    val filename = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/ConditionalStatement.txt"
     val input = Source.fromFile(filename).getLines().mkString
 
     val tokenizer = Lexer(input)

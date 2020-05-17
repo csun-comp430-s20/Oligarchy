@@ -1,0 +1,10 @@
+Class ForLoopStatement{
+int myInt;
+      constructor(bool myBool){
+       int i = 1;
+       print(i)
+      }
+    int testMethod(int i) for(i = 0; i < 10; i = i + 1;)i = i+1; return i;
+
+}
+int i = 1;
