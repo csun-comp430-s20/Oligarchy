@@ -1,4 +1,4 @@
-#Language Documentation for group 'Oligarchy' COMP 430 Spring '20
+# Language Documentation for group 'Oligarchy' COMP 430 Spring '20
 
 
 **Why this language and why this language design?**
