@@ -1,0 +1,9 @@
+Class Testing {
+int myInt;
+      constructor(bool myBool){
+       int i = 1;
+       print(i)
+      }
+    int testMethod(int i) i =0; return i;
+}
+int i = 1;

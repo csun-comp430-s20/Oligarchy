@@ -2,15 +2,20 @@ import scala.io.Source
 
 object compiler {
   def main(args: Array[String]) {
-    val filename = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/ConditionalStatement.txt"
-    val input = Source.fromFile(filename).getLines().mkString
-
+//    val filename = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\createExtendedClass.txt"
+    val filenameS = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/ConditionalStatement.txt"
+    val filename = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\createAndCallHighOrderFunction.txt"
+    val source = Source.fromFile(filename)
+    val input = source.getLines().mkString
+    source.close()
     val tokenizer = Lexer(input)
     val tokenizerOutput:List[Token] = tokenizer.tokenize()
     val parser = Parser(tokenizerOutput)
     val parserOutput = parser.parseProgram(tokenizerOutput)
     val typechecker = Typechecker(parserOutput._1)
     val codeGen = ClassGenerator(parserOutput._1)
-    codeGen.writeClasses("/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/")
+    val pathE = "C:\\Users\\edpre\\JavaProjects\\Oligarchy\\src\\main\\scala\\"
+    val pathS = "/Users/stephanie/Documents/Comp430/Oligarchy/src/main/scala/"
+    codeGen.writeClasses(pathE)
   }
 }

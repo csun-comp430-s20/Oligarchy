@@ -1,6 +1,14 @@
 
 public class main {
     public static void main(String args[]){
+//        Child x = new Child();
+//        int a = x.childMethod(1);
+//        Parent y = new Parent();
+//        int b = y.parentMethod(1);
+//        System.out.println(a);
+//        System.out.println(b);
+  
+      
 //        Arithmetic x = new Arithmetic();
 //        int multiplication = x.multiplication(5,6);
 //        int addition = x.addition(1, 2);
@@ -13,6 +21,8 @@ public class main {
 //        System.out.println("Division: " + division);
 //        System.out.println("Subtraction: " + subtraction);
 //        System.out.println("Random Sequence: " + randomSequence);
+      
+ 
 //        ConditionalStatement c = new ConditionalStatement();
 //        boolean value = c.testMethod(false);
 //        System.out.println(value);

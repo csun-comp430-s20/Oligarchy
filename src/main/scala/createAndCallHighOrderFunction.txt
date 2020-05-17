@@ -1,0 +1,12 @@
+Class Testing {
+int myInt;
+      constructor(bool myBool){
+       int i = 1;
+       print(i)
+      }
+    int testMethod(int i) {
+        Integer a = (Integer x )(Integer) => x+1;
+        i = hofc(a,Integer,2);
+    } return a;
+}
+int i = 1;
